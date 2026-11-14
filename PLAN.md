@@ -8,7 +8,7 @@
 **Prior art:** `lignum` — agents, hooks, skills, server and web shell are ported from it (D3). The earlier `BusRL` repo is not used (D4).
 
 ### Progress
-- [ ] Phase 0 — Scaffold, board data, rules spec, board look ✋ *you review spec, §4 defaults and the board preview*
+- [x] Phase 0 — Scaffold, board data, rules spec, board look ✋ *you review spec, §4 defaults and the board preview*
 - [ ] Phase 1 — Engine: the full game, 3–5 players
 - [ ] Phase 2 — Server + polished board UI ✋ *playtest #1*
 - [ ] Phase 3 — Bots (random, heuristic, MCTS) ✋ *playtest #2*
@@ -212,6 +212,16 @@ Opus spot audits only for units touching line-expansion validity, resolution ord
 Should-fix and minor findings, tagged with the phase that found them. `/close-phase` appends here.
 
 - [Phase 2, from Phase 0 preview review] Buses cell of the action board: each seat owns one row of the bus grid, and a seat's buses fill along its row as they are added (user, 2026-11-14). `layout.bus_grid` in `data/board.yaml` should be addressed as row-per-seat (5 cells per row = 5 buses max, R-043). The preview currently fills the grid in reading order across seats. The printed grid as digitized has 4 rows; check how a 5th seat's row is shown in 5-player games.
+- [Phase 0, code-reviewer, should-fix] `bus/board.py` `Layout` holds plain dicts, so the frozen cached `Board` is unhashable and mutable (`hash(load_board())` raises). Store tuples/`MappingProxyType` or exclude `layout` from hash/compare before Phase 1 caches on the board.
+- [Phase 0, code-reviewer, should-fix] `tests/data/test_board.py`: frame/letter/count tests only re-check data `load_board()` already validates; add negative tests feeding bad raw dicts to the parser (out-of-frame point, letters a–e, 19 bus cells, missing clock segment) expecting `ValueError`.
+- [Phase 0, code-reviewer, minor] `bus/board.py` bounds check accepts 1991 (`<=` vs `<` FRAME_SIZE); tests repeat the literal 1991. `_parse_layout` accepts unknown action keys, non-positive clock hand/radius, 3-element or float points.
+- [Phase 0, code-reviewer, minor] `tools/render_board.py`: clock order re-listed instead of `CLOCK_SEGMENTS`; supplies 25/20 are literals (move to `bus/constants.py` in Phase 1); scores >20 clamped silently (preview only); `BG_HREF` is docs/-relative, so a non-`--embed` render elsewhere has a broken background.
+- [Phase 0, code-reviewer, minor] `tests/data/test_board.py:62` names node pairs (3,6) and (28,35) — the only ids outside board.yaml; acceptable for a data test.
+- [Phase 0, rules-auditor, should-fix] ACTIONS.md:26 / SCENARIOS.md:53 (R-062, R-070): move numbers are history length, but scenarios can set `last_score_move` before load; define a scenario move-number origin (`move_offset`, or default to the max `last_score_move`) so the tiebreak stays correct for editor games and fixtures.
+- [Phase 0, rules-auditor, should-fix, needs AMENDING] RULES_SPEC.md R-049, R-066: "every site is occupied" means every site has a building, but "occupied" means passenger-inside elsewhere (R-062, SCENARIOS `occupied`); reword to "every site has a building" at the next amendment.
+- [Phase 0, rules-auditor, minor] SCENARIOS.md: `waiting` defaults to `{}` outside setup, so the round-1 shorthand drops the 4 roundabout passengers (R-015) — document or require it; S-STONES should reject `stones_on_clock` 0 unless phase `END`.
+- [Phase 0, rules-auditor, minor, needs AMENDING] RULES_SPEC.md R-046: missing full stop after "(R-058)".
+- [Phase 0, both reviewers] `layout.bus_grid` validation requires exactly 20 cells; revisit with the row-per-seat item above (5 seats × 5 buses).
 
 ## 10. Risks
 
