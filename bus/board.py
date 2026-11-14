@@ -6,9 +6,11 @@ Everything here is immutable and safe to share between pyspiel states.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections.abc import Mapping
+from dataclasses import dataclass, field
 from functools import cache
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any
 
 import yaml
@@ -61,13 +63,14 @@ CLOCK_SEGMENTS = ("house", "office", "pub")
 class Layout:
     """Placement-section and score-track pixel positions (drawing only)."""
 
-    actions: dict[str, dict[str, Point]]  # action key -> letter -> centre
+    # mappings are read-only but unhashable, so they are left out of the hash (still compared)
+    actions: Mapping[str, Mapping[str, Point]] = field(hash=False)  # key -> letter -> centre
     bus_grid: tuple[Point, ...]  # 20 cells of the Buses grid
     clock_x: int
     clock_y: int
     clock_hand: int  # hand length
     clock_radius: int
-    clock_angles: dict[str, float]  # segment -> centre angle in degrees (0 = east, 90 = south)
+    clock_angles: Mapping[str, float] = field(hash=False)  # segment -> degrees (0=east, 90=south)
     stones: tuple[Point, ...]
     score_track: tuple[Point, ...]  # cell for score 1..20
 
@@ -95,7 +98,8 @@ class Board:
         return tuple(s.id for s in self.sites if s.tier == tier)
 
 
-def _parse(raw: dict[str, Any]) -> Board:
+def parse_board(raw: dict[str, Any]) -> Board:
+    """Build a validated ``Board`` from the raw ``board.yaml`` dict; ValueError on bad data."""
     nodes = tuple(
         Node(
             id=int(n["id"]),
@@ -129,14 +133,25 @@ def _parse(raw: dict[str, Any]) -> Board:
 
 
 def _pt(p: Any) -> Point:
-    x, y = int(p[0]), int(p[1])
-    if not (0 <= x <= FRAME_SIZE and 0 <= y <= FRAME_SIZE):
+    if not isinstance(p, (list, tuple)) or len(p) != 2:  # pyright: ignore[reportUnknownArgumentType]
+        raise ValueError(f"layout point {p!r} must have exactly 2 elements")
+    x, y = p  # pyright: ignore[reportUnknownVariableType]
+    if (
+        not (isinstance(x, int) and isinstance(y, int))
+        or isinstance(x, bool)
+        or isinstance(y, bool)
+    ):
+        raise ValueError(f"layout point {p!r} must hold integers")
+    if not (0 <= x < FRAME_SIZE and 0 <= y < FRAME_SIZE):
         raise ValueError(f"layout point ({x}, {y}) lies outside the map frame")
     return (x, y)
 
 
 def _parse_layout(raw: dict[str, Any]) -> Layout:
     actions = {k: {str(ltr): _pt(p) for ltr, p in v.items()} for k, v in raw["actions"].items()}
+    unknown = set(actions) - set(MULTI_USE_ACTIONS) - set(SINGLE_USE_ACTIONS)
+    if unknown:
+        raise ValueError(f"layout has unknown actions {sorted(unknown)}")
     for key in MULTI_USE_ACTIONS:
         if sorted(actions.get(key, {})) != list("abcdef"):
             raise ValueError(f"layout action {key} needs letters a-f")
@@ -153,14 +168,17 @@ def _parse_layout(raw: dict[str, Any]) -> Layout:
     angles = {str(k): float(v) for k, v in c["segments"].items()}
     if set(angles) != set(CLOCK_SEGMENTS):
         raise ValueError("layout clock needs house, office and pub segments")
+    hand, radius = int(c["hand"]), int(c["radius"])
+    if hand <= 0 or radius <= 0:
+        raise ValueError("layout clock hand and radius must be positive")
     return Layout(
-        actions,
+        MappingProxyType({k: MappingProxyType(v) for k, v in actions.items()}),
         bus_grid,
         int(c["x"]),
         int(c["y"]),
-        int(c["hand"]),
-        int(c["radius"]),
-        angles,
+        hand,
+        radius,
+        MappingProxyType(angles),
         stones,
         track,
     )
@@ -176,7 +194,7 @@ def _validate(
     points += [("site", s.id, s.x, s.y) for s in sites]
     points += [("street via", st.id, x, y) for st in streets for x, y in st.via]
     for kind, ident, x, y in points:
-        if not (0 <= x <= FRAME_SIZE and 0 <= y <= FRAME_SIZE):
+        if not (0 <= x < FRAME_SIZE and 0 <= y < FRAME_SIZE):
             raise ValueError(f"{kind} {ident} at ({x}, {y}) lies outside the map frame")
     for kind, items in (("node", nodes), ("street", streets), ("site", sites)):
         ids = [item.id for item in items]
@@ -203,4 +221,4 @@ def load_board(path: Path = BOARD_PATH) -> Board:
     """The board, parsed and validated (cached; the result is immutable)."""
     with path.open(encoding="utf-8") as f:
         raw: dict[str, Any] = yaml.safe_load(f)
-    return _parse(raw)
+    return parse_board(raw)
