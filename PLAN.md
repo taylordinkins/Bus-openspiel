@@ -170,10 +170,10 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 **Phase 1 — Engine (the whole game, 3–5 players)**
 - Constants, actions, setup, selection, all seven resolutions, end and scoring, both `returns`; observer with RL-ready tensor; `action_meta`; scenario loader; invariant checker; `tools/play_text.py`, `tools/replay.py`, `tools/sim_stats.py`; golden playthroughs for 3 seeds.
 - [x] 1. Constants, action IDs, board fixes (R-001–R-008; ACTIONS.md §2, §4; backlog: Layout hashable, bounds, negative parser tests, supplies to constants) — `spec-test-writer` → `implementer` (2026-11-14)
-- [ ] 2. State model and game registration (R-003, R-009, R-014, R-073; §5.2 params) — `spec-test-writer` → `implementer`
+- [x] 2. State model and game registration (R-003, R-009, R-014, R-073; §5.2 params) — `spec-test-writer` → `implementer` (2026-11-14; state-aware EXTEND wording moves to unit 5)
 - [ ] 3. Scenario loader and invariant checker (SCENARIOS.md, `S-*` codes, §6.3; backlog: `move_offset`, round-1 `waiting`, `S-STONES`) — `spec-test-writer` → `implementer`
 - [ ] 4. Line geometry ⚑ (R-035–R-039, R-041) — `spec-test-writer` → `implementer` → `rules-auditor`
-- [ ] 5. Setup phases (R-015–R-019, R-021) — `spec-test-writer` → `implementer`
+- [ ] 5. Setup phases (R-015–R-019, R-021; plus state-aware EXTEND `action_to_string`) — `spec-test-writer` → `implementer`
 - [ ] 6. Action selection (R-020, R-022–R-028) — `spec-test-writer` → `implementer`
 - [ ] 7. Resolution framework and Buses ⚑ (R-029–R-034, R-043, R-044) — `spec-test-writer` → `implementer` → `rules-auditor`
 - [ ] 8. Lines resolution ⚑ (R-040, R-042) — `spec-test-writer` → `implementer` → `rules-auditor`
