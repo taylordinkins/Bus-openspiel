@@ -68,3 +68,25 @@ def test_coordinates_inside_frame() -> None:
     pts = [(n.x, n.y) for n in b.nodes] + [(s.x, s.y) for s in b.sites]
     pts += [p for s in b.streets for p in s.via]
     assert all(0 <= x <= 1991 and 0 <= y <= 1991 for x, y in pts)
+
+
+def test_layout_actions_have_letters() -> None:
+    lay = load_board().layout
+    for key in ("lines", "passengers", "buildings", "vrrooomm"):
+        assert sorted(lay.actions[key]) == list("abcdef")
+    for key in ("buses", "clock", "starting_player"):
+        assert sorted(lay.actions[key]) == ["a"]
+
+
+def test_layout_counts_and_frame() -> None:
+    lay = load_board().layout
+    assert len(lay.bus_grid) == 20 and len(lay.stones) == 5 and len(lay.score_track) == 20
+    assert set(lay.clock_angles) == {"house", "office", "pub"}
+    pts = [p for v in lay.actions.values() for p in v.values()]
+    pts += [*lay.bus_grid, *lay.stones, *lay.score_track, (lay.clock_x, lay.clock_y)]
+    assert all(0 <= x <= 1991 and 0 <= y <= 1991 for x, y in pts)
+
+
+def test_score_track_runs_downward() -> None:
+    ys = [y for _, y in load_board().layout.score_track]
+    assert ys == sorted(ys)

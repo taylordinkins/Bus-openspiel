@@ -52,6 +52,7 @@ A faithful, well-tested implementation of *Bus* as a **Python OpenSpiel game**, 
 | D12 | Spec lock | `docs/RULES_SPEC.md` Status DRAFT → APPROVED → AMENDING; a hook blocks edits while APPROVED; only you change the Status line | As lignum D16 |
 | D13 | Tests ahead of code | `@pytest.mark.pending("R-0xx")` (non-strict xfail); `spec-test-writer` can't read `bus/` source (hook) | As lignum D17 |
 | D14 | Model use | Sonnet workhorses, Haiku search and sims, Opus audits at phase close and spot checks (§8); main session defaults to Sonnet | As lignum D15 |
+| D15 | Board art (2026-11-14) | The UI uses the user's art `assets/map/bus_map_reworked_v2.png` as the background for both the map and the placement section (action board, clock, stones, score track); only pieces are drawn on top, positioned from `data/board.yaml` (topology plus a `layout` block for action spaces, bus grid, clock, stone slots, score cells) | User decision; replaces the redrawn-board reading of §5.5 |
 
 ## 4. Rules clarifications
 
@@ -134,7 +135,7 @@ About 380 decision ids, no chance ids.
 
 ### 5.5 Server and web
 
-Ported (D3): the action history is the source of truth; Back, Rewind (dev), Report, replay export/import; the action-list fallback stays as a debug panel. The Bus plugin draws the board as SVG from `data/board.yaml`, following the reworked map's layout and palette: our own house / office / pub icons as on the map, generic pieces for line markers (coloured offset strokes so shared streets show every line), buses, passengers, time stones and the clock. Click targets: line ends then streets, sites then a type picker, stations, passengers then buildings. The action board, clock, stones, scores and markers-left sit beside the map as on the printed board.
+Ported (D3): the action history is the source of truth; Back, Rewind (dev), Report, replay export/import; the action-list fallback stays as a debug panel. The Bus plugin shows the user's map art as the background (D15) and draws pieces over it as SVG from `data/board.yaml`: generic pieces for line markers (coloured offset strokes so shared streets show every line), buses, passengers, time stones and the clock. Click targets: line ends then streets, sites then a type picker, stations, passengers then buildings. The action board, clock, stones, scores and markers-left sit beside the map as on the printed board.
 
 ### 5.6 Bots
 

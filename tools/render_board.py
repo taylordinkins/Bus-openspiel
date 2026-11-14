@@ -1,16 +1,16 @@
-"""Static board preview: ``uv run python -m tools.render_board [--out docs/board-preview.svg]``.
+"""Static board preview: ``uv run python -m tools.render_board [--out FILE] [--embed]``.
 
-Draws the map from ``data/board.yaml`` (via ``bus.board``) plus a hard-coded ``SAMPLE`` state and
-the action board, as one stdlib-built SVG. Element ids (``street-<i>``, ``site-<i>``,
-``node-<i>``) are the scheme the Phase 2 web UI reuses. All artwork is our own.
-
-Palette tokens (sampled from assets/map/bus_map_reworked_v2.png; see docs/board-palette.md):
-see the constants below.
+The user's art (assets/map/bus_map_reworked_v2.png) is the background; we draw only pieces on
+top, positioned from ``data/board.yaml`` (via ``bus.board``): line markers, building discs,
+passengers, action markers, buses, score discs, the clock hand and time stones. Element ids
+(``street-<i>``, ``site-<i>``, ``node-<i>``) are transparent hit overlays the Phase 2 web UI
+reuses. A player strip below the art shows per-seat info. Pieces are generic.
 """
 
 from __future__ import annotations
 
 import argparse
+import base64
 import math
 from collections import defaultdict
 from pathlib import Path
@@ -25,11 +25,6 @@ INK = "#1A1A1A"  # icons, text on cream
 RED = "#B00A0A"  # frames, streets, slots, action spaces
 RED_DARK = "#7E0606"
 SLOT_TEXT = "#FFF4D6"
-DISTRICT_OUTER = "#E3D5F0"  # lavender outer ring
-DISTRICT_MID = "#FDE3D6"  # peach middle ring
-DISTRICT_CORE = "#CDE39A"  # green centre
-RIVER = "#8FE3FF"
-RIVER_EDGE = "#14B4F0"
 PASSENGER = "#3A3A3A"
 STONE = "#8C1D1D"
 # Seat colours: colour-blind-friendly (Okabe-Ito based), P0..P4.
@@ -37,9 +32,12 @@ SEAT_COLORS = ("#0072B2", "#E69F00", "#009E73", "#D55E00", "#7B3FA0")
 FONT = "Helvetica, Arial, sans-serif"
 
 WIDTH = 1991
-MAP_BOTTOM = 1400  # the map frame ends here, the action board starts below
-HEIGHT = 2800
-LINE_GAP = 11  # offset between lines sharing a street
+ART = 1991  # the PNG is square
+STRIP = 330  # player-panel strip below the art
+HEIGHT = ART + STRIP
+BG_HREF = "../assets/map/bus_map_reworked_v2.png"  # relative to docs/
+BG_PATH = Path(__file__).resolve().parent.parent / "assets" / "map" / "bus_map_reworked_v2.png"
+LINE_GAP = 13  # offset between lines sharing a street
 
 # Hard-coded sample state. Streets/nodes/sites are picked from the loaded board by index into
 # the walks derived below, never by literal id.
@@ -60,7 +58,7 @@ SAMPLE: dict[str, Any] = {
         "Passengers": [(0, 2), (1, 0)],
         "Buildings": [(0, 1)],
         "Clock": [(0, 3)],
-        "Vrrooomm!": [(0, 0), (1, 2), (3, 4)],
+        "Vrrooomm!": [(0, 0), (1, 2), (2, 4)],
         "Starting Player": [(0, 1)],
     },
 }
@@ -241,52 +239,45 @@ def marker(cx: float, cy: float, seat: int, r: float = 17) -> str:
     )
 
 
-# --- Map --------------------------------------------------------------------------------------
-def _map_layer(board: Board) -> list[str]:
+# --- Overlay layers ---------------------------------------------------------------------------
+ACTION_KEYS = {
+    "Lines": "lines",
+    "Buses": "buses",
+    "Passengers": "passengers",
+    "Buildings": "buildings",
+    "Clock": "clock",
+    "Vrrooomm!": "vrrooomm",
+    "Starting Player": "starting_player",
+}
+
+
+def _hit_layer(board: Board) -> list[str]:
+    """Transparent click targets over streets, sites and intersections."""
     out: list[str] = []
-    out.append(
-        f'<rect x="14" y="14" width="{WIDTH - 28}" height="{MAP_BOTTOM - 28}" rx="30" '
-        f'fill="{PAPER}" stroke="{RED}" stroke-width="12"/>'
-    )
-    xs = [n.x for n in board.nodes]
-    ys = [n.y for n in board.nodes]
-    x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
-    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
-    out.append(
-        f'<clipPath id="map-clip"><rect x="20" y="20" width="{WIDTH - 40}" '
-        f'height="{MAP_BOTTOM - 40}" rx="26"/></clipPath><g clip-path="url(#map-clip)">'
-    )
-    for scale, color in ((1.12, DISTRICT_OUTER), (0.9, DISTRICT_MID), (0.56, DISTRICT_CORE)):
-        hw, hh = (x1 - x0) / 2 * scale, (y1 - y0) / 2 * scale
-        c = min(hw, hh) * 0.28
-        out.append(
-            f'<polygon class="district" fill="{color}" points="'
-            f"{_f(cx - hw + c)},{_f(cy - hh)} {_f(cx + hw - c)},{_f(cy - hh)} "
-            f"{_f(cx + hw)},{_f(cy - hh + c)} {_f(cx + hw)},{_f(cy + hh - c)} "
-            f"{_f(cx + hw - c)},{_f(cy + hh)} {_f(cx - hw + c)},{_f(cy + hh)} "
-            f'{_f(cx - hw)},{_f(cy + hh - c)} {_f(cx - hw)},{_f(cy - hh + c)}"/>'
-        )
-    # river, generic decoration (not derived from the map art)
-    out.append(
-        f'<path d="M {x0 - 150} {_f(cy - 60)} L {_f(cx - 200)} {_f(cy - 60)} L {_f(cx - 200)} '
-        f"{_f(cy + 130)} L {_f(cx + 40)} {_f(cy + 130)} L {_f(cx + 300)} {_f(cy - 130)} "
-        f'L {x1 + 60} {_f(cy - 130)}" fill="none" stroke="{RIVER_EDGE}" stroke-width="46" '
-        f'stroke-linejoin="round" stroke-linecap="round" opacity="0.8"/>'
-        f'<path d="M {x0 - 150} {_f(cy - 60)} L {_f(cx - 200)} {_f(cy - 60)} L {_f(cx - 200)} '
-        f"{_f(cy + 130)} L {_f(cx + 40)} {_f(cy + 130)} L {_f(cx + 300)} {_f(cy - 130)} "
-        f'L {x1 + 60} {_f(cy - 130)}" fill="none" stroke="{RIVER}" stroke-width="36" '
-        f'stroke-linejoin="round" stroke-linecap="round" opacity="0.8"/>'
-    )
-    out.append("</g>")
-    # streets
     for s in board.streets:
         d = _path(_street_points(board, s))
         out.append(
-            f'<g id="street-{s.id}" class="street"><path d="{d}" fill="none" stroke="{RED}" '
-            f'stroke-width="9" stroke-linejoin="round"/><path d="{d}" fill="none" '
-            f'stroke="{PAPER}" stroke-width="4" stroke-linejoin="round"/></g>'
+            f'<path id="street-{s.id}" class="street hit" d="{d}" fill="none" stroke="#000" '
+            f'stroke-opacity="0" stroke-width="22" stroke-linejoin="round"/>'
         )
-    # bus lines
+    for site in board.sites:
+        out.append(
+            f'<rect id="site-{site.id}" class="site hit tier-{site.tier}" x="{site.x - 24}" '
+            f'y="{site.y - 24}" width="48" height="48" rx="7" fill="#000" fill-opacity="0"/>'
+        )
+    for n in board.nodes:
+        r = 34 if n.station else 16
+        out.append(
+            f'<circle id="node-{n.id}" class="node hit" cx="{n.x}" cy="{n.y}" r="{r}" '
+            f'fill="#000" fill-opacity="0"/>'
+        )
+    return out
+
+
+def _piece_layer(board: Board) -> list[str]:
+    out: list[str] = []
+    lay = board.layout
+    # bus lines: dark outline, then seat colour, offset per seat on shared streets
     lines = sample_lines(board)[: SAMPLE["seats"]]
     users: dict[int, list[int]] = defaultdict(list)
     for seat, steps in enumerate(lines):
@@ -295,258 +286,141 @@ def _map_layer(board: Board) -> list[str]:
     for seat, steps in enumerate(lines):
         col = SEAT_COLORS[seat]
         for sid, _ in steps:
-            s = board.streets[sid]
-            pts = _street_points(board, s)
             k = len(users[sid])
             d = (users[sid].index(seat) - (k - 1) / 2) * LINE_GAP
-            off = _offset(pts, d)
+            path = _path(_offset(_street_points(board, board.streets[sid]), d))
             out.append(
-                f'<path class="bus-line seat-{seat}" data-street="{sid}" d="{_path(off)}" '
-                f'fill="none" stroke="{col}" stroke-width="7" stroke-linecap="round" '
-                f'stroke-linejoin="round" opacity="0.95"/>'
+                f'<g class="bus-line seat-{seat}" data-street="{sid}" fill="none" '
+                f'stroke-linecap="round" stroke-linejoin="round">'
+                f'<path d="{path}" stroke="{INK}" stroke-width="12"/>'
+                f'<path d="{path}" stroke="{col}" stroke-width="8"/></g>'
             )
         if steps:
-            first, last = steps[0], steps[-1]
-            fn = first[1]
-            ln = board.streets[last[0]].other(last[1])
-            if fn == ln:  # loop: draw a ring marker at the closing node
+            fn = steps[0][1]
+            ln = board.streets[steps[-1][0]].other(steps[-1][1])
+            if fn == ln:  # loop: ring at the closing node
                 n = board.nodes[fn]
                 out.append(
-                    f'<circle class="line-loop seat-{seat}" cx="{n.x}" cy="{n.y}" r="22" '
-                    f'fill="none" stroke="{col}" stroke-width="5" stroke-dasharray="6 5"/>'
+                    f'<circle class="line-loop seat-{seat}" cx="{n.x}" cy="{n.y}" r="24" '
+                    f'fill="none" stroke="{INK}" stroke-width="11"/>'
+                    f'<circle cx="{n.x}" cy="{n.y}" r="24" fill="none" stroke="{col}" '
+                    f'stroke-width="7" stroke-dasharray="9 6"/>'
                 )
             else:
                 for end in (fn, ln):
                     n = board.nodes[end]
                     out.append(
-                        f'<rect class="line-end seat-{seat}" x="{n.x - 8}" y="{n.y - 8}" '
-                        f'width="16" height="16" fill="{col}" stroke="{INK}" stroke-width="2"/>'
+                        f'<rect class="line-end seat-{seat}" x="{n.x - 9}" y="{n.y - 9}" '
+                        f'width="18" height="18" fill="{col}" stroke="{INK}" stroke-width="3"/>'
                     )
-    # nodes
-    for n in board.nodes:
-        if n.station:
-            out.append(
-                f'<g id="node-{n.id}" class="node station"><rect x="{n.x - 33}" y="{n.y - 33}" '
-                f'width="66" height="66" rx="8" fill="{RED}" stroke="{PAPER}" stroke-width="3"/>'
-                f"{train_glyph(n.x, n.y, 0.95)}</g>"
-            )
-        elif n.roundabout:
-            out.append(
-                f'<g id="node-{n.id}" class="node roundabout">'
-                f'<circle cx="{n.x}" cy="{n.y}" r="17" fill="{PAPER}" stroke="{RED}" '
-                f'stroke-width="5"/><circle cx="{n.x}" cy="{n.y}" r="8" fill="{PAPER}" '
-                f'stroke="{RED}" stroke-width="4"/></g>'
-            )
-        else:
-            out.append(
-                f'<circle id="node-{n.id}" class="node" cx="{n.x}" cy="{n.y}" r="9" '
-                f'fill="{PAPER}" stroke="{RED}" stroke-width="4"/>'
-            )
-    # sites
+    # building discs on sites (the sites' own letter boxes are part of the art)
     kinds = SAMPLE["buildings"]
-    for site in board.sites:
-        n = board.nodes[site.node]
+    for site in board.sites[: len(kinds)]:
         out.append(
-            f'<line class="site-tick" x1="{n.x}" y1="{n.y}" x2="{site.x}" y2="{site.y}" '
-            f'stroke="{RED}" stroke-width="2" opacity="0.35"/>'
+            f'<g class="building"><circle cx="{site.x}" cy="{site.y}" r="25" fill="{PAPER}" '
+            f'stroke="{INK}" stroke-width="3"/>{icon(kinds[site.id], site.x, site.y, 0.8)}'
         )
-        built = site.id < len(kinds)
-        body = (
-            f'<rect x="{site.x - 24}" y="{site.y - 24}" width="48" height="48" rx="7" '
-            f'fill="{PAPER if built else RED}" stroke="{RED}" stroke-width="4"/>'
-        )
-        if built:
-            body += icon(kinds[site.id], site.x, site.y + 2, 0.95)
-            body += _text(site.x - 15, site.y - 17, site.tier, 12, RED)
-            if site.id in SAMPLE["passenger_buildings"]:
-                body += passenger(site.x + 14, site.y + 6, 0.75)
-        else:
-            body += _text(site.x, site.y + 2, site.tier, 34, SLOT_TEXT)
-        out.append(f'<g id="site-{site.id}" class="site tier-{site.tier}">{body}</g>')
+        if site.id in SAMPLE["passenger_buildings"]:
+            out.append(passenger(site.x + 20, site.y - 14, 0.8))
+        out.append("</g>")
     # waiting passengers at intersections
     step = max(1, len(board.nodes) // SAMPLE["waiting_nodes"])
     for n in board.nodes[::step][: SAMPLE["waiting_nodes"]]:
-        if n.station or n.roundabout:
-            out.append(passenger(n.x - 22 if n.station else n.x, n.y - 30, 0.9))
-        else:
-            out.append(passenger(n.x, n.y - 24, 0.9))
-    # score track (right edge, as on the printed map)
-    tx, ty0, ty1 = WIDTH - 70, 90, MAP_BOTTOM - 90
-    out.append(f'<line x1="{tx}" y1="{ty0}" x2="{tx}" y2="{ty1}" stroke="{RED}" stroke-width="6"/>')
-    steps_n = 20
-    for i in range(steps_n):
-        y = ty0 + (ty1 - ty0) * i / (steps_n - 1)
-        out.append(
-            f'<rect x="{tx - 22}" y="{_f(y - 20)}" width="44" height="40" rx="7" fill="{RED}"/>'
-            f"{_text(tx, y + 1, str(i + 1), 24, SLOT_TEXT)}"
-        )
-    for seat, pts in enumerate(SAMPLE["scores"][: SAMPLE["seats"]]):
-        if pts <= 0:
-            continue
-        y = ty0 + (ty1 - ty0) * (min(pts, steps_n) - 1) / (steps_n - 1)
-        out.append(marker(tx - 48 - 20 * seat, y, seat, 14))
-    out.append(_text(tx, ty0 - 38, "Score", 22, RED))
-    return out
-
-
-# --- Action board and player areas ------------------------------------------------------------
-def _letters(
-    x: float,
-    y: float,
-    markers: list[tuple[int, int]],
-    hints: list[str] | None,
-    count: int = 6,
-    gap: int = 78,
-) -> list[str]:
-    out: list[str] = []
-    for k in range(count):
-        px = x + k * gap
-        out.append(
-            f'<rect x="{_f(px - 27)}" y="{_f(y - 27)}" width="54" height="54" rx="8" '
-            f'fill="{RED}"/>{_text(px, y + 1, "abcdef"[k], 36, SLOT_TEXT, weight="normal")}'
-        )
-        if hints:
-            out.append(_text(px, y + 46, hints[k], 18, RED_DARK))
-    for k, seat in markers:
-        out.append(marker(x + k * gap, y, seat, 21))
-    return out
-
-
-def _panel(x: float, y: float, w: float, h: float, num: int, title: str) -> list[str]:
-    return [
-        f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="none" stroke="{RED}" '
-        f'stroke-width="5"/>',
-        f'<rect x="{x + 28}" y="{y + 22}" width="44" height="44" rx="7" fill="{INK}"/>',
-        _text(x + 50, y + 45, str(num), 32, SLOT_TEXT),
-        _text(x + 88, y + 45, title, 34, INK, "start"),
-    ]
-
-
-def _action_board() -> list[str]:
-    top = MAP_BOTTOM + 24
-    out = [
-        f'<rect x="14" y="{top}" width="{WIDTH - 28}" height="1020" rx="30" fill="{PAPER}" '
-        f'stroke="{RED}" stroke-width="12"/>'
-    ]
-    m = SAMPLE["markers"]
-    five = SAMPLE["seats"] == 5
-    dwindle = ["M", "M-1", "M-2", "M-3", "M-4", "M-5"]
-    lines_hint = [h + "+1" if five else h for h in dwindle]
-    colx = (28, 560, 1090, 1620)
-    mid = top + 500
-    # 1 Lines
-    out += _panel(colx[0], top + 20, 520, 470, 1, "Lines")
-    out += _letters(colx[0] + 50, top + 190, m["Lines"], lines_hint)
-    out.append(_text(colx[0] + 260, top + 290, "power = bus maximum M, dwindling", 20, RED_DARK))
-    out.append(_text(colx[0] + 260, top + 320, "5 players: +1 on Lines", 20, RED_DARK))
-    # 4 Buildings
-    out += _panel(colx[0], mid, 520, 480, 4, "Buildings")
-    for i, kind in enumerate(("office", "pub", "house")):
-        out.append(icon(kind, colx[0] + 80 + i * 90, mid + 130, 1.5))
-    out += _letters(colx[0] + 50, mid + 260, m["Buildings"], dwindle)
-    # 2 Buses
-    out += _panel(colx[1], top + 20, 520, 470, 2, "Buses")
-    for r in range(4):
-        for c in range(5):
-            out.append(bus_glyph(colx[1] + 200 + c * 62, top + 120 + r * 58, 0.6))
-    out += _letters(colx[1] + 50, top + 200, m["Buses"], None, 1)
-    out.append(_text(colx[1] + 100, top + 320, "1 space", 20, RED_DARK))
-    # 5 Clock
-    out += _panel(colx[1], mid, 520, 480, 5, "Clock")
-    ccx, ccy, cr = colx[1] + 340, mid + 270, 120
+        out.append(passenger(n.x + (-26 if n.station else 0), n.y - 26, 0.9))
+    # action markers: earliest empty letter first, so a is filled before b
+    for name, placed in SAMPLE["markers"].items():
+        spaces = lay.actions[ACTION_KEYS[name]]
+        for k, seat in placed:
+            x, y = spaces["abcdef"[k]]
+            out.append(marker(x, y, seat, 19))
+    # buses in the Buses grid: owned buses, seat by seat
+    cells = iter(lay.bus_grid)
+    for seat, count in enumerate(SAMPLE["buses"][: SAMPLE["seats"]]):
+        for _ in range(count):
+            x, y = next(cells)
+            out.append(
+                f'<rect x="{x - 27}" y="{y - 26}" width="54" height="52" rx="6" '
+                f'fill="{PAPER}" opacity="0.9"/>{bus_glyph(x, y, 0.8, SEAT_COLORS[seat])}'
+            )
+    # score discs on the track
+    scores: list[int] = list(SAMPLE["scores"][: SAMPLE["seats"]])
+    for seat, pts in enumerate(scores):
+        if pts > 0:
+            sx, sy = lay.score_track[min(pts, 20) - 1]
+            out.append(marker(sx - 40, sy, seat, 17))
+    # clock hand
+    ha = math.radians(lay.clock_angles[("house", "office", "pub")[SAMPLE["clock"]]])
     out.append(
-        f'<circle cx="{ccx}" cy="{ccy}" r="{cr}" fill="{RED}" stroke="{RED_DARK}" '
-        f'stroke-width="4"/>'
+        f'<g class="clock-hand"><line x1="{lay.clock_x}" y1="{lay.clock_y}" '
+        f'x2="{_f(lay.clock_x + lay.clock_hand * math.cos(ha))}" '
+        f'y2="{_f(lay.clock_y + lay.clock_hand * math.sin(ha))}" stroke="{PAPER}" '
+        f'stroke-width="14" stroke-linecap="round"/>'
+        f'<line x1="{lay.clock_x}" y1="{lay.clock_y}" '
+        f'x2="{_f(lay.clock_x + lay.clock_hand * math.cos(ha))}" '
+        f'y2="{_f(lay.clock_y + lay.clock_hand * math.sin(ha))}" stroke="{INK}" '
+        f'stroke-width="8" stroke-linecap="round"/>'
+        f'<circle cx="{lay.clock_x}" cy="{lay.clock_y}" r="11" fill="{INK}" stroke="{PAPER}" '
+        f'stroke-width="3"/></g>'
     )
-    for i, kind in enumerate(("house", "office", "pub")):
-        a = math.radians(-90 + i * 120 + 60)
-        out.append(
-            f'<path d="M {ccx} {ccy} L {_f(ccx + cr * math.cos(a - 1.047))} '
-            f'{_f(ccy + cr * math.sin(a - 1.047))}" stroke="{PAPER}" stroke-width="4"/>'
-        )
-        px, py = ccx + 68 * math.cos(a), ccy + 68 * math.sin(a)
-        out.append(
-            f'<circle cx="{_f(px)}" cy="{_f(py)}" r="34" fill="{PAPER}"/>{icon(kind, px, py, 0.9)}'
-        )
-    ha = math.radians(-90 + SAMPLE["clock"] * 120 + 60)
-    out.append(
-        f'<path class="clock-hand" d="M {ccx} {ccy} L {_f(ccx + 44 * math.cos(ha))} '
-        f'{_f(ccy + 44 * math.sin(ha))}" stroke="{INK}" stroke-width="8" stroke-linecap="round"/>'
-        f'<circle cx="{ccx}" cy="{ccy}" r="10" fill="{INK}"/>'
-    )
-    out.append(_text(colx[1] + 60, mid + 190, "house", 24, RED_DARK, "start"))
-    out.append(_text(colx[1] + 60, mid + 220, "> office", 24, RED_DARK, "start"))
-    out.append(_text(colx[1] + 60, mid + 250, "> pub", 24, RED_DARK, "start"))
-    out += _letters(colx[1] + 50, mid + 400, m["Clock"], None, 1)
-    # 3 Passengers
-    out += _panel(colx[2], top + 20, 510, 320, 3, "Passengers")
-    out.append(train_glyph(colx[2] + 66, top + 150, 1.2).replace(PAPER, INK, 1))
-    out += _letters(colx[2] + 140, top + 150, m["Passengers"], dwindle, 6, 68)
-    # 6 Vrrooomm!
-    out += _panel(colx[2], top + 340, 510, 400, 6, "Vrrooomm!!!")
-    out += _letters(colx[2] + 50, top + 480, m["Vrrooomm!"], None)
-    out.append(_text(colx[2] + 240, top + 580, "not dwindling: all your buses", 20, RED_DARK))
-    # 7 Starting Player
-    out += _panel(colx[2], top + 740, 510, 270, 7, "Starting Player")
-    out += _letters(colx[2] + 50, top + 880, m["Starting Player"], None, 1)
-    # stones
-    out.append(
-        f'<rect x="{colx[3]}" y="{top + 20}" width="340" height="990" fill="none" stroke="{RED}" '
-        f'stroke-width="5"/>'
-    )
-    out.append(_text(colx[3] + 170, top + 60, "Clock stones", 30, RED))
-    total = 5
-    for i in range(total):
-        x = colx[3] + 100 + (i % 2) * 160
-        y = top + 170 + (i // 2) * 170
+    # time stones: slots still holding a stone get a ring; the taken one is covered
+    for i, (x, y) in enumerate(lay.stones):
         if i < SAMPLE["stones_left"]:
-            out.append(stone(x, y))
+            out.append(
+                f'<circle class="stone-present" cx="{x}" cy="{y}" r="70" fill="none" '
+                f'stroke="{INK}" stroke-width="4" stroke-dasharray="3 7"/>'
+            )
         else:
             out.append(
-                f'<circle cx="{x}" cy="{y}" r="38" fill="none" stroke="{RED}" stroke-width="3" '
-                f'stroke-dasharray="6 6"/>'
+                f'<g class="stone-taken"><circle cx="{x}" cy="{y}" r="76" fill="{PAPER}" '
+                f'opacity="0.92"/>{marker(x, y, SAMPLE["stone_holder"], 26)}</g>'
             )
     return out
 
 
-def _player_areas() -> list[str]:
-    y0 = MAP_BOTTOM + 24 + 1020 + 30
+def _player_strip() -> list[str]:
+    y0 = ART + 12
     out: list[str] = []
     n = SAMPLE["seats"]
-    w = (WIDTH - 28 - 20 * (n - 1)) / n
+    w = (WIDTH - 28 - 16 * (n - 1)) / n
     for seat in range(n):
-        x = 14 + seat * (w + 20)
+        x = 14 + seat * (w + 16)
         out.append(
             f'<g class="seat-area seat-{seat}"><rect x="{_f(x)}" y="{y0}" width="{_f(w)}" '
-            f'height="{HEIGHT - y0 - 20}" rx="18" fill="{PAPER}" stroke="{SEAT_COLORS[seat]}" '
+            f'height="{STRIP - 24}" rx="18" fill="{PAPER}" stroke="{SEAT_COLORS[seat]}" '
             f'stroke-width="8"/>'
         )
-        out.append(marker(x + 38, y0 + 40, seat, 24))
-        out.append(_text(x + 76, y0 + 40, f"P{seat}", 30, INK, "start"))
-        out.append(_text(x + w - 14, y0 + 40, f"{SAMPLE['scores'][seat]} pts", 24, INK, "end"))
-        out.append(_text(x + 20, y0 + 92, "Buses", 20, RED_DARK, "start"))
+        out.append(marker(x + 40, y0 + 42, seat, 24))
+        out.append(_text(x + 78, y0 + 42, f"P{seat}", 30, INK, "start"))
+        out.append(_text(x + w - 16, y0 + 42, f"{SAMPLE['scores'][seat]} pts", 26, INK, "end"))
+        out.append(_text(x + 20, y0 + 100, "Buses", 20, RED_DARK, "start"))
         for b in range(5):
             has = b < SAMPLE["buses"][seat]
             out.append(
-                bus_glyph(x + 40 + b * 52, y0 + 135, 0.65, SEAT_COLORS[seat] if has else "#D8CFB8")
+                bus_glyph(x + 40 + b * 52, y0 + 142, 0.65, SEAT_COLORS[seat] if has else "#D8CFB8")
             )
-        if seat == SAMPLE["stone_holder"]:
-            out.append(stone(x + w - 52, y0 + 135, 28))
-        out.append(_text(x + 20, y0 + 195, "Markers left", 20, RED_DARK, "start"))
-        out.append(_text(x + w - 14, y0 + 195, "25 lines, 20 actions", 17, RED_DARK, "end"))
+        out.append(_text(x + 20, y0 + 200, "Markers left", 20, RED_DARK, "start"))
+        out.append(_text(x + w - 16, y0 + 200, "25 lines, 20 actions", 17, RED_DARK, "end"))
+        out.append(_text(x + 20, y0 + 245, "Stones held", 20, RED_DARK, "start"))
+        held = 1 if seat == SAMPLE["stone_holder"] else 0
+        out.append(_text(x + w - 16, y0 + 245, str(held), 24, INK, "end"))
         out.append("</g>")
     return out
 
 
-def render(board: Board | None = None) -> str:
+def render(board: Board | None = None, embed: bool = False) -> str:
     board = board or load_board()
+    href = BG_HREF
+    if embed:
+        href = "data:image/png;base64," + base64.b64encode(BG_PATH.read_bytes()).decode()
     parts = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {WIDTH} {HEIGHT}" '
-        f'width="{WIDTH}" height="{HEIGHT}">',
+        f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" '
+        f'viewBox="0 0 {WIDTH} {HEIGHT}" width="{WIDTH}" height="{HEIGHT}">',
         f'<rect width="{WIDTH}" height="{HEIGHT}" fill="#2B2B2B"/>',
-        *_map_layer(board),
-        *_action_board(),
-        *_player_areas(),
+        f'<image id="board-art" href="{href}" xlink:href="{href}" x="0" y="0" '
+        f'width="{WIDTH}" height="{ART}"/>',
+        *_piece_layer(board),
+        *_hit_layer(board),
+        *_player_strip(),
         "</svg>",
     ]
     return "\n".join(parts) + "\n"
@@ -555,10 +429,11 @@ def render(board: Board | None = None) -> str:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", default="docs/board-preview.svg")
+    ap.add_argument("--embed", action="store_true", help="base64-inline the background PNG")
     args = ap.parse_args()
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(render(), encoding="utf-8")
+    out.write_text(render(embed=args.embed), encoding="utf-8")
     print(f"wrote {out}")
 
 
