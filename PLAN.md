@@ -172,11 +172,11 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 - [x] 1. Constants, action IDs, board fixes (R-001–R-008; ACTIONS.md §2, §4; backlog: Layout hashable, bounds, negative parser tests, supplies to constants) — `spec-test-writer` → `implementer` (2026-11-14)
 - [x] 2. State model and game registration (R-003, R-009, R-014, R-073; §5.2 params) — `spec-test-writer` → `implementer` (2026-11-14; state-aware EXTEND wording moves to unit 5)
 - [x] 3. Scenario loader and invariant checker (SCENARIOS.md, `S-*` codes, §6.3; backlog: `move_offset`, round-1 `waiting`, `S-STONES`) — `spec-test-writer` → `implementer` (2026-11-14; SCENARIOS.md §9 clarifications)
-- [ ] 4. Line geometry ⚑ (R-035–R-039, R-041) — `spec-test-writer` → `implementer` → `rules-auditor`
+- [x] 4. Line geometry ⚑ (R-035–R-039, R-041) — `spec-test-writer` → `implementer` → `rules-auditor` (2026-11-14; audit PASS)
 - [ ] 5. Setup phases (R-015–R-019, R-021; plus state-aware EXTEND `action_to_string`) — `spec-test-writer` → `implementer`
 - [ ] 6. Action selection (R-020, R-022–R-028) — `spec-test-writer` → `implementer`
 - [ ] 7. Resolution framework and Buses ⚑ (R-029–R-034, R-043, R-044) — `spec-test-writer` → `implementer` → `rules-auditor`
-- [ ] 8. Lines resolution ⚑ (R-040, R-042) — `spec-test-writer` → `implementer` → `rules-auditor`
+- [ ] 8. Lines resolution ⚑ (R-040, R-042; must include a state-level O-2 test: unit k+1's legal set reflects the street placed in unit k, per unit 4 audit) — `spec-test-writer` → `implementer` → `rules-auditor`
 - [ ] 9. Passengers and Buildings (R-045–R-049; R-049/R-066 wording amendment first, needs user OK) — `spec-test-writer` → `implementer`
 - [ ] 10. Clock and passenger movement ⚑ (R-050–R-055) — `spec-test-writer` → `implementer` → `rules-auditor`
 - [ ] 11. Vrrooomm! ⚑ (R-056–R-063) — `spec-test-writer` → `implementer` → `rules-auditor`
