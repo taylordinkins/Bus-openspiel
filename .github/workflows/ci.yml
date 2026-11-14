@@ -1,0 +1,24 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pyright
+      - name: Fast tests
+        run: uv run pytest -q -rxX
+      - name: Slow simulation tests
+        # exit code 5 means no slow tests were collected
+        run: uv run pytest -q -m slow -rxX || test $? -eq 5
+
+  # The web and e2e jobs (typecheck, vitest, build, generated API types, Playwright) are added
+  # in Phase 2 when web/ exists; copy them from the lignum repo's ci.yml.

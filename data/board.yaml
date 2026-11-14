@@ -1,0 +1,175 @@
+# Bus board: the reworked map (assets/map/bus_map_reworked_v2.pdf).
+# Digitized in Phase 0 from the map image (circle/street detection + OCR of site letters),
+# then checked by eye against the overlay in docs/board-check.png.
+#
+# Coordinates are map pixels in a 1991 x 1991 frame (the PDF page rendered at 100 dpi);
+# the UI scales them. Node ids run in reading order (top to bottom, left to right).
+#
+# nodes:   intersections. station = train station (Passengers action puts passengers here);
+#          roundabout = Central Park roundabout (one starting passenger each).
+# streets: undirected edges between two nodes; `via` lists bend points for drawing only.
+# sites:   construction sites. tier A-D replaces the rulebook's numbered tiers: all A sites must
+#          be filled before any B, and so on (setup fills A). `node` is the intersection the
+#          building belongs to (passengers enter and leave it there).
+# Counts: 36 nodes, 70 streets, 47 sites (A 12, B 11, C 9, D 15). tests/data/test_board.py checks them.
+
+map: {width: 1991, height: 1991, source: assets/map/bus_map_reworked_v2.pdf}
+
+nodes:
+  - {id: 0, x: 1344, y: 142}
+  - {id: 1, x: 1203, y: 286}
+  - {id: 2, x: 1486, y: 286}
+  - {id: 3, x: 781, y: 433}
+  - {id: 4, x: 1061, y: 430}
+  - {id: 5, x: 1349, y: 428, station: true}
+  - {id: 6, x: 353, y: 574}
+  - {id: 7, x: 495, y: 573}
+  - {id: 8, x: 636, y: 574}
+  - {id: 9, x: 920, y: 574}
+  - {id: 10, x: 1203, y: 574}
+  - {id: 11, x: 495, y: 717}
+  - {id: 12, x: 778, y: 717}
+  - {id: 13, x: 1061, y: 717, roundabout: true}
+  - {id: 14, x: 1344, y: 717}
+  - {id: 15, x: 1624, y: 717}
+  - {id: 16, x: 636, y: 860}
+  - {id: 17, x: 920, y: 860, roundabout: true}
+  - {id: 18, x: 1203, y: 860, roundabout: true}
+  - {id: 19, x: 495, y: 1004}
+  - {id: 20, x: 778, y: 1004}
+  - {id: 21, x: 1061, y: 1004, roundabout: true}
+  - {id: 22, x: 1344, y: 1004}
+  - {id: 23, x: 1624, y: 1004}
+  - {id: 24, x: 354, y: 1148}
+  - {id: 25, x: 636, y: 1148, station: true}
+  - {id: 26, x: 920, y: 1148}
+  - {id: 27, x: 1061, y: 1148}
+  - {id: 28, x: 1198, y: 1148}
+  - {id: 29, x: 1344, y: 1148}
+  - {id: 30, x: 1624, y: 1148}
+  - {id: 31, x: 495, y: 1291}
+  - {id: 32, x: 636, y: 1291}
+  - {id: 33, x: 778, y: 1291}
+  - {id: 34, x: 1061, y: 1291}
+  - {id: 35, x: 1624, y: 1336}
+
+streets:
+  - {id: 0, a: 0, b: 1}
+  - {id: 1, a: 0, b: 2}
+  - {id: 2, a: 0, b: 5}
+  - {id: 3, a: 1, b: 4}
+  - {id: 4, a: 1, b: 5}
+  - {id: 5, a: 2, b: 5}
+  - {id: 6, a: 3, b: 4}
+  - {id: 7, a: 3, b: 6, via: [[496, 430]]}
+  - {id: 8, a: 3, b: 8}
+  - {id: 9, a: 3, b: 9}
+  - {id: 10, a: 4, b: 5}
+  - {id: 11, a: 4, b: 9}
+  - {id: 12, a: 4, b: 10}
+  - {id: 13, a: 5, b: 10}
+  - {id: 14, a: 5, b: 14}
+  - {id: 15, a: 5, b: 15}
+  - {id: 16, a: 6, b: 7}
+  - {id: 17, a: 6, b: 11}
+  - {id: 18, a: 7, b: 8}
+  - {id: 19, a: 7, b: 11}
+  - {id: 20, a: 8, b: 9}
+  - {id: 21, a: 8, b: 12}
+  - {id: 22, a: 9, b: 13}
+  - {id: 23, a: 10, b: 13}
+  - {id: 24, a: 10, b: 14}
+  - {id: 25, a: 11, b: 12}
+  - {id: 26, a: 11, b: 16}
+  - {id: 27, a: 12, b: 13}
+  - {id: 28, a: 12, b: 16}
+  - {id: 29, a: 12, b: 17}
+  - {id: 30, a: 13, b: 17}
+  - {id: 31, a: 13, b: 18}
+  - {id: 32, a: 14, b: 15}
+  - {id: 33, a: 14, b: 18}
+  - {id: 34, a: 14, b: 22}
+  - {id: 35, a: 14, b: 23}
+  - {id: 36, a: 15, b: 23}
+  - {id: 37, a: 16, b: 19}
+  - {id: 38, a: 16, b: 20}
+  - {id: 39, a: 17, b: 20}
+  - {id: 40, a: 17, b: 21}
+  - {id: 41, a: 18, b: 21}
+  - {id: 42, a: 19, b: 24}
+  - {id: 43, a: 19, b: 25}
+  - {id: 44, a: 20, b: 25}
+  - {id: 45, a: 20, b: 26}
+  - {id: 46, a: 21, b: 22}
+  - {id: 47, a: 21, b: 26}
+  - {id: 48, a: 21, b: 27}
+  - {id: 49, a: 21, b: 28}
+  - {id: 50, a: 22, b: 23}
+  - {id: 51, a: 22, b: 29}
+  - {id: 52, a: 23, b: 30}
+  - {id: 53, a: 24, b: 25}
+  - {id: 54, a: 25, b: 26}
+  - {id: 55, a: 25, b: 31}
+  - {id: 56, a: 25, b: 32}
+  - {id: 57, a: 25, b: 33}
+  - {id: 58, a: 26, b: 27}
+  - {id: 59, a: 26, b: 33}
+  - {id: 60, a: 26, b: 34}
+  - {id: 61, a: 27, b: 34}
+  - {id: 62, a: 28, b: 29}
+  - {id: 63, a: 28, b: 34}
+  - {id: 64, a: 28, b: 35, via: [[1387, 1337]]}
+  - {id: 65, a: 29, b: 30}
+  - {id: 66, a: 30, b: 35}
+  - {id: 67, a: 31, b: 32}
+  - {id: 68, a: 32, b: 33}
+  - {id: 69, a: 33, b: 34}
+
+sites:
+  - {id: 0, tier: A, node: 10, x: 1085, y: 570}
+  - {id: 1, tier: A, node: 14, x: 1384, y: 679}
+  - {id: 2, tier: A, node: 13, x: 1122, y: 713}
+  - {id: 3, tier: A, node: 13, x: 1180, y: 713}
+  - {id: 4, tier: A, node: 17, x: 980, y: 858}
+  - {id: 5, tier: A, node: 17, x: 1039, y: 858}
+  - {id: 6, tier: A, node: 18, x: 1226, y: 908}
+  - {id: 7, tier: A, node: 18, x: 1284, y: 908}
+  - {id: 8, tier: A, node: 20, x: 649, y: 999}
+  - {id: 9, tier: A, node: 21, x: 937, y: 1001}
+  - {id: 10, tier: A, node: 21, x: 995, y: 1001}
+  - {id: 11, tier: A, node: 26, x: 890, y: 1237}  # CHECK: sits between nodes 26, 33 and 34 (PLAN §9)
+  - {id: 12, tier: B, node: 0, x: 1403, y: 142}
+  - {id: 13, tier: B, node: 4, x: 978, y: 387}
+  - {id: 14, tier: B, node: 9, x: 921, y: 510}
+  - {id: 15, tier: B, node: 8, x: 558, y: 619}  # CHECK: nearest-node call; could belong to node 7 or 11 (PLAN §9)
+  - {id: 16, tier: B, node: 12, x: 810, y: 673}
+  - {id: 17, tier: B, node: 16, x: 568, y: 856}
+  - {id: 18, tier: B, node: 22, x: 1387, y: 966}
+  - {id: 19, tier: B, node: 27, x: 1101, y: 1120}
+  - {id: 20, tier: B, node: 29, x: 1344, y: 1193}
+  - {id: 21, tier: B, node: 31, x: 460, y: 1335}
+  - {id: 22, tier: B, node: 33, x: 749, y: 1335}
+  - {id: 23, tier: C, node: 4, x: 1036, y: 387}
+  - {id: 24, tier: C, node: 10, x: 1143, y: 570}
+  - {id: 25, tier: C, node: 8, x: 616, y: 619}  # CHECK: nearest-node call; could belong to node 7 or 11 (PLAN §9)
+  - {id: 26, tier: C, node: 14, x: 1442, y: 679}
+  - {id: 27, tier: C, node: 20, x: 708, y: 999}
+  - {id: 28, tier: C, node: 22, x: 1445, y: 966}
+  - {id: 29, tier: C, node: 27, x: 1101, y: 1178}
+  - {id: 30, tier: C, node: 26, x: 948, y: 1237}  # CHECK: sits between nodes 26, 33 and 34 (PLAN §9)
+  - {id: 31, tier: C, node: 33, x: 807, y: 1335}
+  - {id: 32, tier: D, node: 1, x: 1171, y: 250}
+  - {id: 33, tier: D, node: 2, x: 1533, y: 286}
+  - {id: 34, tier: D, node: 3, x: 780, y: 387}
+  - {id: 35, tier: D, node: 7, x: 498, y: 532}
+  - {id: 36, tier: D, node: 6, x: 307, y: 574}
+  - {id: 37, tier: D, node: 15, x: 1669, y: 716}
+  - {id: 38, tier: D, node: 11, x: 461, y: 748}
+  - {id: 39, tier: D, node: 19, x: 463, y: 969}
+  - {id: 40, tier: D, node: 23, x: 1669, y: 1004}
+  - {id: 41, tier: D, node: 28, x: 1231, y: 1108}
+  - {id: 42, tier: D, node: 24, x: 307, y: 1148}
+  - {id: 43, tier: D, node: 30, x: 1669, y: 1148}
+  - {id: 44, tier: D, node: 32, x: 636, y: 1335}
+  - {id: 45, tier: D, node: 34, x: 1065, y: 1335}
+  - {id: 46, tier: D, node: 35, x: 1673, y: 1336}

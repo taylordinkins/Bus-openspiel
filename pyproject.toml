@@ -1,0 +1,50 @@
+[project]
+name = "bus"
+version = "0.0.1"
+description = "Bus (Splotter, Complete Edition rules) as an OpenSpiel game, with a web UI for human play and bots."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi>=0.162.0",
+    "open-spiel==2.0.2",
+    "pyyaml>=6.0.3",
+    "uvicorn>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "hypothesis>=6",
+    "ruff>=0.8",
+    "pyright>=1.1.390",
+    "types-pyyaml>=6.0.12",
+    "httpx>=0.28.1",
+]
+
+[tool.uv]
+# Not packaged for distribution; tests import the package from the repo root.
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "--import-mode=importlib -m 'not slow'"
+markers = [
+    "pending(rule_id): test written from the spec ahead of the implementation; runs as non-strict xfail until the implementer removes the marker",
+    "regression(report_id): regression test for a playtest report; runs as strict xfail, so it XPASSes (suite red) once the bug is fixed and the implementer must remove the marker",
+    "slow: long simulation runs (CI and /close-phase only; run with -m slow)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["third_party"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.pyright]
+include = ["bus", "tools", "tests/support"]  # add "server" in Phase 2
+stubPath = "typings"
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+reportMissingTypeStubs = false

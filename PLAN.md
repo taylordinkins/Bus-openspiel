@@ -1,0 +1,217 @@
+# Bus — OpenSpiel Implementation Plan
+
+**Status:** Draft v1 · 2026-11-14 (scaffold and board data done; §4 defaults await your review)
+**Repository:** `taylordinkins/Bus-openspiel` (public; default branch `master`)
+**Rules source:** *Bus* Complete Edition rulebook (Jeroen Doumen & Joris Wiersinga, Splotter / Capstone Games 2024), kept locally at `third_party/rules/bus_rulebook.pdf` (git-ignored). Then §3–§4 of this file.
+**Board:** the reworked map `assets/map/bus_map_reworked_v2.pdf` (unofficial, committed), digitized into `data/board.yaml`.
+**Target framework:** OpenSpiel `open-spiel==2.0.2`, Python 3.12 (same pin as `kingisdead` and `lignum`)
+**Prior art:** `lignum` — agents, hooks, skills, server and web shell are ported from it (D3). The earlier `BusRL` repo is not used (D4).
+
+### Progress
+- [ ] Phase 0 — Scaffold, board data, rules spec, board look ✋ *you review spec, §4 defaults and the board preview*
+- [ ] Phase 1 — Engine: the full game, 3–5 players
+- [ ] Phase 2 — Server + polished board UI ✋ *playtest #1*
+- [ ] Phase 3 — Bots (random, heuristic, MCTS) ✋ *playtest #2*
+- [ ] Phase 4 — Trained agents *(starts with a mini-interview)*
+
+---
+
+## 1. Goal
+
+A faithful, well-tested implementation of *Bus* as a **Python OpenSpiel game**, playable by humans in a **browser** with a board that is pleasant to look at and quick to use, against other humans and bots, and usable unchanged by OpenSpiel algorithms for RL work.
+
+**Done for v1 (end of Phase 3) means:**
+1. `pyspiel.load_game("python_bus", {"players": n})` works for n = 3, 4, 5 and passes `random_sim_test` with serialization.
+2. Every rule in `docs/RULES_SPEC.md` has at least one test citing its rule ID; `data/board.yaml` matches the map.
+3. You can play a full game in the browser on a board drawn after the reworked map, with click-to-act on streets, sites, stations and passengers, against any mix of humans and bots, and report a problem with one click.
+
+## 2. Scope
+
+| In v1 | Later | Out of scope |
+|---|---|---|
+| Complete Edition rules, 3–5 players | Trained agents (Phase 4) | 2-player or solo variants |
+| Hotseat; random, heuristic, MCTS seats | | Networked multiplayer, accounts |
+| Board UI after the reworked map, own icons, generic pieces | | Mobile-optimised layout |
+| Report button, replay export/import, setup editor | | C++ port (only if Phase 4 measures a need) |
+
+## 3. Decisions log
+
+| # | Topic | Decision | Notes |
+|---|---|---|---|
+| D1 | Language and framework | Python game registered via `pyspiel.register_game`; pin `open-spiel==2.0.2`, Python 3.12 | Proven twice; `docs/OPENSPIEL_NOTES.md` copied from lignum |
+| D2 | Phase flow (2026-11-14) | Four phases instead of lignum's eight: spec and scaffold together, the whole engine in one phase, server and the real board UI together (no text-board stage), then bots. Opus audits only at phase close and at spot checks (§8) | User: get the implementation out faster |
+| D3 | Server and web | Port lignum's game-agnostic `server/` (app, sessions, bots, reports, schemas, adapter base) and `web/src/shell/` in Phase 2; the Bus board plugin replaces the text board | The shell lives in the private `lignum` repo (the public `lignum-openspiel` lacks `web/src/shell/`) |
+| D4 | BusRL (2026-11-14) | Not used, not even its board file; the map was digitized again from the reworked map | User decision |
+| D5 | Information and chance | `PERFECT_INFORMATION`, `chance_mode=DETERMINISTIC`: Bus has no randomness. The starting player is a lobby choice (seat 0 starts, ⚑) | Simplifies MCTS and RL; no resamplers |
+| D6 | Player counts (2026-11-14) | 3, 4 and 5 players, as published | User decision |
+| D7 | Returns | Parameter `returns`: `win_loss` (default) — sole winner +1, others −1/(n−1); a k-way tie that survives every tiebreak shares the win, (n−k)/(k·(n−1)) each; `margin` — own final score minus the mean of the others, divided by 10 and clipped to [−1, 1] (GENERAL_SUM) | As lignum D7; policies may train on `margin`, are always evaluated on `win_loss` |
+| D8 | Third-party material (2026-11-14) | The rulebook stays local in git-ignored `third_party/rules/`. The reworked map is unofficial and is committed under `assets/map/` | User decision. Rulebook text is paraphrased in the spec, never pasted |
+| D9 | Bots and UI shape the engine | `action_meta(state, id)` gives every legal action its kind and board targets (street, node, site, end, building type) so the UI can be click-to-act and bots can featurize; observation tensor designed for RL in Phase 1 | The user's priorities: good UI now, agents later |
+| D10 | Board data | `data/board.yaml` is the only source of topology (36 nodes, 70 streets, 47 sites A–D, 2 stations, 4 roundabouts) with map-pixel coordinates the UI reuses; `bus/board.py` loads and validates it | §4 C1 |
+| D11 | Persistence | Persist action histories (plus scenario JSON for editor-built states); never accept `serialize()` strings from clients | As lignum D18 |
+| D12 | Spec lock | `docs/RULES_SPEC.md` Status DRAFT → APPROVED → AMENDING; a hook blocks edits while APPROVED; only you change the Status line | As lignum D16 |
+| D13 | Tests ahead of code | `@pytest.mark.pending("R-0xx")` (non-strict xfail); `spec-test-writer` can't read `bus/` source (hook) | As lignum D17 |
+| D14 | Model use | Sonnet workhorses, Haiku search and sims, Opus audits at phase close and spot checks (§8); main session defaults to Sonnet | As lignum D15 |
+
+## 4. Rules clarifications
+
+Where the rulebook is silent or ambiguous. Each becomes a numbered entry in `docs/RULES_SPEC.md`. ⚑ = my default where no source settles it — **veto any of them during the Phase 0 review.**
+
+**C1 — The board** (`data/board.yaml`, overlay `docs/board-check.png`). The map's letters A–D replace the rulebook's numbered construction-site tiers: A is the lowest, filled first (setup builds on A), then B, C, D. Each site belongs to one intersection, the one passengers enter it from. The 4 double-ring intersections are the Central Park roundabouts; the 2 bus-icon intersections are the train stations (no sites). Two streets bend (3–6 and 28–35 are drawn via a corner); bends are drawing only. Two site assignments are judgement calls, flagged `CHECK` in the YAML (§9 Q1).
+
+**C2 — Components.** Per player: 20 Action markers, 25 Bus Line markers, 5 buses (1 placed at setup). 15 passengers in all (4 placed at setup). Time stones: 5, or 4 with 3 players. Buildings are effectively unlimited (90 discs, 47 sites). Score track has no cap (the map's 1–20 track is drawn as a lap counter in the UI).
+
+**C3 — Setup**, in order: clock points at house; one passenger on each roundabout (they stand at the intersection and do not enter buildings until a Clock action resolves ⚑); each player places 2 buildings, one player at a time in turn order, each on any empty lowest-tier site with a type of their choice; each player places a first Bus Line marker on any street (occupied or not), in turn order; then in reverse turn order a second marker extending from either end of their first, under C5's placement rule. Seat 0 is the starting player.
+
+**C4 — Action selection.** Starting with the start player and going in seat order, each player places one Action marker; then a second round, also mandatory; then rounds continue in which each player either places a marker or drops out for the rest of the round. A player with no markers left is skipped (and out). A multi-use action takes the earliest empty letter (a, b, …); an action whose spaces are full can't be chosen. Any action with a free space may be chosen even if it will have no effect (blocking is a real tactic) ⚑. Selection ends when every player has dropped out.
+
+**C5 — Line expansion.** A line is an ordered path of streets with two ends; it never repeats a street of its own and may revisit intersections (loops). Extending means adding one street at one end. The engine stores the path, so loop ends are never ambiguous; in a full-line loop the player's choice of which end to extend from is the "from A to B / from B to A" choice in the rulebook. **Placement rule, per end ⚑ (from the rulebook's Red C/D example):** from a given end, if any of its candidate streets is unoccupied (no player's marker), the new marker must go on an unoccupied street; otherwise any candidate is allowed. **Exception:** if another player's line has an end at the same intersection and its last street is not your last street, you may extend onto that street even when unoccupied streets exist. The exception covers exactly that one street per use. An end with no candidate street is dead; if both are dead or you have no markers left, the remaining extensions are lost.
+
+**C6 — Resolution and action power.** Actions resolve top to bottom: Lines, Buses, Passengers, Buildings, Clock, Vrrooomm!, Starting Player. Multi-use spaces resolve left to right as printed: for Lines and Buildings (letters printed f…a), the marker on the highest letter goes first; for Passengers and Vrrooomm! (a…f), a goes first. Dwindling power for the marker on letter index k (a = 0) is M − k for Lines, Passengers and Buildings (Lines +1 with 5 players); M is the current most buses any player has, read when the marker resolves (so a Buses action raises M for Passengers and Buildings in the same round). Power ≤ 0 does nothing. Vrrooomm! is not dwindling: each marker uses all its owner's buses. Every effect must be carried out as fully as possible.
+
+**C7 — Buses.** Add one bus if you have one left; with 5 already, no effect.
+
+**C8 — Passengers.** For each unit of power, place one passenger from the supply on either station (your choice each time); stop when the supply is empty.
+
+**C9 — Buildings.** For each unit of power, choose an empty site of the lowest tier that still has empty sites, and a type (house, office, pub). When every site is full, remaining builds are lost, and the game ends at the end of the round.
+
+**C10 — Clock.** Choose: advance (house → office → pub → house) or pause (take a time stone, −1 at game end). Taking the last stone ends the game immediately, before any further action resolves. Otherwise passengers then move: every passenger in a building steps out to its intersection; then at each intersection, waiting passengers enter empty buildings of the clock's current type there, one per building (passengers are identical, so no choice).
+
+**C11 — Vrrooomm!** Markers resolve a → f. The owner moves up to (number of buses) passengers, one at a time, each from an intersection on their line (not inside a building) to an empty building of the clock's type whose intersection is on their line, +1 point each. A passenger already standing at the destination's intersection may be moved into it ⚑. The count is always min(buses, waiting passengers on the line, empty target buildings on the line), so only *which* passengers and buildings is a choice.
+
+**C12 — Starting player and round end.** The Starting Player marker's owner starts next round; if nobody took it, the start passes to the next seat. Spent markers are gone. If at most one player has Action markers left, the game ends ⚑ (the rulebook says "only 1"; 0 is treated the same).
+
+**C13 — Game end and winner.** Ends: all sites full (end of that round); last time stone taken (immediately); at most one player with markers (end of round). Final score = points − stones. Ties: most time stones; then whoever reached their points total first (the engine records the move number when each player's points last changed; earlier wins). A tie that survives (e.g. players still on 0 points) is a shared win (D7) ⚑.
+
+## 5. Architecture
+
+### 5.1 Repository layout
+
+```
+Bus-openspiel/
+├─ PLAN.md · CLAUDE.md · README.md
+├─ .claude/                   # settings, agents, skills, hooks, rules (ported from lignum)
+├─ .github/workflows/ci.yml   # python job now; web + e2e jobs join in Phase 2
+├─ third_party/rules/         # rulebook PDF, local only (git-ignored)
+├─ assets/map/                # the reworked map (PDF + 1991 px PNG)
+├─ data/board.yaml            # board topology + map coordinates (D10)
+├─ docs/  (RULES_SPEC.md, ACTIONS.md, SCENARIOS.md, OPENSPIEL_NOTES.md, board-check.png, phase-reports/)
+├─ bus/                       # board, constants, rules, actions, game, observer, scenario, bots/
+├─ server/                    # Phase 2: ported FastAPI app + bus adapter
+├─ web/                       # Phase 2: ported React/TS shell + games/bus/ board plugin
+├─ tests/  (data/, rules/, scenarios/, regressions/, playthroughs/, support/)
+├─ tools/  (render_board, play_text, replay, sim_stats, tournament)
+└─ playtest/reports/
+```
+
+### 5.2 OpenSpiel game definition
+
+`short_name="python_bus"`, `dynamics=SEQUENTIAL`, `chance_mode=DETERMINISTIC`, `information=PERFECT_INFORMATION`, `utility=ZERO_SUM` (`win_loss`) or `GENERAL_SUM` (`margin`), `reward_model=TERMINAL`, players 3–5. Parameters: `players` (4), `returns` ("win_loss"). Observation via `make_py_observer`: one tensor plane set per street (line occupancy per seat, own-line ends), per node (waiting passengers, line membership), per site (building type, occupied), plus clock, stones, markers left, buses, scores, action-board occupancy and the pending sub-decision. `max_game_length` bounded from markers (20 per player) and per-marker sub-decisions.
+
+### 5.3 Round machine
+
+```
+SETUP: buildings (2 each, turn order) ─► first line marker (turn order) ─► second marker (reverse order)
+ROUND: SELECT (mandatory ×2, then place-or-drop until all dropped)
+       ─► RESOLVE Lines ─► Buses ─► Passengers ─► Buildings ─► Clock ─► Vrrooomm! ─► Starting Player
+       ─► end checks ─► next ROUND or TERMINAL
+```
+
+Resolution sub-decisions are made by the marker's owner as they come up; steps with exactly one legal choice auto-advance in the UI and for bots.
+
+### 5.4 Actions (sketch; fixed in `docs/ACTIONS.md` during Phase 0, frozen when Phase 1 closes)
+
+| Kind | IDs (approx.) |
+|---|---|
+| `SELECT action a` (7) and `DROP_OUT` | 8 |
+| `EXTEND(end, street)` — end 0/1 × 70 streets (also the setup line markers) | 140 |
+| `BUILD(site, type)` — 47 × 3 (also setup buildings) | 141 |
+| `PASSENGER_TO(station)` | 2 |
+| `CLOCK_ADVANCE`, `CLOCK_PAUSE` | 2 |
+| `PICK_PASSENGER(node)` then `DELIVER_TO(site)` | 36 + 47 |
+
+About 380 decision ids, no chance ids.
+
+### 5.5 Server and web
+
+Ported (D3): the action history is the source of truth; Back, Rewind (dev), Report, replay export/import; the action-list fallback stays as a debug panel. The Bus plugin draws the board as SVG from `data/board.yaml`, following the reworked map's layout and palette: our own house / office / pub icons as on the map, generic pieces for line markers (coloured offset strokes so shared streets show every line), buses, passengers, time stones and the clock. Click targets: line ends then streets, sites then a type picker, stations, passengers then buildings. The action board, clock, stones, scores and markers-left sit beside the map as on the printed board.
+
+### 5.6 Bots
+
+Random; heuristic (greedy over a few hand features: deliverable passengers, buildings reachable on own line, line contestation); Python MCTS (`open_spiel.python.algorithms.mcts.MCTSBot`, never the C++ bot, see notes) with heuristic or random rollouts. Trained agents are Phase 4.
+
+## 6. Verification strategy
+
+Cheapest first:
+
+1. **Board data tests** (`tests/data/`): counts, connectivity, site tiers; plus your review of `docs/board-check.png`.
+2. **Rule tests** named `test_R###_…`, written from the spec before the code, on small scenario fixtures.
+3. **Invariants after every action** in random simulations: passengers on board + supply = 15; at most one passenger per building; each line is a valid trail (no repeated own street, contiguous); line markers + supply = 25 per player; buses 1–5; markers only decrease; points never decrease; sites filled tier by tier; stones on clock + taken = 5 (or 4); non-terminal states have a legal action; returns sum to 0 for `win_loss`.
+4. **OpenSpiel conformance**: `random_sim_test` with serialization, every player count.
+5. **Golden playthroughs**: fixed-seed files; any diff explained in the commit.
+6. **Independent audits**: `rules-auditor` (spec vs rulebook, code vs spec), `code-reviewer` (diff).
+7. **Your playtests** at each ✋, with the Report button.
+
+## 7. Phases
+
+Each phase starts with `/start-phase N` (task list for your approval) and ends with `/close-phase` (evidence report, PR). ✋ = stop for you.
+
+**Phase 0 — Scaffold, board data, rules spec, board look ✋**
+- [x] 1. Scaffold: `uv` project, pins, ruff, pyright, pytest, CI, `CLAUDE.md`, `.claude/` ported from lignum (agents, skills, hooks, rules), `docs/OPENSPIEL_NOTES.md`, hook tests green (2026-11-14)
+- [x] 2. Board digitized: `data/board.yaml`, `bus/board.py`, `tests/data/test_board.py`, overlay `docs/board-check.png` (2026-11-14)
+- [ ] 3. `docs/RULES_SPEC.md` from the rulebook and §4 — `implementer`
+- [ ] 4. `docs/ACTIONS.md` and `docs/SCENARIOS.md` — `implementer`
+- [ ] 5. Spec audit vs rulebook, board data audit vs map — `rules-auditor`, then fixes
+- [ ] 6. Board preview: `tools/render_board.py` draws `docs/board-preview.svg` (map layout, icons, sample lines, buses, passengers, action board) so the look is settled before Phase 2 — `implementer`
+- [ ] 7. ✋ You review the spec, §4 defaults, §9 questions and the preview; you set the spec Status to APPROVED
+- *Exit:* spec APPROVED; board data confirmed; preview look agreed.
+
+**Phase 1 — Engine (the whole game, 3–5 players)**
+- Constants, actions, setup, selection, all seven resolutions, end and scoring, both `returns`; observer with RL-ready tensor; `action_meta`; scenario loader; invariant checker; `tools/play_text.py`, `tools/replay.py`, `tools/sim_stats.py`; golden playthroughs for 3 seeds.
+- *Exit:* rule tests green; `random_sim_test` passes for 3, 4, 5 players; 10,000 random games with zero invariant violations; `sim_stats` report (end-type mix, rounds, scores, markers used); `rules-auditor` + `code-reviewer` pass.
+
+**Phase 2 — Server + polished board UI ✋ playtest #1**
+- Port server and shell (D3); Bus adapter (views, labels, `action_meta`); SVG board plugin per §5.5 and the agreed preview; setup editor; random seats; Playwright test that finishes a game; CI web + e2e jobs.
+- *Exit:* you play one hotseat game and one against random bots, and file reports.
+
+**Phase 3 — Bots ✋ playtest #2**
+- Heuristic and Python MCTS seats; `tools/tournament.py` with Wilson CIs; server seats with think-time limits.
+- *Exit:* MCTS beats random and the heuristic beats random over a few hundred 4-player games; you play against them.
+
+**Phase 4 — Trained agents** *(mini-interview: algorithm, compute budget, evaluation, C++ port only on measured need)*
+
+## 8. Working agreement for agent sessions
+
+| Role | Agent | Model | Used for |
+|---|---|---|---|
+| Orchestrator | main session | Sonnet (project default) | Runs the skills, delegates, talks to you |
+| Workhorse | `implementer` | Sonnet | One task-list unit |
+| Workhorse | `spec-test-writer` | Sonnet | Tests from the spec before code; regression tests |
+| Cheap | `Explore` | Haiku | Codebase search |
+| Cheap | `sim-runner` | Haiku | Full suite, slow sims, tool scripts |
+| QA | `rules-auditor` | Opus, high effort | Spec vs rulebook; code and tests vs spec |
+| QA | `code-reviewer` | Opus, high effort | Correctness review of the phase diff |
+
+Opus spot audits only for units touching line-expansion validity, resolution order and action power, Vrrooomm! scoring, or game end; everything else waits for `/close-phase`.
+
+**The loop:** `/start-phase N` → `/next-task` per unit (tests from spec → implement → suite → optional spot audit → commit, tick) → `/close-phase` (full run, both reviewers in parallel, one fix round, phase report, PR) → `/triage-report <file>` for playtest reports.
+
+**Rules for every session:** no rule behaviour without a spec entry; ambiguity → §9 and ask. Tests cite rule IDs and are never edited to pass. Commit at each green step on the phase branch; `master` changes only by PR. Keep this file current.
+
+## 9. Open questions
+
+- **Q1 (board):** two site pairs are assigned by nearest intersection and flagged `CHECK` in `data/board.yaml`: the B/C pair below node 8 (alternatives: nodes 7, 11) and the A/C pair below node 26 (alternatives: 33, 34). Confirm or correct from the map's intent.
+- **Q2:** confirm C5's per-end reading of "unoccupied street if you can" (taken from the Red C/D example) and C4's "any non-full action may be chosen".
+- **Q3:** C13 tiebreak by "reached that score first" — confirm the move-number reading.
+
+### Backlog
+Should-fix and minor findings, tagged with the phase that found them. `/close-phase` appends here.
+
+## 10. Risks
+
+| Risk | Mitigation |
+|---|---|
+| Line-expansion rules (loops, exception, per-end rule) are subtle | Dedicated rule tests with drawn scenarios; Opus spot audit; UI shows legal streets only |
+| Sub-decision chains (Vrrooomm!, Buildings) bloat search trees | Canonical orderings; forced single-choice steps auto-advance |
+| Board digitization error | Data tests, overlay review, auditor check against the map |
+| Python speed for MCTS/RL | Fine for play; `search_clone` pattern from lignum; C++ only on measured need |
