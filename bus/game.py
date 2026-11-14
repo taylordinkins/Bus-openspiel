@@ -8,7 +8,13 @@ import pyspiel
 
 from bus import constants as C
 from bus import rules
-from bus.actions import NUM_DISTINCT_ACTIONS, action_to_string, decode_action, street_ref
+from bus.actions import (
+    ACTION_NAMES,
+    NUM_DISTINCT_ACTIONS,
+    action_to_string,
+    decode_action,
+    street_ref,
+)
 from bus.lines import line_ends
 from bus.observer import BusObserver, observation_string
 from bus.rules import Core, Seat
@@ -69,7 +75,7 @@ class BusGame(pyspiel.Game):
         return BusState(self)
 
     def make_py_observer(self, iig_obs_type: Any = None, params: Any = None) -> BusObserver:
-        return BusObserver(self.returns_mode)
+        return BusObserver(self.returns_mode, self.players)
 
     def max_chance_nodes_in_history(self) -> int:
         return 0
@@ -191,6 +197,99 @@ class BusState(pyspiel.State):
 
     def __str__(self) -> str:
         return observation_string(self.core, self._returns_mode)
+
+
+def action_meta(state: BusState, action_id: int) -> dict[str, Any]:
+    """JSON-serialisable description of an action for click-to-act (ACTIONS 5). Pure.
+
+    Any id 0..375 gets a dict; target fields not applicable in this state are None.
+    """
+    core = state.core
+    b = rules.board()
+    kind, p = decode_action(action_id)
+    player = core.current
+    m: dict[str, Any] = {
+        "id": action_id,
+        "kind": kind,
+        "player": player,
+        "label": state._action_to_string(player, action_id),  # pyright: ignore[reportPrivateUsage]
+    }
+    if kind == "select":
+        a = p[0]
+        spaces = len(core.action_board[a])
+        m.update(
+            action=a,
+            action_name=ACTION_NAMES[a],
+            space=spaces if spaces < C.ACTION_SPACES[a] else None,
+        )
+    elif kind == "extend":
+        e, street = p
+        first = core.phase == rules.PHASE_L1
+        line = core.seats[player].line
+        frm: int | None = None
+        to: int | None = None
+        if line and not first:
+            frm = line_ends(b, line)[e]
+            st = b.streets[street]
+            to = st.other(frm) if frm in (st.a, st.b) else None
+        shared = not first and any(
+            street in s.line for i, s in enumerate(core.seats) if i != player
+        )
+        setup = {rules.PHASE_L1: "first", rules.PHASE_L2: "second"}.get(core.phase)
+        m.update(
+            end=0 if first else e,
+            street=street,
+            from_node=frm,
+            to_node=to,
+            setup=setup,
+            shared_end=shared,
+        )
+    elif kind == "build":
+        t, y = p
+        site = b.sites[t]
+        m.update(
+            site=t,
+            node=site.node,
+            tier=site.tier,
+            building_type=C.BUILDING_TYPES[y],
+            setup=core.phase == rules.PHASE_SB,
+        )
+    elif kind == "passenger_to":
+        m.update(station=p[0], node=b.stations[p[0]])
+    elif kind == "clock_advance":
+        m["from"] = C.BUILDING_TYPES[core.clock]
+        m["to"] = C.BUILDING_TYPES[(core.clock + 1) % len(C.BUILDING_TYPES)]
+    elif kind == "clock_pause":
+        m.update(
+            stones_left_after=core.stones_on_clock - 1, ends_game=core.stones_on_clock - 1 <= 0
+        )
+    elif kind == "pick_passenger":
+        m.update(node=p[0], waiting=core.waiting[p[0]])
+    elif kind == "deliver_to":
+        site = b.sites[p[0]]
+        picked = core.picked_node if core.picked_node >= 0 else None
+        m.update(
+            site=p[0],
+            node=site.node,
+            tier=site.tier,
+            building_type=C.BUILDING_TYPES[core.clock],
+            picked_node=picked,
+            same_node=picked == site.node,
+        )
+    return m
+
+
+def game_result(state: BusState) -> dict[str, Any] | None:
+    """End types, winners, final scores and returns at END; None before (ACTIONS 3.12)."""
+    core = state.core
+    if core.phase != rules.PHASE_END:
+        return None
+    return {
+        "end_types": list(core.end_types),
+        "winners": list(rules.winners(core)),
+        "final_scores": list(rules.final_scores(core)),
+        "returns": state.returns(),
+    }
 
 
 pyspiel.register_game(GAME_TYPE, BusGame)

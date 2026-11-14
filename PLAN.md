@@ -181,7 +181,7 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 - [x] 10. Clock and passenger movement ⚑ (R-050–R-055) — `spec-test-writer` → `implementer` → `rules-auditor` (2026-11-14; audit PASS)
 - [x] 11. Vrrooomm! ⚑ (R-056–R-063; add a reachable Vrrooomm!-first fixture with moves > 0 — `resolve_vp` may be unreachable) — `spec-test-writer` → `implementer` → `rules-auditor` (2026-11-14; audit PASS)
 - [x] 12. Round end, game end, returns ⚑ (R-064–R-072; fill the `end_round` stub: R-065 bookkeeping, R-066 checks incl. no seat with markers) — `spec-test-writer` → `implementer` → `rules-auditor` (2026-11-14; audit PASS)
-- [ ] 13. Observer, `action_meta`, `forced_action`, `max_game_length` (§5.2; ACTIONS.md §3, §5, §6; plus ACTIONS §3.12 `game_result(state)` and winners in the observer string; canonical `current` at END so `str(load(dump(s))) == str(s)`, per unit 12 audit) — `spec-test-writer` → `implementer`
+- [x] 13. Observer, `action_meta`, `forced_action`, `max_game_length` (§5.2; ACTIONS.md §3, §5, §6; plus ACTIONS §3.12 `game_result(state)` and winners in the observer string; canonical `current` at END so `str(load(dump(s))) == str(s)`, per unit 12 audit) — `spec-test-writer` → `implementer` (2026-11-14; tensor 1178/1474/1770 floats, ~100 µs; observed max length 177/197/257 vs 702/936/1170)
 - [ ] 14. Conformance and random sims (`random_sim_test` 3/4/5, 10,000 games slow) — `implementer`, `sim-runner`
 - [ ] 15. `tools/play_text.py`, `tools/replay.py` — `implementer`
 - [ ] 16. `tools/sim_stats.py`, golden playthroughs for 3 seeds — `implementer`, `sim-runner`

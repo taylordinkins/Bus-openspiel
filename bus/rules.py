@@ -153,6 +153,16 @@ def legal_actions(core: Core) -> list[int]:
     return []
 
 
+def forced_action(state: object) -> int | None:
+    """The only legal action id, else None (also None at END). Implements ACTIONS 1.5.
+
+    ``state`` is a ``Core`` or anything with a ``core`` attribute (a ``BusState``).
+    """
+    core: Core = getattr(state, "core", state)  # pyright: ignore[reportAssignmentType]
+    legal = legal_actions(core)
+    return legal[0] if len(legal) == 1 else None
+
+
 def apply(core: Core, action: int) -> Core:
     """Apply a legal action, dispatched by phase."""
     if core.phase == PHASE_SB:
@@ -522,7 +532,8 @@ def _ck_apply(core: Core, action: int) -> Core:
         seats = (*core.seats[:p], replace(seat, stones=seat.stones + 1), *core.seats[p + 1 :])
         nxt = replace(core, seats=seats, stones_on_clock=core.stones_on_clock - 1)
         if nxt.stones_on_clock == 0:  # R-053
-            return replace(nxt, phase=PHASE_END, end_types=("last_stone",))
+            # R-053; current is canonical (0) at END so dump/load round-trips
+            return replace(nxt, phase=PHASE_END, end_types=("last_stone",), current=0)
     return advance(move_passengers(nxt))
 
 
@@ -652,7 +663,7 @@ def end_round(core: Core) -> Core:
     )
     types = round_end_types(nxt)
     if types:
-        return replace(nxt, phase=PHASE_END, end_types=types)
+        return replace(nxt, phase=PHASE_END, end_types=types, current=0)
     nxt = replace(nxt, phase=PHASE_SEL, round=core.round + 1)
     # R-027: selection opens with the first seat in turn order that still has markers.
     first = _sel_next(nxt)
