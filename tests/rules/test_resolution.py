@@ -207,7 +207,6 @@ def test_R029_selection_ends_exactly_when_last_seat_drops() -> None:
     assert s.round == 1
 
 
-@pytest.mark.pending("R-045")
 def test_R029_all_lines_markers_resolve_before_passengers_start() -> None:
     """R-029: every marker of an action resolves before the next action starts.  M = 2: Lines b
     (P1, power 1) then Lines a (P2, power 2) then Passengers a (P3, power 2)."""
@@ -222,7 +221,6 @@ def test_R029_all_lines_markers_resolve_before_passengers_start() -> None:
     ]
 
 
-@pytest.mark.pending("R-045")
 def test_R029_buildings_after_passengers_after_lines() -> None:
     """R-029: LN nodes, then PX nodes, then BD nodes, never interleaved (M = 1)."""
     s = run(board={BUILDINGS: [0], PASSENGERS: [1], LINES: [2]})
@@ -269,7 +267,6 @@ def test_R030_passengers_lowest_letter_first() -> None:
     assert node(s) == ("PX", 0, 2, 3)
 
 
-@pytest.mark.pending("R-045")
 def test_R030_passengers_chain_a_then_b_then_c() -> None:
     """R-030/R-031: Passengers a (P2), b (P3), c (P1) with M = 3: a does 3 units, then b 2,
     then c 1, each completely before the next."""
@@ -292,7 +289,6 @@ def test_R030_buildings_highest_letter_first() -> None:
     assert node(s) == ("BD", 2, 3, 1)
 
 
-@pytest.mark.pending("R-047")
 def test_R030_buildings_chain_c_b_a() -> None:
     """R-030: Buildings chain order c (P3, 1), b (P2, 2), a (P1, 3) at M = 3."""
     s = run(board={BUILDINGS: [1, 2, 3]}, buses={0: 3})
@@ -320,7 +316,6 @@ def test_R030_owner_is_the_player_who_placed_the_marker_per_letter() -> None:
     assert node(s) == ("PX", 0, 3, 3)
 
 
-@pytest.mark.pending("R-045")
 def test_R030_same_owner_on_two_letters_resolves_each_separately() -> None:
     """R-030: P3 on a and b of Passengers (M = 2): a does 2 units (cursor 0), then b does 1
     (cursor 1); cursor and units are per marker."""
@@ -357,7 +352,6 @@ def test_R031_passengers_first_marker_has_power_m(m: int) -> None:
     assert node(s) == ("PX", 0, 0, m)
 
 
-@pytest.mark.pending("R-045")
 def test_R031_passengers_power_dwindles_along_letters() -> None:
     """R-031 example: M = 3, Passengers a,b,c,d have power 3, 2, 1, 0.  d does nothing (no node);
     after c the next action's node (Buildings, P0) follows directly."""
@@ -408,7 +402,6 @@ def test_R031_all_markers_nonpositive_goes_to_next_action() -> None:
     assert node(s) == ("BD", 0, 1, 1)
 
 
-@pytest.mark.pending("R-047")
 def test_R031_skipped_buildings_then_next_action_node() -> None:
     """R-031: Buildings a is the only marker with power; after its single unit, Clock (P3)."""
     s = run(board={BUILDINGS: [1], CLOCK: [3]})
@@ -438,7 +431,6 @@ def test_R031_pending_state_has_no_stale_fields() -> None:
     assert p["cursor"] == {"letter": 0}
 
 
-@pytest.mark.pending("R-031")
 def test_R031_power_is_recomputed_when_loaded_directly() -> None:
     """SCENARIOS 4.2: the M of a directly loaded resolution position comes from the seats'
     buses: resolve_px reloaded with buses 3 still reports its stored units_left and owner."""
@@ -510,7 +502,6 @@ def test_R032_m_read_when_each_marker_resolves_across_lines_and_passengers() -> 
     assert node(s) == ("LN", 0, 0, 1)
 
 
-@pytest.mark.pending("R-045")
 def test_R032_m_read_per_marker_chain_lines_buses_passengers() -> None:
     """R-032: Lines a (P0): M = 1 -> one unit.  Then Buses (P1: 1 -> 2).  Then Passengers a (P2):
     M = 2 -> two units."""
@@ -597,7 +588,6 @@ def test_R033_five_players_m5_f_has_power_one() -> None:
 # ---- R-034: as fully as possible -------------------------------------------------------------
 
 
-@pytest.mark.pending("R-034")
 def test_R034_passengers_node_offers_only_placements_no_stop() -> None:
     """R-034: the owner may not do less; at a Passengers unit the only legal actions are the
     two PASSENGER_TO ids (no pass / stop action)."""
@@ -605,7 +595,6 @@ def test_R034_passengers_node_offers_only_placements_no_stop() -> None:
     assert s.legal_actions() == [PASSENGER_TO_BASE, PASSENGER_TO_BASE + 1]
 
 
-@pytest.mark.pending("R-045")
 @pytest.mark.parametrize("which", [0, 1])
 def test_R034_passengers_supply_shortfall_loses_the_rest(which: int) -> None:
     """R-034/R-045: supply 2 (13 waiting), power 4 (M = 4): exactly two placements are offered;
@@ -682,7 +671,6 @@ def test_R043_buses_has_not_resolved_while_lines_is_pending() -> None:
     assert s.seat(2).buses == 2
 
 
-@pytest.mark.pending("R-045")
 def test_R043_buses_resolves_after_the_last_lines_unit() -> None:
     """R-043: after Lines is done, Buses runs and then Passengers sees the new bus."""
     s = run(board={LINES: [0], BUSES: [2], PASSENGERS: [3]}, buses={0: 2, 1: 2, 2: 2, 3: 2})

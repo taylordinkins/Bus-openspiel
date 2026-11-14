@@ -111,6 +111,10 @@ class BusState(pyspiel.State):
         return self.core.start_player
 
     @property
+    def sites_full(self) -> bool:
+        return rules.sites_full(self.core)
+
+    @property
     def end_types(self) -> tuple[str, ...]:
         return self.core.end_types
 

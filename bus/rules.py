@@ -140,6 +140,10 @@ def legal_actions(core: Core) -> list[int]:
         return _sel_legal(core)
     if core.phase == PHASE_LN:
         return _ln_legal(core)
+    if core.phase == PHASE_PX:
+        return _px_legal()
+    if core.phase == PHASE_BD:
+        return _bd_legal(core)
     return []
 
 
@@ -153,6 +157,10 @@ def apply(core: Core, action: int) -> Core:
         return replace(_sel_apply(core, action), move_number=core.move_number + 1)
     if core.phase == PHASE_LN:
         return replace(_ln_apply(core, action), move_number=core.move_number + 1)
+    if core.phase == PHASE_PX:
+        return replace(_px_apply(core, action), move_number=core.move_number + 1)
+    if core.phase == PHASE_BD:
+        return replace(_bd_apply(core, action), move_number=core.move_number + 1)
     raise ValueError(f"phase {core.phase} not implemented")
 
 
@@ -412,6 +420,55 @@ def _ln_apply(core: Core, action: int) -> Core:
     )
     nxt = replace(core, seats=tuple(seats), units_left=core.units_left - 1)
     if nxt.units_left > 0 and _ln_legal(nxt):
+        return nxt
+    return advance(replace(nxt, units_left=0))
+
+
+def sites_full(core: Core) -> bool:
+    """Implements R-049: every site has a building (derived, not stored)."""
+    return all(ty != EMPTY for ty in core.site_types)
+
+
+def _px_legal() -> list[int]:
+    """Implements R-045: one PASSENGER_TO per station."""
+    from bus.actions import encode_passenger_to
+
+    return sorted(encode_passenger_to(k) for k in range(len(board().stations)))
+
+
+def _px_apply(core: Core, action: int) -> Core:
+    """Implements R-034, R-045: one passenger from supply to the chosen station."""
+    if action not in _px_legal():
+        raise ValueError(f"illegal action {action} in {core.phase}")
+    _, (k,) = decode_action(action)
+    node = board().stations[k]
+    waiting = core.waiting[:node] + (core.waiting[node] + 1,) + core.waiting[node + 1 :]
+    nxt = replace(core, waiting=waiting, supply=core.supply - 1, units_left=core.units_left - 1)
+    if nxt.units_left > 0 and nxt.supply > 0:
+        return nxt
+    return advance(replace(nxt, units_left=0))
+
+
+def _bd_legal(core: Core) -> list[int]:
+    """Implements R-010, R-046: any type on any empty site of the lowest open tier."""
+    from bus.actions import encode_build
+
+    return sorted(
+        encode_build(t, y)
+        for t in lowest_open_tier_sites(core)
+        for y in range(len(C.BUILDING_TYPES))
+    )
+
+
+def _bd_apply(core: Core, action: int) -> Core:
+    """Implements R-034, R-046, R-047: place one unoccupied building."""
+    if action not in _bd_legal(core):
+        raise ValueError(f"illegal action {action} in {core.phase}")
+    _, (t, y) = decode_action(action)
+    types = core.site_types[:t] + (y,) + core.site_types[t + 1 :]
+    # Buildings have no owner (SCENARIOS §3.2, §9.6): Seat.buildings counts setup buildings only.
+    nxt = replace(core, site_types=types, units_left=core.units_left - 1)
+    if nxt.units_left > 0 and lowest_open_tier_sites(nxt):
         return nxt
     return advance(replace(nxt, units_left=0))
 
