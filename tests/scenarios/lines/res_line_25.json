@@ -1,0 +1,144 @@
+{
+ "format": 1,
+ "description": "Seat 0 has all 25 Bus Line markers on the board (none left): a Lines marker produces no node. Use through a SEL conversion only (an LN node for it would have no legal action).",
+ "parameters": {
+  "players": 4
+ },
+ "round": 1,
+ "phase": "LN",
+ "buildings": [
+  {
+   "site": 0,
+   "type": "house"
+  },
+  {
+   "site": 1,
+   "type": "office"
+  },
+  {
+   "site": 2,
+   "type": "pub"
+  },
+  {
+   "site": 3,
+   "type": "house"
+  },
+  {
+   "site": 4,
+   "type": "office"
+  },
+  {
+   "site": 5,
+   "type": "pub"
+  },
+  {
+   "site": 6,
+   "type": "house"
+  },
+  {
+   "site": 7,
+   "type": "office"
+  }
+ ],
+ "seats": [
+  {
+   "line": [
+    3,
+    4,
+    2,
+    1,
+    5,
+    15,
+    36,
+    50,
+    34,
+    33,
+    31,
+    22,
+    9,
+    8,
+    18,
+    16,
+    17,
+    25,
+    29,
+    30,
+    23,
+    13,
+    10,
+    6,
+    7
+   ],
+   "markers_left": 19,
+   "buses": 1
+  },
+  {
+   "line": [
+    39,
+    38
+   ]
+  },
+  {
+   "line": [
+    58,
+    59
+   ]
+  },
+  {
+   "line": [
+    62,
+    65
+   ]
+  }
+ ],
+ "waiting": {},
+ "action_board": {
+  "lines": [
+   0,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "buses": [
+   null
+  ],
+  "passengers": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "buildings": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "clock": [
+   null
+  ],
+  "vrrooomm": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "starting_player": [
+   null
+  ]
+ },
+ "pending": {
+  "cursor": {
+   "letter": 0
+  },
+  "units_left": 1
+ }
+}

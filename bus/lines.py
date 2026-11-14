@@ -90,3 +90,56 @@ def extend(board: Board, line: Sequence[int], end: int, street: int) -> tuple[in
     if node not in (st.a, st.b):
         raise ValueError(f"street {street} is not incident to node {node}")
     return (street, *line) if end == 0 else (*line, street)
+
+
+def _best_continuation(
+    board: Board,
+    lines: tuple[tuple[int, ...], ...],
+    seat: int,
+    depth: int,
+    memo: dict[tuple[tuple[int, ...], int], int],
+) -> int:
+    """Most further placements (at most ``depth``) from ``lines`` along legal continuations."""
+    if depth <= 0:
+        return 0
+    key = (lines[seat], depth)
+    cached = memo.get(key)
+    if cached is not None:
+        return cached
+    best = 0
+    for end, street in sorted(legal_extensions(board, lines, seat)):
+        nxt = (*lines[:seat], extend(board, lines[seat], end, street), *lines[seat + 1 :])
+        best = max(best, 1 + _best_continuation(board, nxt, seat, depth - 1, memo))
+        if best >= depth:
+            break
+    memo[key] = best
+    return best
+
+
+def max_placements(board: Board, lines: Sequence[Sequence[int]], seat: int, depth: int) -> int:
+    """Largest number (at most ``depth``) of consecutive legal placements for ``seat`` (R-042)."""
+    frozen = tuple(tuple(line) for line in lines)
+    return _best_continuation(board, frozen, seat, depth, {})
+
+
+def maximal_extensions(
+    board: Board, lines: Sequence[Sequence[int]], seat: int, units: int, supply: int
+) -> frozenset[tuple[int, int]]:
+    """Legal ``(end, street)`` choices for the next unit under maximal resolution (R-040, R-042).
+
+    ``units`` is the remaining power including this unit, ``supply`` the seat's Bus Line markers
+    left. Only choices that keep the maximum achievable number of placements reachable remain.
+    """
+    reach = min(units, supply)
+    if reach <= 0:
+        return frozenset()
+    frozen = tuple(tuple(line) for line in lines)
+    memo: dict[tuple[tuple[int, ...], int], int] = {}
+    scored: dict[tuple[int, int], int] = {}
+    for end, street in legal_extensions(board, frozen, seat):
+        nxt = (*frozen[:seat], extend(board, frozen[seat], end, street), *frozen[seat + 1 :])
+        scored[(end, street)] = 1 + _best_continuation(board, nxt, seat, reach - 1, memo)
+    if not scored:
+        return frozenset()
+    top = max(scored.values())
+    return frozenset(c for c, v in scored.items() if v == top)

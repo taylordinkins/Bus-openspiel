@@ -10,7 +10,7 @@ from dataclasses import dataclass, replace
 from functools import cache
 
 from bus import constants as C
-from bus.actions import NUM_ACTION_KINDS, decode_action
+from bus.actions import NUM_ACTION_KINDS, decode_action, encode_extend
 from bus.board import Board, load_board
 
 PHASE_SB = "SB"  # setup buildings (R-016)
@@ -138,6 +138,8 @@ def legal_actions(core: Core) -> list[int]:
         return _l2_legal(core)
     if core.phase == PHASE_SEL:
         return _sel_legal(core)
+    if core.phase == PHASE_LN:
+        return _ln_legal(core)
     return []
 
 
@@ -149,6 +151,8 @@ def apply(core: Core, action: int) -> Core:
         return replace(_line_apply(core, action), move_number=core.move_number + 1)
     if core.phase == PHASE_SEL:
         return replace(_sel_apply(core, action), move_number=core.move_number + 1)
+    if core.phase == PHASE_LN:
+        return replace(_ln_apply(core, action), move_number=core.move_number + 1)
     raise ValueError(f"phase {core.phase} not implemented")
 
 
@@ -363,14 +367,10 @@ def _enter(core: Core, action: int, letter: int) -> Core | None:
     power = marker_power(core, action, letter)
     base = replace(core, cursor=letter, current=owner, units_left=0, moves_left=0, picked_node=-1)
     if action == ACT_LINES:
-        from bus.lines import legal_extensions
-
-        lines = tuple(s.line for s in core.seats)
-        if power <= 0 or core.seats[owner].line_markers <= 0:
+        entered = replace(base, phase=PHASE_LN, units_left=power)
+        if power <= 0 or not _ln_legal(entered):
             return None
-        if not legal_extensions(board(), lines, owner):
-            return None
-        return replace(base, phase=PHASE_LN, units_left=power)
+        return entered
     if action == ACT_PASSENGERS:
         if power <= 0 or core.supply <= 0:
             return None
@@ -385,6 +385,35 @@ def _enter(core: Core, action: int, letter: int) -> Core | None:
         moves = vrrooomm_moves(core, owner)
         return replace(base, phase=PHASE_VP, moves_left=moves) if moves > 0 else None
     raise ValueError(f"action {action} has no decision node")
+
+
+def _ln_legal(core: Core) -> list[int]:
+    """Implements R-040, R-042: maximal-resolution extensions for the current unit."""
+    from bus.lines import maximal_extensions
+
+    seat = core.seats[core.current]
+    lines = tuple(s.line for s in core.seats)
+    found = maximal_extensions(board(), lines, core.current, core.units_left, seat.line_markers)
+    return sorted(encode_extend(e, s) for e, s in found)
+
+
+def _ln_apply(core: Core, action: int) -> Core:
+    """Implements R-042, O-2: place one street, then the next unit or the next marker."""
+    from bus.lines import extend
+
+    if action not in _ln_legal(core):
+        raise ValueError(f"illegal action {action} in {core.phase}")
+    _, (e, street) = decode_action(action)
+    p = core.current
+    seat = core.seats[p]
+    seats = list(core.seats)
+    seats[p] = replace(
+        seat, line=extend(board(), seat.line, e, street), line_markers=seat.line_markers - 1
+    )
+    nxt = replace(core, seats=tuple(seats), units_left=core.units_left - 1)
+    if nxt.units_left > 0 and _ln_legal(nxt):
+        return nxt
+    return advance(replace(nxt, units_left=0))
 
 
 def _resolve_buses(core: Core, owner: int) -> Core:

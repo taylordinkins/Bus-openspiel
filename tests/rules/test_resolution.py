@@ -207,7 +207,7 @@ def test_R029_selection_ends_exactly_when_last_seat_drops() -> None:
     assert s.round == 1
 
 
-@pytest.mark.pending("R-042")
+@pytest.mark.pending("R-045")
 def test_R029_all_lines_markers_resolve_before_passengers_start() -> None:
     """R-029: every marker of an action resolves before the next action starts.  M = 2: Lines b
     (P1, power 1) then Lines a (P2, power 2) then Passengers a (P3, power 2)."""
@@ -222,7 +222,7 @@ def test_R029_all_lines_markers_resolve_before_passengers_start() -> None:
     ]
 
 
-@pytest.mark.pending("R-042")
+@pytest.mark.pending("R-045")
 def test_R029_buildings_after_passengers_after_lines() -> None:
     """R-029: LN nodes, then PX nodes, then BD nodes, never interleaved (M = 1)."""
     s = run(board={BUILDINGS: [0], PASSENGERS: [1], LINES: [2]})
@@ -249,7 +249,6 @@ def test_R030_lines_highest_letter_first_spec_example() -> None:
     assert node(s) == ("LN", 2, 0, 1)
 
 
-@pytest.mark.pending("R-042")
 def test_R030_lines_chain_order_spec_example() -> None:
     """R-030 example continued: after c (P0, 1 unit) comes b (P2, 2 units), then a (P1, 3)."""
     s = run(board={LINES: [1, 2, 0]}, buses={3: 3})
@@ -511,7 +510,7 @@ def test_R032_m_read_when_each_marker_resolves_across_lines_and_passengers() -> 
     assert node(s) == ("LN", 0, 0, 1)
 
 
-@pytest.mark.pending("R-042")
+@pytest.mark.pending("R-045")
 def test_R032_m_read_per_marker_chain_lines_buses_passengers() -> None:
     """R-032: Lines a (P0): M = 1 -> one unit.  Then Buses (P1: 1 -> 2).  Then Passengers a (P2):
     M = 2 -> two units."""
@@ -547,7 +546,6 @@ def test_R033_plus_one_is_added_before_the_nonpositive_check() -> None:
     assert node(s) == ("LN", 1, 1, 1)
 
 
-@pytest.mark.pending("R-042")
 def test_R033_m1_chain_b_then_a_units() -> None:
     """R-033: 5 players, M = 1: b (P1) has 1 unit, then a (P0) has 2 units."""
     s = run(5, board={LINES: [0, 1]})
@@ -684,7 +682,7 @@ def test_R043_buses_has_not_resolved_while_lines_is_pending() -> None:
     assert s.seat(2).buses == 2
 
 
-@pytest.mark.pending("R-042")
+@pytest.mark.pending("R-045")
 def test_R043_buses_resolves_after_the_last_lines_unit() -> None:
     """R-043: after Lines is done, Buses runs and then Passengers sees the new bus."""
     s = run(board={LINES: [0], BUSES: [2], PASSENGERS: [3]}, buses={0: 2, 1: 2, 2: 2, 3: 2})

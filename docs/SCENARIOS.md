@@ -125,7 +125,7 @@ Setup phases use `round` 0. `current_player` is derived from turn order starting
 | `S-END` | `END` with a missing/invalid `end` block |
 | `S-HISTORY` | an id is illegal or not in range |
 
-Not checked (fixtures may be unreachable): the tier-fill order of buildings (R-010), whether lines respect R-038/R-039 placement, the relation between points and the number of occupied buildings, who holds which stones. A `"strict": true` flag turns the first of these into an error for editor-built games that start from a fresh setup.
+Not checked (fixtures may be unreachable): whether a resolution node (`LN`, `PX`, `BD`, `VP`) has any legal action — the engine never emits such a node (ACTIONS §3), but a fixture may load one and then has `legal_actions() == []`; the tier-fill order of buildings (R-010), whether lines respect R-038/R-039 placement, the relation between points and the number of occupied buildings, who holds which stones. A `"strict": true` flag turns the first of these into an error for editor-built games that start from a fresh setup.
 
 ## 7. Defaults ("fresh") and shorthand
 `{"format": 1}` is the state right after R-014: round 0, phase `SB`, `done` 0, seat 0 to act, empty board with the four roundabout passengers (R-015). A shorthand scenario lists only differing fields: for example a round-1 selection fixture is `{"format":1,"round":1,"phase":"SEL","seats":[…],"waiting":{…}}` with the setup buildings, lines and waiting passengers supplied (`waiting` is required from round 1 so the four roundabout passengers of R-015 are never dropped silently). The loader resolves shorthand and `dump_scenario` emits it in full.

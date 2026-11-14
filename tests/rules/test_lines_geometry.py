@@ -809,7 +809,6 @@ def test_R038_every_fixture_matches_the_spec_oracle_for_seat_zero(name: str) -> 
 # ============================== state wiring (unit 8) ==============================
 
 
-@pytest.mark.pending("R-042")
 @pytest.mark.parametrize("name", [n for n in FIXTURES if n != "dead_both_ends"])
 def test_R042_lines_phase_legal_actions_are_the_geometry_extensions(name: str) -> None:
     """ACTIONS 3.5 / R-042: in phase LN with one unit left, legal_actions() is exactly the encoded
