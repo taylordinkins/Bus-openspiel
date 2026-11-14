@@ -23,7 +23,7 @@ A scenario is **a position, not a history**. It need not be reachable by legal p
 | `format` | `1` | yes | – | format version |
 | `description` | string | no | `""` | free text |
 | `parameters` | object | no | R-001 defaults | `players` 3..5 (4), `returns` `"win_loss"`\|`"margin"` (`"win_loss"`) |
-| `round` | int ≥ 1 | no | 1 | current round number (`0` while in setup phases `SB`, `L1`, `L2`) |
+| `round` | int ≥ 0 | no | 0 (with `phase` default `SB`) | current round number (`0` while in setup phases `SB`, `L1`, `L2`) |
 | `phase` | code | no | `SEL` if `round`≥1 else `SB` | phase code of ACTIONS §3: `SB`, `L1`, `L2`, `SEL`, `LN`, `PX`, `BD`, `CK`, `VP`, `VD`, `END` |
 | `current_player` | seat | no | derived (§4) | seat to act; required in `END`-free phases when not derivable |
 | `start_player` | seat | no | 0 | start player of the current round (R-019, R-064); also the setup turn-order anchor |
@@ -31,11 +31,14 @@ A scenario is **a position, not a history**. It need not be reachable by legal p
 | `stones_on_clock` | int ≥ 0 | no | 5 (4 if 3 players) | stones still on the clock (R-006) |
 | `seats` | list of seat objects (or map `"0"`…) | no | defaults | one per seat, §3 |
 | `buildings` | list | no | `[]` | §3.2 |
-| `waiting` | map node → int | no | the 4 roundabout passengers (R-015) in `SB`/`L1`/`L2`, else `{}` | waiting passengers by node (§3.3) |
+| `waiting` | map node → int | cond. | the 4 roundabout passengers (R-015) in `SB`/`L1`/`L2`; **required** when `round` ≥ 1 (`S-SCHEMA` if missing; `{}` is allowed) | waiting passengers by node (§3.3) |
 | `supply` | int | no | derived (15 minus all passengers on the board) | passengers in supply (R-005); if given it must equal the derived value |
 | `action_board` | map action → list | no | all empty | markers on the board (§3.4) |
 | `pending` | object | cond. | `{}` | sub-decision state (§4) |
 | `end` | object | cond. | – | in `END` only: `{"types": [...]}`; terminal check data (§4.7) |
+| `move_offset` | int ≥ 0 | no | max of the seats' `last_score_move` (0 if all null) | move number of the scenario position itself: an action applied after load has move number `move_offset` + its index in the post-load history + 1 (ACTIONS §1.7, R-062, R-070) |
+| `allow_unreachable` | bool | no | false | relaxes only the `points` ↔ `last_score_move` link of §3.1 |
+| `strict` | bool | no | false | §6: tier-fill order (R-010) becomes an error |
 | `history` | list of ints | no | `[]` | action ids applied after the scenario |
 | `expect` | object | no | none | assertions after `history` (§5) |
 
@@ -69,7 +72,7 @@ For each action a list of length equal to its spaces (1 for Buses, Clock, Starti
 
 ## 4. Phases and pending sub-decision
 
-`pending` holds exactly the fields below for the phase; extra or missing keys are errors (`S-PENDING`). `current_player` defaults are given in the second column.
+`pending` holds exactly the fields below for the phase; extra or missing keys are errors (`S-PHASE`). `current_player` defaults are given in the second column.
 
 | Phase | Default `current_player` | `pending` fields |
 |---|---|---|
@@ -86,7 +89,7 @@ For each action a list of length equal to its spaces (1 for Buses, Clock, Starti
 | `END` | – | `{}` plus top-level `end` |
 
 ### 4.1 `SEL`
-`pass` ≥ 0 is the 0-based pass; passes 0 and 1 are mandatory (R-023). `dropped` lists seats that have dropped out this round. Consistency (`S-SEL`): a dropped seat has placed ≥ 2 markers; every seat before `current_player` in turn order has placed ≥ `pass + 1` markers (or is dropped / out of markers) and every seat from `current_player` on has placed ≥ `pass` (same exceptions). Markers placed are counted from `action_board`.
+`pass` ≥ 0 is the 0-based pass; passes 0 and 1 are mandatory (R-023). `dropped` lists seats that have dropped out this round. Consistency (`S-SEL`): a dropped seat has placed ≥ 2 markers; every seat before `current_player` in turn order has placed exactly `pass + 1` markers and every seat from `current_player` on has placed exactly `pass` (dropped seats and seats with `markers_left` 0 are exempt). `current_player` is the first such active seat with `pass` markers placed. Markers placed are counted from `action_board`.
 
 ### 4.2 Resolution phases and `cursor`
 `cursor.letter` is the 0-based letter index (a = 0) of the marker being resolved; the action is implied by the phase (`LN` → Lines, `PX` → Passengers, `BD` → Buildings, `CK` → Clock, `VP`/`VD` → Vrrooomm!). Markers that resolve before the cursor (earlier actions entirely; same action in R-030 order) are done and must not hold stale state; the loader does not alter the board for them. The owner is `action_board[action][letter]` and must not be null. `units_left` is the remaining units of the current marker including the pending one (1..6); `moves_left` likewise (1..5). The M used for the current marker's power is recomputed from the seats' `buses` and is not stored.
@@ -111,13 +114,13 @@ Setup phases use `round` 0. `current_player` is derived from turn order starting
 | `S-LINE` | consecutive streets of a line do not share a node; a street appears twice in one line (R-037); line longer than 25 (R-004); a loop with a repeated street |
 | `S-BUS` | `buses` outside 1..5 (R-044) |
 | `S-MARKERS` | `markers_left` + markers of that seat on the action board > 20; `markers_left` outside 0..20 |
-| `S-STONES` | `stones_on_clock` + sum of seat `stones` ≠ 5 (4 at 3 players) (R-006) |
+| `S-STONES` | `stones_on_clock` + sum of seat `stones` ≠ 5 (4 at 3 players) (R-006); `stones_on_clock` = 0 outside phase `END` (R-053) |
 | `S-SITES` | duplicate sites in `buildings`; invalid type |
 | `S-PASSENGERS` | conservation fails (§3.3); `waiting` key not a node; `occupied` building count + waiting + supply ≠ 15 (R-005) |
 | `S-BOARD` | action board shape wrong; letters not contiguous (R-025); non-empty board outside phases `SEL`..`VD` |
 | `S-PHASE` | `phase` not compatible with `round` (`SB`/`L1`/`L2` need round 0; others need ≥ 1); pending keys wrong; `current_player` is not the seat the phase would call; `cursor` points at an empty letter |
 | `S-SEL` | §4.1 |
-| `S-POINTS` | `last_score_move` null mismatch (§3.1) |
+| `S-POINTS` | `last_score_move` null mismatch (§3.1); a seat's `last_score_move` > `move_offset` |
 | `S-SETUP` | in `SB`/`L1`/`L2`, seats' buildings/lines inconsistent with `done`; a non-empty line before `L1` |
 | `S-END` | `END` with a missing/invalid `end` block |
 | `S-HISTORY` | an id is illegal or not in range |
@@ -125,7 +128,7 @@ Setup phases use `round` 0. `current_player` is derived from turn order starting
 Not checked (fixtures may be unreachable): the tier-fill order of buildings (R-010), whether lines respect R-038/R-039 placement, the relation between points and the number of occupied buildings, who holds which stones. A `"strict": true` flag turns the first of these into an error for editor-built games that start from a fresh setup.
 
 ## 7. Defaults ("fresh") and shorthand
-`{"format": 1}` is the state right after R-014: round 0, phase `SB`, `done` 0, seat 0 to act, empty board with the four roundabout passengers (R-015). A shorthand scenario lists only differing fields: for example a round-1 selection fixture is `{"format":1,"round":1,"phase":"SEL","seats":[…]}` with the setup buildings and lines supplied. The loader resolves shorthand and `dump_scenario` emits it in full.
+`{"format": 1}` is the state right after R-014: round 0, phase `SB`, `done` 0, seat 0 to act, empty board with the four roundabout passengers (R-015). A shorthand scenario lists only differing fields: for example a round-1 selection fixture is `{"format":1,"round":1,"phase":"SEL","seats":[…],"waiting":{…}}` with the setup buildings, lines and waiting passengers supplied (`waiting` is required from round 1 so the four roundabout passengers of R-015 are never dropped silently). The loader resolves shorthand and `dump_scenario` emits it in full.
 
 ## 8. Named reusable scenarios
 
@@ -173,3 +176,13 @@ Files live in `tests/scenarios/`, named `<id>.json`. Each is described by intent
 | `returns_win_loss` / `returns_margin` | terminal with scores 14, 8, 5 (3p), sole and shared winners | R-071, R-072 |
 
 Rulebook examples (`lines_blue_midline`, `lines_red_cd`, `vrrooomm_example2`) are transcribed onto real board ids chosen to reproduce the geometry; each file's `description` says which rulebook example it mirrors and the mapping from the example's letters to ids.
+
+## 9. Clarifications (Phase 1 unit 3)
+
+1. Error codes for cases §6 does not name: an unknown `phase` string, `done` / `units_left` / `moves_left` out of range, a `pending` or `end` block that does not fit the phase → `S-PHASE`. A `waiting` key that is not an integer → `S-PASSENGERS`; an integer key outside `0..N-1` → `S-ID`; a `waiting` count < 1 → `S-PASSENGERS`. An unknown action name on the board or an unknown `expect` key → `S-SCHEMA`. An empty line when `round` ≥ 1 → `S-LINE`.
+2. In `VD` the picked passenger still stands at `picked_node` and is counted in `waiting` until `DELIVER_TO` moves it.
+3. `load_scenario` checks the schema of `expect` but does not evaluate it; `check_expect` (used by the harness) evaluates it after `history`.
+4. `load_scenario(doc, game)` with a `game` whose parameters differ from `parameters` → `S-PLAYERS` (player count) or `S-SCHEMA` (returns).
+5. Move numbers: the move number used for scoring (R-062, R-070) is `move_offset` + the number of actions applied since load. `dump_scenario` emits that value as `move_offset`. `State.move_number()` keeps OpenSpiel's meaning (actions applied to this state object).
+6. `S-SETUP`: in `SB` the number of buildings equals `done`; in `L1`/`L2` there are 2n buildings and the seats' line lengths follow from `done` and turn order (`L1`: served seats have 1 street, others 0; `L2`: served seats 2, others 1). Buildings have no owner; the per-seat setup building count of the state API is derived from `done` and turn order (2 for every seat after `SB`).
+7. PLAN §6.3 "markers only decrease" covers both a seat's Action markers in hand (`markers_left`, R-065) and its Bus Line markers left (25 − line length).

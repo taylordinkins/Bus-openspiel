@@ -15,6 +15,30 @@ from bus.board import Board, load_board
 
 PHASE_SB = "SB"  # setup buildings (R-016)
 PHASE_L1 = "L1"  # first setup line markers (R-017); not implemented yet
+PHASE_L2 = "L2"
+PHASE_SEL = "SEL"
+PHASE_LN = "LN"
+PHASE_PX = "PX"
+PHASE_BD = "BD"
+PHASE_CK = "CK"
+PHASE_VP = "VP"
+PHASE_VD = "VD"
+PHASE_END = "END"
+PHASES = (
+    PHASE_SB,
+    PHASE_L1,
+    PHASE_L2,
+    PHASE_SEL,
+    PHASE_LN,
+    PHASE_PX,
+    PHASE_BD,
+    PHASE_CK,
+    PHASE_VP,
+    PHASE_VD,
+    PHASE_END,
+)
+SETUP_PHASES = (PHASE_SB, PHASE_L1, PHASE_L2)
+END_TYPES = ("sites_full", "last_stone", "markers")  # R-066
 
 SETUP_BUILDINGS_PER_SEAT = 2  # R-016
 EMPTY = -1  # site_types entry for an empty site
@@ -31,6 +55,7 @@ class Seat:
     stones: int = 0
     buildings: int = 0
     line: tuple[int, ...] = ()
+    last_score_move: int | None = None  # R-062, R-070
 
 
 @dataclass(frozen=True)
@@ -48,7 +73,17 @@ class Core:
     round: int
     phase: str
     current: int
-    setup_placed: int  # buildings placed so far in SB
+    setup_placed: int  # `done` of SB / L1 / L2 (buildings, first or second markers placed)
+    start_player: int = 0  # R-019, R-064
+    move_number: int = 0  # moves played so far, counting a loaded scenario's move_offset
+    sel_pass: int = 0  # SEL: 0-based pass (R-023)
+    dropped: tuple[int, ...] = ()  # SEL: seats that dropped out this round
+    cursor: int = 0  # resolution: 0-based letter of the marker being resolved
+    units_left: int = 0  # LN / PX / BD: units still to do, pending one included
+    moves_left: int = 0  # VP / VD
+    picked_node: int = -1  # VD: node of the picked passenger
+    occupied: tuple[int, ...] = ()  # sorted sites whose building holds a passenger
+    end_types: tuple[str, ...] = ()  # END: R-066 end types
 
 
 @cache
@@ -88,6 +123,11 @@ def lowest_open_tier_sites(core: Core) -> list[int]:
     return [t for t in empty if b.sites[t].tier == low]
 
 
+def turn_order(core: Core) -> tuple[int, ...]:
+    """Seats in turn order from the start player. Implements R-016, R-019."""
+    return tuple((core.start_player + i) % core.players for i in range(core.players))
+
+
 def legal_actions(core: Core) -> list[int]:
     """Sorted legal action ids, dispatched by phase."""
     if core.phase == PHASE_SB:
@@ -98,7 +138,7 @@ def legal_actions(core: Core) -> list[int]:
 def apply(core: Core, action: int) -> Core:
     """Apply a legal action, dispatched by phase."""
     if core.phase == PHASE_SB:
-        return _sb_apply(core, action)
+        return replace(_sb_apply(core, action), move_number=core.move_number + 1)
     raise ValueError(f"phase {core.phase} not implemented")
 
 
@@ -124,15 +164,16 @@ def _sb_apply(core: Core, action: int) -> Core:
     seats = list(core.seats)
     seats[p] = replace(seats[p], buildings=seats[p].buildings + 1)
     placed = core.setup_placed + 1
+    order = turn_order(core)
     nxt = placed // SETUP_BUILDINGS_PER_SEAT
     phase = core.phase
     current = p
     if placed % SETUP_BUILDINGS_PER_SEAT == 0:
         if nxt >= core.players:
             phase = PHASE_L1  # unit 5 continues from here
-            current = 0
+            current = order[0]
         else:
-            current = nxt
+            current = order[nxt]
     return replace(
         core,
         site_types=types,

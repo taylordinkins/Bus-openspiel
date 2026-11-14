@@ -105,6 +105,21 @@ class BusState(pyspiel.State):
     def action_board(self) -> tuple[tuple[int, ...], ...]:
         return self.core.action_board
 
+    @property
+    def start_player(self) -> int:
+        return self.core.start_player
+
+    @property
+    def end_types(self) -> tuple[str, ...]:
+        return self.core.end_types
+
+    @property
+    def returns_mode(self) -> str:
+        return self._returns_mode
+
+    def is_occupied(self, t: int) -> bool:
+        return t in self.core.occupied
+
     def waiting_at(self, node: int) -> int:
         return self.core.waiting[node]
 
@@ -120,7 +135,7 @@ class BusState(pyspiel.State):
         return pyspiel.PlayerId.TERMINAL if self.is_terminal() else self.core.current
 
     def is_terminal(self) -> bool:
-        return False  # game end arrives with later units
+        return self.core.phase == rules.PHASE_END
 
     def _legal_actions(self, player: int) -> list[int]:
         return rules.legal_actions(self.core)

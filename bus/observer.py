@@ -17,7 +17,7 @@ def observation_string(core: Core, returns_mode: str) -> str:
     """Public state text (perfect information: identical for every seat)."""
     seats = ";".join(
         f"P{i}:pts={s.points},bus={s.buses},am={s.action_markers},lm={s.line_markers},"
-        f"st={s.stones},bld={s.buildings},line={list(s.line)}"
+        f"st={s.stones},bld={s.buildings},line={list(s.line)},last={s.last_score_move}"
         for i, s in enumerate(core.seats)
     )
     sites = {t: C.BUILDING_TYPES[y] for t, y in enumerate(core.site_types) if y != EMPTY}
@@ -26,6 +26,10 @@ def observation_string(core: Core, returns_mode: str) -> str:
         f"bus n={core.players} returns={returns_mode} round={core.round} phase={core.phase} "
         f"cur={core.current} clock={C.BUILDING_TYPES[core.clock]} "
         f"stones_on_clock={core.stones_on_clock} supply={core.supply} placed={core.setup_placed} "
+        f"start={core.start_player} move={core.move_number} pass={core.sel_pass} "
+        f"dropped={list(core.dropped)} cursor={core.cursor} units={core.units_left} "
+        f"moves_left={core.moves_left} picked={core.picked_node} "
+        f"occupied={list(core.occupied)} end={list(core.end_types)} "
         f"board={[list(x) for x in core.action_board]} sites={sites} waiting={waiting} | {seats}"
     )
 

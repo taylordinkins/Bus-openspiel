@@ -171,7 +171,7 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 - Constants, actions, setup, selection, all seven resolutions, end and scoring, both `returns`; observer with RL-ready tensor; `action_meta`; scenario loader; invariant checker; `tools/play_text.py`, `tools/replay.py`, `tools/sim_stats.py`; golden playthroughs for 3 seeds.
 - [x] 1. Constants, action IDs, board fixes (R-001–R-008; ACTIONS.md §2, §4; backlog: Layout hashable, bounds, negative parser tests, supplies to constants) — `spec-test-writer` → `implementer` (2026-11-14)
 - [x] 2. State model and game registration (R-003, R-009, R-014, R-073; §5.2 params) — `spec-test-writer` → `implementer` (2026-11-14; state-aware EXTEND wording moves to unit 5)
-- [ ] 3. Scenario loader and invariant checker (SCENARIOS.md, `S-*` codes, §6.3; backlog: `move_offset`, round-1 `waiting`, `S-STONES`) — `spec-test-writer` → `implementer`
+- [x] 3. Scenario loader and invariant checker (SCENARIOS.md, `S-*` codes, §6.3; backlog: `move_offset`, round-1 `waiting`, `S-STONES`) — `spec-test-writer` → `implementer` (2026-11-14; SCENARIOS.md §9 clarifications)
 - [ ] 4. Line geometry ⚑ (R-035–R-039, R-041) — `spec-test-writer` → `implementer` → `rules-auditor`
 - [ ] 5. Setup phases (R-015–R-019, R-021; plus state-aware EXTEND `action_to_string`) — `spec-test-writer` → `implementer`
 - [ ] 6. Action selection (R-020, R-022–R-028) — `spec-test-writer` → `implementer`
@@ -233,9 +233,9 @@ Should-fix and minor findings, tagged with the phase that found them. `/close-ph
 - [Phase 0, code-reviewer, minor] `bus/board.py` bounds check accepts 1991 (`<=` vs `<` FRAME_SIZE); tests repeat the literal 1991. `_parse_layout` accepts unknown action keys, non-positive clock hand/radius, 3-element or float points.
 - [Phase 0, code-reviewer, minor] `tools/render_board.py`: clock order re-listed instead of `CLOCK_SEGMENTS`; supplies 25/20 are literals (move to `bus/constants.py` in Phase 1); scores >20 clamped silently (preview only); `BG_HREF` is docs/-relative, so a non-`--embed` render elsewhere has a broken background.
 - [Phase 0, code-reviewer, minor] `tests/data/test_board.py:62` names node pairs (3,6) and (28,35) — the only ids outside board.yaml; acceptable for a data test.
-- [Phase 0, rules-auditor, should-fix] ACTIONS.md:26 / SCENARIOS.md:53 (R-062, R-070): move numbers are history length, but scenarios can set `last_score_move` before load; define a scenario move-number origin (`move_offset`, or default to the max `last_score_move`) so the tiebreak stays correct for editor games and fixtures.
+- [x] *(done Phase 1 unit 3: `move_offset`)* [Phase 0, rules-auditor, should-fix] ACTIONS.md:26 / SCENARIOS.md:53 (R-062, R-070): move numbers are history length, but scenarios can set `last_score_move` before load; define a scenario move-number origin (`move_offset`, or default to the max `last_score_move`) so the tiebreak stays correct for editor games and fixtures.
 - [Phase 0, rules-auditor, should-fix, needs AMENDING] RULES_SPEC.md R-049, R-066: "every site is occupied" means every site has a building, but "occupied" means passenger-inside elsewhere (R-062, SCENARIOS `occupied`); reword to "every site has a building" at the next amendment.
-- [Phase 0, rules-auditor, minor] SCENARIOS.md: `waiting` defaults to `{}` outside setup, so the round-1 shorthand drops the 4 roundabout passengers (R-015) — document or require it; S-STONES should reject `stones_on_clock` 0 unless phase `END`.
+- [x] *(done Phase 1 unit 3)* [Phase 0, rules-auditor, minor] SCENARIOS.md: `waiting` defaults to `{}` outside setup, so the round-1 shorthand drops the 4 roundabout passengers (R-015) — document or require it; S-STONES should reject `stones_on_clock` 0 unless phase `END`.
 - [Phase 0, rules-auditor, minor, needs AMENDING] RULES_SPEC.md R-046: missing full stop after "(R-058)".
 - [Phase 0, both reviewers] `layout.bus_grid` validation requires exactly 20 cells; revisit with the row-per-seat item above (5 seats × 5 buses).
 
