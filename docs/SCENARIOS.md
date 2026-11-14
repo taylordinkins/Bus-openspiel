@@ -117,7 +117,7 @@ Setup phases use `round` 0. `current_player` is derived from turn order starting
 | `S-STONES` | `stones_on_clock` + sum of seat `stones` ≠ 5 (4 at 3 players) (R-006); `stones_on_clock` = 0 outside phase `END` (R-053) |
 | `S-SITES` | duplicate sites in `buildings`; invalid type |
 | `S-PASSENGERS` | conservation fails (§3.3); `waiting` key not a node; `occupied` building count + waiting + supply ≠ 15 (R-005) |
-| `S-BOARD` | action board shape wrong; letters not contiguous (R-025); non-empty board outside phases `SEL`..`VD` |
+| `S-BOARD` | action board shape wrong; letters not contiguous (R-025); non-empty board outside phases `SEL`..`VD`, except `END` with `end.types` = `["last_stone"]` (the immediate end of R-053 keeps the round's markers on the board) |
 | `S-PHASE` | `phase` not compatible with `round` (`SB`/`L1`/`L2` need round 0; others need ≥ 1); pending keys wrong; `current_player` is not the seat the phase would call; `cursor` points at an empty letter |
 | `S-SEL` | §4.1 |
 | `S-POINTS` | `last_score_move` null mismatch (§3.1); a seat's `last_score_move` > `move_offset` |
@@ -187,3 +187,4 @@ Rulebook examples (`lines_blue_midline`, `lines_red_cd`, `vrrooomm_example2`) ar
 6. `S-SETUP`: in `SB` the number of buildings equals `done`; in `L1`/`L2` there are 2n buildings and the seats' line lengths follow from `done` and turn order (`L1`: served seats have 1 street, others 0; `L2`: served seats 2, others 1). Buildings have no owner; the per-seat setup building count of the state API is derived from `done` and turn order (2 for every seat after `SB`).
 7. PLAN §6.3 "markers only decrease" covers both a seat's Action markers in hand (`markers_left`, R-065) and its Bus Line markers left (25 − line length).
 8. Shortfall (Phase 1 unit 7): on entering a marker, `units_left` is its full power (R-031..R-033) even when the supply, empty sites or Bus Line markers cannot cover it; units that become impossible are lost when reached (R-034), with no node.
+9. A last-stone `END` (R-053) keeps the action board as it was when the game ended; a round-end `END` (R-065, R-066) has an empty board. `load(dump(s))` holds for both.

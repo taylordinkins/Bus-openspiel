@@ -469,8 +469,9 @@ def _build(d: dict[str, Any], game: Any) -> tuple[Core, str]:
     if "supply" in d and _int(d["supply"], "supply") != supply:
         raise _err("S-PASSENGERS", f"supply must equal the derived value {supply}")
 
-    # S-BOARD
-    if phase not in BOARD_PHASES and any(board):
+    # S-BOARD; a last-stone END (R-053) keeps the round's markers on the board (SCENARIOS §9.9)
+    last_stone_end = phase == "END" and tuple(end_types or ()) == ("last_stone",)
+    if phase not in BOARD_PHASES and not last_stone_end and any(board):
         raise _err("S-BOARD", f"the action board must be empty in {phase}")
 
     # S-MARKERS (R-004)

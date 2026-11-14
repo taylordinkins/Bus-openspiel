@@ -144,6 +144,8 @@ def legal_actions(core: Core) -> list[int]:
         return _px_legal()
     if core.phase == PHASE_BD:
         return _bd_legal(core)
+    if core.phase == PHASE_CK:
+        return _ck_legal(core)
     return []
 
 
@@ -161,6 +163,8 @@ def apply(core: Core, action: int) -> Core:
         return replace(_px_apply(core, action), move_number=core.move_number + 1)
     if core.phase == PHASE_BD:
         return replace(_bd_apply(core, action), move_number=core.move_number + 1)
+    if core.phase == PHASE_CK:
+        return replace(_ck_apply(core, action), move_number=core.move_number + 1)
     raise ValueError(f"phase {core.phase} not implemented")
 
 
@@ -471,6 +475,47 @@ def _bd_apply(core: Core, action: int) -> Core:
     if nxt.units_left > 0 and lowest_open_tier_sites(nxt):
         return nxt
     return advance(replace(nxt, units_left=0))
+
+
+def move_passengers(core: Core) -> Core:
+    """Step out of every building, then into clock-type buildings. Implements R-054, R-055."""
+    sites = board().sites
+    waiting = list(core.waiting)
+    for t in core.occupied:  # R-054
+        waiting[sites[t].node] += 1
+    occupied: list[int] = []
+    for t, ty in enumerate(core.site_types):  # ascending site id (R-055)
+        node = sites[t].node
+        if ty == core.clock and waiting[node] > 0:
+            waiting[node] -= 1
+            occupied.append(t)
+    return replace(core, waiting=tuple(waiting), occupied=tuple(occupied))
+
+
+def _ck_legal(core: Core) -> list[int]:
+    """Implements R-050, R-052: advance, or pause (a stone is always on the clock)."""
+    from bus.actions import CLOCK_ADVANCE, CLOCK_PAUSE
+
+    assert core.stones_on_clock > 0
+    return [CLOCK_ADVANCE, CLOCK_PAUSE]
+
+
+def _ck_apply(core: Core, action: int) -> Core:
+    """Implements R-050..R-055: clock choice, then movement unless the last stone ends the game."""
+    from bus.actions import CLOCK_ADVANCE
+
+    if action not in _ck_legal(core):
+        raise ValueError(f"illegal action {action} in {core.phase}")
+    if action == CLOCK_ADVANCE:  # R-051
+        nxt = replace(core, clock=(core.clock + 1) % len(C.BUILDING_TYPES))
+    else:  # R-052
+        p = core.current
+        seat = core.seats[p]
+        seats = (*core.seats[:p], replace(seat, stones=seat.stones + 1), *core.seats[p + 1 :])
+        nxt = replace(core, seats=seats, stones_on_clock=core.stones_on_clock - 1)
+        if nxt.stones_on_clock == 0:  # R-053
+            return replace(nxt, phase=PHASE_END, end_types=("last_stone",))
+    return advance(move_passengers(nxt))
 
 
 def _resolve_buses(core: Core, owner: int) -> Core:
