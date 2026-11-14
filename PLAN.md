@@ -57,7 +57,7 @@ A faithful, well-tested implementation of *Bus* as a **Python OpenSpiel game**, 
 
 Where the rulebook is silent or ambiguous. Each becomes a numbered entry in `docs/RULES_SPEC.md`. ⚑ = my default where no source settles it — **veto any of them during the Phase 0 review.**
 
-**C1 — The board** (`data/board.yaml`, overlay `docs/board-check.png`). The map's letters A–D replace the rulebook's numbered construction-site tiers: A is the lowest, filled first (setup builds on A), then B, C, D. Each site belongs to one intersection, the one passengers enter it from. The 4 double-ring intersections are the Central Park roundabouts; the 2 bus-icon intersections are the train stations (no sites). Two streets bend (3–6 and 28–35 are drawn via a corner); bends are drawing only. Two site assignments are judgement calls, flagged `CHECK` in the YAML (§9 Q1).
+**C1 — The board** (`data/board.yaml`, overlay `docs/board-check.png`). The map's letters A–D replace the rulebook's numbered construction-site tiers: A is the lowest, filled first (setup builds on A), then B, C, D. Each site belongs to one intersection, the one passengers enter it from. The 4 double-ring intersections are the Central Park roundabouts; the 2 bus-icon intersections are the train stations (no sites). Two streets bend (3–6 and 28–35 are drawn via a corner); bends are drawing only. Every site assignment, including the two judgement calls at nodes 8 and 26, was confirmed by the user (2026-11-14).
 
 **C2 — Components.** Per player: 20 Action markers, 25 Bus Line markers, 5 buses (1 placed at setup). 15 passengers in all (4 placed at setup). Time stones: 5, or 4 with 3 players. Buildings are effectively unlimited (90 discs, 47 sites). Score track has no cap (the map's 1–20 track is drawn as a lap counter in the UI).
 
@@ -161,7 +161,7 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 - [x] 2. Board digitized: `data/board.yaml`, `bus/board.py`, `tests/data/test_board.py`, overlay `docs/board-check.png` (2026-11-14)
 - [ ] 3. `docs/RULES_SPEC.md` from the rulebook and §4 — `implementer`
 - [ ] 4. `docs/ACTIONS.md` and `docs/SCENARIOS.md` — `implementer`
-- [ ] 5. Spec audit vs rulebook, board data audit vs map — `rules-auditor`, then fixes
+- [ ] 5. Spec audit vs rulebook (user runs it from the CLI before implementation), board data audit vs map — `rules-auditor`, then fixes
 - [ ] 6. Board preview: `tools/render_board.py` draws `docs/board-preview.svg` (map layout, icons, sample lines, buses, passengers, action board) so the look is settled before Phase 2 — `implementer`
 - [ ] 7. ✋ You review the spec, §4 defaults, §9 questions and the preview; you set the spec Status to APPROVED
 - *Exit:* spec APPROVED; board data confirmed; preview look agreed.
@@ -200,7 +200,7 @@ Opus spot audits only for units touching line-expansion validity, resolution ord
 
 ## 9. Open questions
 
-- **Q1 (board):** two site pairs are assigned by nearest intersection and flagged `CHECK` in `data/board.yaml`: the B/C pair below node 8 (alternatives: nodes 7, 11) and the A/C pair below node 26 (alternatives: 33, 34). Confirm or correct from the map's intent.
+- ~~Q1 (board)~~ resolved 2026-11-14: the B/C pair below node 8 belongs to node 8 and the A/C pair below node 26 to node 26 (user confirmed).
 - **Q2:** confirm C5's per-end reading of "unoccupied street if you can" (taken from the Red C/D example) and C4's "any non-full action may be chosen".
 - **Q3:** C13 tiebreak by "reached that score first" — confirm the move-number reading.
 

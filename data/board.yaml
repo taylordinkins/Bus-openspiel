@@ -137,11 +137,11 @@ sites:
   - {id: 8, tier: A, node: 20, x: 649, y: 999}
   - {id: 9, tier: A, node: 21, x: 937, y: 1001}
   - {id: 10, tier: A, node: 21, x: 995, y: 1001}
-  - {id: 11, tier: A, node: 26, x: 890, y: 1237}  # CHECK: sits between nodes 26, 33 and 34 (PLAN §9)
+  - {id: 11, tier: A, node: 26, x: 890, y: 1237}
   - {id: 12, tier: B, node: 0, x: 1403, y: 142}
   - {id: 13, tier: B, node: 4, x: 978, y: 387}
   - {id: 14, tier: B, node: 9, x: 921, y: 510}
-  - {id: 15, tier: B, node: 8, x: 558, y: 619}  # CHECK: nearest-node call; could belong to node 7 or 11 (PLAN §9)
+  - {id: 15, tier: B, node: 8, x: 558, y: 619}
   - {id: 16, tier: B, node: 12, x: 810, y: 673}
   - {id: 17, tier: B, node: 16, x: 568, y: 856}
   - {id: 18, tier: B, node: 22, x: 1387, y: 966}
@@ -151,12 +151,12 @@ sites:
   - {id: 22, tier: B, node: 33, x: 749, y: 1335}
   - {id: 23, tier: C, node: 4, x: 1036, y: 387}
   - {id: 24, tier: C, node: 10, x: 1143, y: 570}
-  - {id: 25, tier: C, node: 8, x: 616, y: 619}  # CHECK: nearest-node call; could belong to node 7 or 11 (PLAN §9)
+  - {id: 25, tier: C, node: 8, x: 616, y: 619}
   - {id: 26, tier: C, node: 14, x: 1442, y: 679}
   - {id: 27, tier: C, node: 20, x: 708, y: 999}
   - {id: 28, tier: C, node: 22, x: 1445, y: 966}
   - {id: 29, tier: C, node: 27, x: 1101, y: 1178}
-  - {id: 30, tier: C, node: 26, x: 948, y: 1237}  # CHECK: sits between nodes 26, 33 and 34 (PLAN §9)
+  - {id: 30, tier: C, node: 26, x: 948, y: 1237}
   - {id: 31, tier: C, node: 33, x: 807, y: 1335}
   - {id: 32, tier: D, node: 1, x: 1171, y: 250}
   - {id: 33, tier: D, node: 2, x: 1533, y: 286}
