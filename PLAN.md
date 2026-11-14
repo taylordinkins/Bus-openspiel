@@ -164,7 +164,7 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 - [x] 4. `docs/ACTIONS.md` and `docs/SCENARIOS.md` — `implementer` (2026-11-14; 376 action ids)
 - [x] 5. Spec audit vs rulebook (user runs it from the CLI before implementation), board data audit vs map — `rules-auditor`, then fixes (2026-11-14; spec FAIL→fixed in 4ed05b6, board PASS)
 - [x] 6. Board preview: `tools/render_board.py` draws `docs/board-preview.svg` (map layout, icons, sample lines, buses, passengers, action board) so the look is settled before Phase 2 — `implementer` (2026-11-14)
-- [ ] 7. ✋ You review the spec, §4 defaults, §9 questions and the preview; you set the spec Status to APPROVED
+- [x] 7. ✋ You review the spec, §4 defaults, §9 questions and the preview; you set the spec Status to APPROVED (2026-11-14; approved by the user)
 - *Exit:* spec APPROVED; board data confirmed; preview look agreed.
 
 **Phase 1 — Engine (the whole game, 3–5 players)**
