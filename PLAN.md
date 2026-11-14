@@ -201,8 +201,10 @@ Opus spot audits only for units touching line-expansion validity, resolution ord
 ## 9. Open questions
 
 - ~~Q1 (board)~~ resolved 2026-11-14: the B/C pair below node 8 belongs to node 8 and the A/C pair below node 26 to node 26 (user confirmed).
-- **Q2:** confirm C5's per-end reading of "unoccupied street if you can" (taken from the Red C/D example) and C4's "any non-full action may be chosen".
-- **Q3:** C13 tiebreak by "reached that score first" — confirm the move-number reading.
+- ~~Q2~~ resolved 2026-11-14: C5's per-end reading and C4's any-free-action confirmed (user confirmed).
+- ~~Q3~~ resolved 2026-11-14: move-number tiebreak and shared surviving ties confirmed, including O-4 (user confirmed).
+- ~~Q-A~~ resolved 2026-11-14: 5-player Lines +1 is added before the power ≤ 0 check (R-033).
+- ~~Q-B~~ resolved 2026-11-14: Lines markers must be resolved maximally; only (end, street) choices that keep the maximum remaining placements reachable are legal (R-040, R-042).
 - ~~O-1/O-2/O-3 (spec)~~ resolved 2026-11-14: building supply unlimited per type; multi-street Lines evaluated one street at a time; markers exhausted in mandatory passes → skipped (user confirmed, see RULES_SPEC.md).
 
 ### Backlog

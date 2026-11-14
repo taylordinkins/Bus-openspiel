@@ -115,8 +115,8 @@ Example: P0 starts on street `s1` between nodes `u` and `v`. P0's second marker 
 Source: RB p.1 (First Bus Lines); C3, C5.
 
 ### R-019 — Starting player
-Seat 0 starts the first round (D5; the start player is a lobby setting with default P0 ⚑). The start player's seat determines the turn order for the setup placements (R-016 to R-018) and for round 1 (R-022 onwards).
-Source: D5; C3; RB p.1 (Setting Up: last person to ride a bus starts, or choose randomly). The rulebook's random or "last rider" choice is replaced by the lobby default.
+Seat 0 always starts the first round (D5). There is no start-player parameter; the lobby decides who sits in seat 0. The start player's seat determines the turn order for the setup placements (R-016 to R-018) and for round 1 (R-022 onwards).
+Source: D5; C3; RB p.1 (Setting Up: last person to ride a bus starts, or choose randomly). The rulebook's random or "last rider" choice is replaced by the fixed seat-0 start.
 
 ---
 
@@ -136,7 +136,7 @@ Source: RB p.1 (Setting Up through First Bus Lines).
 
 ### R-022 — The action board
 There are 7 actions, listed in resolution order (R-029): Lines (Line Expansion), Buses, Passengers, Buildings, Clock, Vrrooomm!, Starting Player. Buses, Clock and Starting Player each have **1** space. Lines, Passengers, Buildings and Vrrooomm! each have **6** spaces, lettered a to f. The board is empty at the start of every round.
-Source: RB p.1 (Phase 1: "Buses, Clock and Starting Player each have only 1 space. The other actions have spaces labeled A–F"; Line Expansion picture shows F to A); C4, C6.
+Source: RB p.1 (Phase 1: the action board shows single-space Buses, Clock and Starting Player, and six lettered spaces for the other four actions, displayed from F down to A); C4, C6.
 
 ### R-023 — First two selections are mandatory
 Starting with the start player and going in turn order, each player places one Action marker on an action. Then a second pass in turn order, in which each player places another Action marker. These two passes are mandatory (no dropping out); a player may choose the same action in both.
@@ -152,9 +152,9 @@ Placing a marker on an action with lettered spaces puts it on the earliest empty
 Example: Lines has a and b occupied; the next marker placed on Lines goes on c.
 Source: RB p.1 (Phase 1: "place your Action marker on the empty space earliest in the alphabet"); C4.
 
-### R-026 — Any action with a free space may be chosen ⚑
-A player may place a marker on any action that still has a free space, even when that action will have no effect for them (a blocking tactic): for example Buses with 5 buses already, Passengers when the supply is empty. See PLAN §9 Q2.
-Source: C4 (⚑); RB p.1 (Phase 1) is silent on ineffective placements.
+### R-026 — Any action with a free space may be chosen
+A player may place a marker on any action that still has a free space, even when that action will have no effect for them (a blocking tactic): for example Buses with 5 buses already, Passengers when the supply is empty. Confirmed by the user (Q2, 2026-11-14).
+Source: C4; RB p.1 (Phase 1) is silent on ineffective placements.
 
 ### R-027 — Players with no markers left
 A player with no Action markers left cannot place and is skipped, which counts as being out for the round and for the rest of the game. A player who still has markers but whose every action space is full must drop out. Passes continue for the others.
@@ -189,8 +189,8 @@ Example: all players have 2 buses; P1 resolves Buses (3 buses, M becomes 3). Pas
 Source: RB p.1 (Phase 2, "M is the bus maximum"); RB p.2 (Buses: new bus raises M immediately); C6.
 
 ### R-033 — Five-player Lines power
-When `players` = 5, a Lines marker's power is (M − k) + 1. This does not apply to Passengers, Buildings, Buses, Clock, Vrrooomm! or Starting Player. The power ≤ 0 rule applies after adding the 1.
-Example (5 players, M = 3): Lines markers on a, b, c, d, e, f have power 4, 3, 2, 1, 0, −1 (so e and f do nothing).
+When `players` = 5, a Lines marker's power is (M − k) + 1. This does not apply to Passengers, Buildings, Buses, Clock, Vrrooomm! or Starting Player. The +1 is added first, then the "power ≤ 0 does nothing" check applies to the result (user decision Q-A, 2026-11-14 ⚑-resolved).
+Example (5 players, M = 3): Lines markers on a, b, c, d, e, f have power 4, 3, 2, 1, 0, −1 (so e and f do nothing). With M = 3, letter d has power 1 and places one street.
 Source: RB p.2 (Line Expansion: "5-player game: action power + 1, but only for Line Expansion"); C6. The +1 is read as applying to every letter's power.
 
 ### R-034 — Every effect is carried out as fully as possible
@@ -214,20 +214,24 @@ For an end at node `v`, the **candidate streets** are streets incident to `v` th
 Example (illustrative): the player's line has an end at `v`; streets `s1`, `s2`, `s3` meet at `v`; `s1` is already in the line. The candidates are `s2` and `s3`.
 Source: RB p.2 (Line Expansion rule 1a, 1b); C5.
 
-### R-038 — Placement rule, per end ⚑
+### R-038 — Placement rule, per end
 For a chosen end, if any of that end's candidate streets (R-037) is unoccupied (R-013), the new marker must go on an unoccupied candidate street. If every candidate street at that end is occupied, any candidate may be chosen. The rule is evaluated per end, not across both ends; evaluation is sequential, so a marker placed earlier counts as occupying its street when a later extension is evaluated. The exception in R-039 widens the set of allowed streets.
 Example (illustrative, from the rulebook's Red example): at end node `v`, candidates `s1`, `s2` where `s1` is yellow-occupied and `s2` is unoccupied. Red extending from `v` must choose `s2`. At the other end `w`, all candidates are occupied, so Red may choose any of them.
-Source: RB p.2 (Line Expansion rule 3 and the Red C/D example); C5 (⚑). See PLAN §9 Q2 and O-2 for the sequential-evaluation reading.
+Source: RB p.2 (Line Expansion rule 3 and the Red C/D example); C5 (per-end reading confirmed by the user, Q2, 2026-11-14). See O-2 for the sequential-evaluation reading.
 
 ### R-039 — The shared-end exception
 The player may extend from an end at node `v` onto street `y` even when an unoccupied candidate street exists at that end if: (a) another player's line has an end at `v`; (b) `y` is that other line's last street at that end; (c) `y` is not the street the player's own end arrives on (that is, "coming from a different direction"); and (d) `y` is a candidate (R-037). The exception allows exactly that one street per use, and it is an extra option: the unoccupied candidates remain legal.
 Example (illustrative): Blue's end at `v` arrives via `b`. Yellow also has an end at `v`, arriving via `y`, `y` ≠ `b`. Unoccupied streets `s1` and `s2` also touch `v`. Blue may go on `s1`, `s2` or `y`, but not on another occupied street `z` that is not the last street of some other player's end at `v`.
 Counter-example: if Yellow's last street at `v` is also `b` (the same street Blue arrives on), Yellow's end gives Blue no exception, because Blue is not "coming from a different direction".
+Counter-example (middle of a line): if the player's end touches the *middle* of another player's line, that is, the intersection is not one of that line's ends, the exception does not apply (rulebook p.2: Blue extending from A, which lies mid-way along Red's line).
+An end of another player's line that sits inside that player's own loop (a partial-line loop) is still an end; its last street is available to others under the exception.
+After the exception is used, the new end is evaluated afresh: normally no exception applies at the next street unless another player's end is there.
+Summary: a new marker may share a street with another line only when (i) all candidates at that end are occupied (R-038); (ii) the shared-end exception applies (R-039); or (iii) it is the first setup marker (R-017).
 The exception also applies to the second setup marker (R-018).
 Source: RB p.1 (First Bus Lines, asterisk), RB p.2 (Line Expansion, asterisk); C5. The formal test (b)–(c) is C5's wording of the rulebook's "same intersection, different direction".
 
-### R-040 — Dead ends and lost extensions
-An end with no candidate street is dead. If both ends are dead, or the player has no Bus Line markers left in their supply, any remaining extensions of that Lines marker are lost. Extensions that remain possible on a live end are not lost; the player must carry them out.
+### R-040 — Dead ends and maximal resolution
+An end with no candidate street is dead. If both ends are dead, or the player has no Bus Line markers left in their supply, any remaining extensions of that Lines marker are lost. Extensions are lost only if no sequence of legal placements can place them: the Lines marker must be resolved maximally (user decision Q-B, 2026-11-14). See R-042 for how this restricts each choice.
 Example: a marker with power 3 and a line whose only live end allows 2 further placements. Two extensions happen, the third is lost.
 Source: RB p.2 (Line Expansion rule 3 and Phase 2 "as fully as possible"); C5.
 
@@ -237,8 +241,9 @@ Example: the path `s1, s2, s3` closes into a loop at node `u` (end 0 and end 1 a
 Source: RB p.2 (Line Expansion rule 2 with the full-line and partial-line loop examples); C5.
 
 ### R-042 — Resolving a Lines marker
-When a Lines marker resolves it has power p (R-031, R-033). For each of the p units in turn, the owner (if a legal extension exists, R-040) chooses an end and a candidate street under R-038/R-039, and places one Bus Line marker from their supply; the new marker counts as occupying its street for later units. A player's supply of Bus Line markers is 25 minus the markers already on the board; no marker is ever returned to supply.
+When a Lines marker resolves it has power p (R-031, R-033). For each of the p units in turn, the owner (if a legal extension exists, R-040) chooses an end and a candidate street under R-038/R-039, and places one Bus Line marker from their supply; the new marker counts as occupying its street for later units. Maximal resolution (user decision Q-B, 2026-11-14): when choosing each street, only (end, street) choices from which the maximum achievable number of remaining placements can still be reached are legal, where "remaining placements" is bounded by the marker's remaining power and the Bus Line markers left in supply, under R-037 to R-039. The lookahead depth is at most the remaining power (at most 6). A player's supply of Bus Line markers is 25 minus the markers already on the board; no marker is ever returned to supply.
 Example (M = 3, marker on a, 4 players): power 3, so three streets are added one at a time. Marker on c: power 1, one street.
+Example (maximal resolution): power 2, one end dead. At the live end, street s1 would leave both ends dead after one street, while s2 allows a second street. Only s2 is legal, because it is the only choice that places both streets.
 Source: RB p.2 (Line Expansion: "extend your bus line a number of streets equal to its action power"); C5, C6.
 
 ---
@@ -264,7 +269,7 @@ Example: M = 3, supply has 1 passenger, marker on a (power 3): one passenger is 
 Source: RB p.2 (Passengers); C8.
 
 ### R-046 — Passengers placed are waiting passengers
-A passenger placed by the Passengers action is a waiting passenger at the chosen station. It becomes available to Vrrooomm! (R-058) and it never enters a building (stations have no sites, R-012).
+A passenger placed by the Passengers action is a waiting passenger at the chosen station. It becomes available to Vrrooomm! (R-058) A passenger at a station never steps into a building by itself (stations have no sites, R-012); Vrrooomm! may carry it away (R-058, R-059).
 Source: RB p.2 (Passengers; Vrrooomm! Example 2); C8.
 
 ---
@@ -374,10 +379,11 @@ Source: RB p.2 (End of Phase 2: "Return all spent Action markers to the box"); C
 ## 15. Game end, scoring, tiebreaks, returns
 
 ### R-066 — The three end conditions
-The game ends in exactly one of these ways, whichever occurs first:
+The game ends when any of these conditions holds, checked as stated:
 1. **Sites full:** every site is occupied. The game ends at the end of that round, after Starting Player resolves and spent markers are removed (R-049, R-065).
 2. **Last time stone:** the last stone is taken from the clock. The game ends immediately (R-053).
 3. **Markers:** at the end of a round (after R-065), at most one player still has any Action markers ⚑. The rulebook says "only 1 player"; 0 is treated the same.
+Sites-full and markers can both hold at the same round end. The recorded end type is the set (list) of all conditions that held; the time-stone end is immediate, so it is always alone in the set.
 Source: RB p.2 (Phase 2 cleanup; End of the Game); C12 (⚑ the 0 case), C13.
 
 ### R-067 — Timing of the end checks
@@ -390,18 +396,18 @@ Example: P1 has 12 points and took 2 stones: final score 10.
 Source: RB p.2 (Clock, End of the Game); C13.
 
 ### R-069 — Winner and tiebreaks
-The player with the highest final score wins. If tied, among the tied players the one with the most time stones wins. If still tied, the tied player who reached that points total first wins (R-070). A tie that survives all of these is a shared win ⚑.
+The player with the highest final score wins. If tied, among the tied players the one with the most time stones wins. If still tied, the tied player who reached that points total first wins (R-070). A tie that survives all of these is a shared win.
 Example: P0 and P2 both have final score 9; P0 took 2 stones and P2 took 0. P0 wins at the first tiebreak.
-Source: RB p.2 (End of the Game); C13 (⚑ the shared win). See PLAN §9 Q3.
+Source: RB p.2 (End of the Game); C13. The shared win for surviving ties is confirmed by the user (Q3, 2026-11-14).
 
 ### R-070 — "Reached the points total first"
 Among players still tied after the stones tiebreak (so they also have equal points), the one whose points last changed at the earliest move number (R-062) wins. A player whose points never changed has no move number and is treated as having reached 0 points at the same instant as every other zero-point player, so a tie among zero-point players is shared (R-069). The rulebook's stack order on the score track is read as this move-number comparison.
 Example: P1 and P3 tie on points and stones with 8 points; P1's last scoring move was move 340, P3's was move 412. P1 wins.
-Source: RB p.2 (End of the Game: "whose score marker is lowest in its stack"); C13 (⚑ the reading). See PLAN §9 Q3.
+Source: RB p.2 (End of the Game: "whose score marker is lowest in its stack"); C13. The move-number reading is confirmed by the user (Q3, 2026-11-14).
 
 ### R-071 — Returns: `win_loss`
 With n players and k players tied for the win after all tiebreaks (R-069), each winner receives (n − k) / (k · (n − 1)) and every other seat receives −1/(n − 1). A sole winner (k = 1) receives +1. Returns sum to 0 (zero-sum).
-Example (n = 4): sole winner +1, others −1/3 each. Two winners: +1/2 each, others −1/3 each.
+Example (n = 4): sole winner +1, others −1/3 each. Two winners: (4 − 2) / (2 · 3) = +1/3 each, the other two −1/3 each (sum: 2/3 − 2/3 = 0).
 Source: D7.
 
 ### R-072 — Returns: `margin`
@@ -414,18 +420,21 @@ Source: D7.
 ## 16. Information and chance
 
 ### R-073 — Perfect information, no chance
-Every state element is public (board, lines, buildings, passengers, clock, stones, markers on the action board, markers left, scores). There are no chance nodes: the game is deterministic given the players' decisions. The start player is a lobby setting (R-019).
+Every state element is public (board, lines, buildings, passengers, clock, stones, markers on the action board, markers left, scores). There are no chance nodes: the game is deterministic given the players' decisions. Seat 0 always starts the first round (R-019).
 Source: D5; §5.2.
 
 ---
 
 ## Open questions
 
-Existing PLAN §9 items: **Q2** (C5's per-end reading; C4's any-free-action) governs R-026, R-038 and R-039; **Q3** (C13's tiebreak move-number reading and the shared-win tie) governs R-069 and R-070. Both stay open until the user answers.
-
-- **O-4 — Passengers and zero-point ties (R-070).** The rulebook's "lowest in the stack" tiebreak depends on physical stacking order at setup. Under R-070 zero-point ties are shared; this is the same decision as Q3, restated for the all-zero case.
+None open.
 
 ### Resolved questions
 - ~~O-1~~ (R-007) resolved 2026-11-14: building supply is unlimited for every type, as C2 (user confirmed).
 - ~~O-2~~ (R-038, R-042) resolved 2026-11-14: a multi-extension Lines marker is evaluated one street at a time; a street added earlier in the same resolution counts as occupied (user confirmed).
 - ~~O-3~~ (R-027) resolved 2026-11-14: a player who runs out of markers during the mandatory passes is skipped and out of the round, as C4 (user confirmed).
+- ~~Q2~~ (R-026, R-038, R-039) confirmed 2026-11-14: C5's per-end placement rule and C4's any-free-space selection (user confirmed).
+- ~~Q3~~ (R-069, R-070) confirmed 2026-11-14: move-number tiebreak and shared surviving ties (user confirmed).
+- ~~O-4~~ (R-070) resolved 2026-11-14: zero-point ties are shared, same decision as Q3 (user confirmed).
+- ~~Q-A~~ (R-033) resolved 2026-11-14: with 5 players the Lines +1 is added first, then the power ≤ 0 check (user decision).
+- ~~Q-B~~ (R-034, R-040, R-042) resolved 2026-11-14: Lines markers are resolved maximally; only choices that keep the maximum achievable number of remaining placements reachable are legal (user decision).
