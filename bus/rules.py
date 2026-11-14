@@ -634,16 +634,12 @@ _PHASE_ACTION = {
 
 
 def end_round(core: Core) -> Core:
-    """Starting Player and round end. Implements R-064 only; unit 12 adds R-065..R-067.
-
-    TODO(unit 12): end checks (R-066) and the END phase.
-    """
+    """Starting Player, spent markers, end checks. Implements R-064, R-065, R-066, R-067."""
     row = core.action_board[ACT_STARTING]
-    start = row[0] if row else (core.start_player + 1) % core.players
+    start = row[0] if row else (core.start_player + 1) % core.players  # R-064
+    # R-065: markers are decremented when placed, so removal is clearing the board.
     nxt = replace(
         core,
-        phase=PHASE_SEL,
-        round=core.round + 1,
         start_player=start,
         current=start,
         action_board=((),) * NUM_ACTION_KINDS,
@@ -654,6 +650,57 @@ def end_round(core: Core) -> Core:
         moves_left=0,
         picked_node=-1,
     )
+    types = round_end_types(nxt)
+    if types:
+        return replace(nxt, phase=PHASE_END, end_types=types)
+    nxt = replace(nxt, phase=PHASE_SEL, round=core.round + 1)
     # R-027: selection opens with the first seat in turn order that still has markers.
     first = _sel_next(nxt)
     return replace(nxt, current=first[0]) if first else nxt
+
+
+def round_end_types(core: Core) -> tuple[str, ...]:
+    """End conditions holding at round end, in R-066 order. Implements R-066, R-067."""
+    out: list[str] = []
+    if sites_full(core):
+        out.append("sites_full")
+    if sum(1 for s in core.seats if s.action_markers > 0) <= 1:
+        out.append("markers")
+    return tuple(out)
+
+
+def final_scores(core: Core) -> tuple[int, ...]:
+    """Implements R-068: points minus time stones held."""
+    return tuple(s.points - s.stones for s in core.seats)
+
+
+def winners(core: Core) -> tuple[int, ...]:
+    """Implements R-069, R-070: score, then stones, then earlier last scoring move; ties shared."""
+    scores = final_scores(core)
+
+    def key(p: int) -> tuple[int, int, float]:
+        seat = core.seats[p]
+        last = float("inf") if seat.last_score_move is None else float(seat.last_score_move)
+        return (-scores[p], -seat.stones, last)
+
+    keys = [key(p) for p in range(core.players)]
+    best = min(keys)
+    return tuple(p for p, k in enumerate(keys) if k == best)
+
+
+def returns_for(core: Core, mode: str) -> list[float]:
+    """Implements R-071 (win_loss) and R-072 (margin); zeros before the game ends."""
+    n = core.players
+    if core.phase != PHASE_END:
+        return [0.0] * n
+    if mode == "win_loss":
+        w = winners(core)
+        k = len(w)
+        return [(n - k) / (k * (n - 1)) if p in w else -1.0 / (n - 1) for p in range(n)]
+    scores = final_scores(core)
+    total = sum(scores)
+    out: list[float] = []
+    for p in range(n):
+        others = (total - scores[p]) / (n - 1)
+        out.append(max(-1.0, min(1.0, (scores[p] - others) / 10)))
+    return out

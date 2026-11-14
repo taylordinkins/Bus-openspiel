@@ -521,7 +521,6 @@ def test_R049_buildings_never_exceed_the_number_of_sites() -> None:
     assert sum(1 for t in range(T) if s.site_building(t) is not None) == T
 
 
-@pytest.mark.pending("R-066")
 def test_R049_rest_of_the_round_resolves_then_game_ends() -> None:
     """R-049 example: Buildings fills the last site in Phase 2; Clock, Vrrooomm! and Starting
     Player still resolve, then the game ends (end type sites_full) in the same round."""

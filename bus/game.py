@@ -119,6 +119,14 @@ class BusState(pyspiel.State):
         return self.core.end_types
 
     @property
+    def final_scores(self) -> tuple[int, ...]:
+        return rules.final_scores(self.core)
+
+    @property
+    def winners(self) -> tuple[int, ...]:
+        return rules.winners(self.core)
+
+    @property
     def bus_max(self) -> int:
         return rules.bus_max(self.core)
 
@@ -179,7 +187,7 @@ class BusState(pyspiel.State):
         return action_to_string(player, action)
 
     def returns(self) -> list[float]:
-        return [0.0] * self.core.players
+        return rules.returns_for(self.core, self._returns_mode)
 
     def __str__(self) -> str:
         return observation_string(self.core, self._returns_mode)

@@ -386,7 +386,7 @@ def _parse_end(d: dict[str, Any], phase: str) -> tuple[str, ...]:
         raise _err("S-END", f"end types must be a non-empty subset of {rules.END_TYPES}")
     if "last_stone" in tl and len(tl) > 1:
         raise _err("S-END", "last_stone must stand alone")
-    return tuple(sorted(cast(list[str], tl)))
+    return tuple(t for t in rules.END_TYPES if t in tl)
 
 
 # ---------------------------------------------------------------- build
@@ -762,8 +762,12 @@ def check_expect(state: BusState, expect: dict[str, Any]) -> None:
                 abs(a - b) > 1e-9 for a, b in zip(got_r, want, strict=False)
             ):
                 raise AssertionError(f"expect returns: got {got_r}, want {want}")
-        else:  # final_scores, winners: scoring arrives with unit 12
-            raise AssertionError(f"expect {key} is not supported yet")
+        elif key == "final_scores":
+            _eq(key, list(state.final_scores), want)
+        elif key == "winners":
+            _eq(key, list(state.winners), sorted(want))
+        else:
+            raise AssertionError(f"expect {key} is not supported")
 
 
 __all__ = [

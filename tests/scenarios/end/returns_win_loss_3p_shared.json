@@ -1,0 +1,109 @@
+{
+ "format": 1,
+ "parameters": {
+  "players": 3,
+  "returns": "win_loss"
+ },
+ "round": 1,
+ "phase": "END",
+ "start_player": 0,
+ "clock": "house",
+ "stones_on_clock": 0,
+ "seats": [
+  {
+   "points": 0,
+   "stones": 1,
+   "buses": 1,
+   "markers_left": 20,
+   "line": [
+    7,
+    8
+   ],
+   "last_score_move": null
+  },
+  {
+   "points": 0,
+   "stones": 1,
+   "buses": 1,
+   "markers_left": 20,
+   "line": [
+    1,
+    5
+   ],
+   "last_score_move": null
+  },
+  {
+   "points": 0,
+   "stones": 2,
+   "buses": 1,
+   "markers_left": 20,
+   "line": [
+    59,
+    60
+   ],
+   "last_score_move": null
+  }
+ ],
+ "buildings": [
+  {
+   "site": 2,
+   "type": "pub",
+   "occupied": false
+  },
+  {
+   "site": 4,
+   "type": "pub",
+   "occupied": false
+  },
+  {
+   "site": 5,
+   "type": "house",
+   "occupied": false
+  },
+  {
+   "site": 8,
+   "type": "house",
+   "occupied": false
+  },
+  {
+   "site": 9,
+   "type": "office",
+   "occupied": false
+  },
+  {
+   "site": 11,
+   "type": "pub",
+   "occupied": false
+  }
+ ],
+ "waiting": {
+  "13": 1,
+  "17": 1,
+  "18": 1,
+  "21": 1
+ },
+ "pending": {},
+ "end": {
+  "types": [
+   "sites_full"
+  ]
+ },
+ "description": "3 players, two shared winners: (3-2)/(2*2)=0.25 each, loser -1/2 (R-071).",
+ "expect": {
+  "terminal": true,
+  "final_scores": [
+   -1,
+   -1,
+   -2
+  ],
+  "winners": [
+   0,
+   1
+  ],
+  "returns": [
+   0.25,
+   0.25,
+   -0.5
+  ]
+ }
+}
