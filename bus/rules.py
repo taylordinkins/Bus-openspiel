@@ -146,6 +146,10 @@ def legal_actions(core: Core) -> list[int]:
         return _bd_legal(core)
     if core.phase == PHASE_CK:
         return _ck_legal(core)
+    if core.phase == PHASE_VP:
+        return _vp_legal(core)
+    if core.phase == PHASE_VD:
+        return _vd_legal(core)
     return []
 
 
@@ -165,6 +169,10 @@ def apply(core: Core, action: int) -> Core:
         return replace(_bd_apply(core, action), move_number=core.move_number + 1)
     if core.phase == PHASE_CK:
         return replace(_ck_apply(core, action), move_number=core.move_number + 1)
+    if core.phase == PHASE_VP:
+        return replace(_vp_apply(core, action), move_number=core.move_number + 1)
+    if core.phase == PHASE_VD:
+        return _vd_apply(core, action)
     raise ValueError(f"phase {core.phase} not implemented")
 
 
@@ -516,6 +524,67 @@ def _ck_apply(core: Core, action: int) -> Core:
         if nxt.stones_on_clock == 0:  # R-053
             return replace(nxt, phase=PHASE_END, end_types=("last_stone",))
     return advance(move_passengers(nxt))
+
+
+def _vp_legal(core: Core) -> list[int]:
+    """Implements R-057: nodes of the owner's line with a waiting passenger."""
+    from bus.actions import encode_pick_passenger
+
+    return sorted(
+        encode_pick_passenger(n) for n in _line_nodes(core, core.current) if core.waiting[n] > 0
+    )
+
+
+def _vp_apply(core: Core, action: int) -> Core:
+    """Implements R-057, R-058: pick a passenger (it stays counted in ``waiting`` until VD)."""
+    if action not in _vp_legal(core):
+        raise ValueError(f"illegal action {action} in {core.phase}")
+    _, (n,) = decode_action(action)
+    return replace(core, phase=PHASE_VD, picked_node=n)
+
+
+def _vd_targets(core: Core) -> dict[int, int]:
+    """Lowest-id empty clock-type building per line node (R-058, R-061, R-063)."""
+    nodes = _line_nodes(core, core.current)
+    sites = board().sites
+    out: dict[int, int] = {}
+    for t, ty in enumerate(core.site_types):
+        node = sites[t].node
+        if ty == core.clock and t not in core.occupied and node in nodes and node not in out:
+            out[node] = t
+    return out
+
+
+def _vd_legal(core: Core) -> list[int]:
+    """Implements R-058, R-061, R-063: one delivery site per node on the line."""
+    from bus.actions import encode_deliver_to
+
+    return sorted(encode_deliver_to(t) for t in _vd_targets(core).values())
+
+
+def _vd_apply(core: Core, action: int) -> Core:
+    """Implements R-034, R-059, R-060, R-062, R-070: deliver, score, next move or next marker."""
+    if action not in _vd_legal(core):
+        raise ValueError(f"illegal action {action} in {core.phase}")
+    _, (t,) = decode_action(action)
+    p = core.current
+    n = core.picked_node
+    waiting = core.waiting[:n] + (core.waiting[n] - 1,) + core.waiting[n + 1 :]
+    seat = core.seats[p]
+    seat = replace(seat, points=seat.points + 1, last_score_move=core.move_number + 1)
+    seats = (*core.seats[:p], seat, *core.seats[p + 1 :])
+    nxt = replace(
+        core,
+        waiting=waiting,
+        seats=seats,
+        occupied=tuple(sorted((*core.occupied, t))),
+        moves_left=core.moves_left - 1,
+        picked_node=-1,
+        move_number=core.move_number + 1,
+    )
+    if nxt.moves_left > 0:
+        return replace(nxt, phase=PHASE_VP)
+    return advance(replace(nxt, moves_left=0))
 
 
 def _resolve_buses(core: Core, owner: int) -> Core:

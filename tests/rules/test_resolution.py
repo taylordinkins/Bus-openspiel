@@ -297,15 +297,19 @@ def test_R030_buildings_chain_c_b_a() -> None:
     assert [x[3] for x in seen] == [1, 2, 1, 3, 2, 1]
 
 
-@pytest.mark.pending("R-056")
 def test_R030_vrrooomm_letter_a_first() -> None:
-    """R-030: Vrrooomm! resolves a first.  Position from resolve_vp (seat 1 can move): a = P1."""
-    base = H.load_doc("resolve_vp")
-    base["phase"] = "SEL"
-    base.pop("pending", None)
-    s = enter(make_doc(board={VRROOOMM: [1, 0]}, base=base))
+    """R-030: Vrrooomm! resolves a first, then b.  Position vrrooomm/base: a = P2, b = P1, both
+    with a waiting passenger and an empty house on their line (count 1 each), so the first node
+    is VP for letter a (P2); after P2's move comes letter b (P1)."""
+    base = H.load_doc("vrrooomm/base")
+    s = enter(make_doc(board={VRROOOMM: [2, 1], STARTING: [1]}, base=base, pad=False))
     assert s.phase == "VP"
     assert node(s)[1] == 0
+    assert s.current_player() == 2
+    s.apply_action(s.legal_actions()[0])  # pick
+    s.apply_action(s.legal_actions()[0])  # deliver
+    assert s.phase == "VP"
+    assert node(s)[1] == 1
     assert s.current_player() == 1
 
 

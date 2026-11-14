@@ -179,7 +179,7 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 - [x] 8. Lines resolution ⚑ (R-040, R-042; must include a state-level O-2 test: unit k+1's legal set reflects the street placed in unit k, per unit 4 audit) — `spec-test-writer` → `implementer` → `rules-auditor` (2026-11-14; audit PASS)
 - [x] 9. Passengers and Buildings (R-045–R-049; R-049/R-066 wording amendment first, needs user OK) — `spec-test-writer` → `implementer` (2026-11-14; amendment applied)
 - [x] 10. Clock and passenger movement ⚑ (R-050–R-055) — `spec-test-writer` → `implementer` → `rules-auditor` (2026-11-14; audit PASS)
-- [ ] 11. Vrrooomm! ⚑ (R-056–R-063; add a reachable Vrrooomm!-first fixture with moves > 0 — `resolve_vp` may be unreachable) — `spec-test-writer` → `implementer` → `rules-auditor`
+- [x] 11. Vrrooomm! ⚑ (R-056–R-063; add a reachable Vrrooomm!-first fixture with moves > 0 — `resolve_vp` may be unreachable) — `spec-test-writer` → `implementer` → `rules-auditor` (2026-11-14; audit PASS)
 - [ ] 12. Round end, game end, returns ⚑ (R-064–R-072; fill the `end_round` stub: R-065 bookkeeping, R-066 checks incl. no seat with markers) — `spec-test-writer` → `implementer` → `rules-auditor`
 - [ ] 13. Observer, `action_meta`, `forced_action`, `max_game_length` (§5.2; ACTIONS.md §3, §5, §6) — `spec-test-writer` → `implementer`
 - [ ] 14. Conformance and random sims (`random_sim_test` 3/4/5, 10,000 games slow) — `implementer`, `sim-runner`
@@ -237,6 +237,7 @@ Should-fix and minor findings, tagged with the phase that found them. `/close-ph
 - [x] *(done Phase 1 unit 9)* [Phase 0, rules-auditor, should-fix, needs AMENDING] RULES_SPEC.md R-049, R-066: "every site is occupied" means every site has a building, but "occupied" means passenger-inside elsewhere (R-062, SCENARIOS `occupied`); reword to "every site has a building" at the next amendment.
 - [x] *(done Phase 1 unit 3)* [Phase 0, rules-auditor, minor] SCENARIOS.md: `waiting` defaults to `{}` outside setup, so the round-1 shorthand drops the 4 roundabout passengers (R-015) — document or require it; S-STONES should reject `stones_on_clock` 0 unless phase `END`.
 - [x] *(done Phase 1 unit 9)* [Phase 0, rules-auditor, minor, needs AMENDING] RULES_SPEC.md R-046: missing full stop after "(R-058)".
+- [Phase 1 unit 11, rules-auditor, minor] `tests/scenarios/resolve_vp.json` / `resolve_vd.json` are unreachable (forced count 0 for the owner; VD has no legal action). `tests/test_invariants.py:106-111` skips such fixtures as "phase not implemented yet", which now hides them. Replace the generic skip with an explicit expected-unreachable list (or make the fixtures reachable) once all phases play.
 - [Phase 0, both reviewers] `layout.bus_grid` validation requires exactly 20 cells; revisit with the row-per-seat item above (5 seats × 5 buses).
 
 ## 10. Risks
