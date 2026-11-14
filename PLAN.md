@@ -159,7 +159,7 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 **Phase 0 — Scaffold, board data, rules spec, board look ✋**
 - [x] 1. Scaffold: `uv` project, pins, ruff, pyright, pytest, CI, `CLAUDE.md`, `.claude/` ported from lignum (agents, skills, hooks, rules), `docs/OPENSPIEL_NOTES.md`, hook tests green (2026-11-14)
 - [x] 2. Board digitized: `data/board.yaml`, `bus/board.py`, `tests/data/test_board.py`, overlay `docs/board-check.png` (2026-11-14)
-- [ ] 3. `docs/RULES_SPEC.md` from the rulebook and §4 — `implementer`
+- [x] 3. `docs/RULES_SPEC.md` from the rulebook and §4 — `implementer` (2026-11-14; R-001–R-073)
 - [ ] 4. `docs/ACTIONS.md` and `docs/SCENARIOS.md` — `implementer`
 - [ ] 5. Spec audit vs rulebook (user runs it from the CLI before implementation), board data audit vs map — `rules-auditor`, then fixes
 - [ ] 6. Board preview: `tools/render_board.py` draws `docs/board-preview.svg` (map layout, icons, sample lines, buses, passengers, action board) so the look is settled before Phase 2 — `implementer`
@@ -203,6 +203,7 @@ Opus spot audits only for units touching line-expansion validity, resolution ord
 - ~~Q1 (board)~~ resolved 2026-11-14: the B/C pair below node 8 belongs to node 8 and the A/C pair below node 26 to node 26 (user confirmed).
 - **Q2:** confirm C5's per-end reading of "unoccupied street if you can" (taken from the Red C/D example) and C4's "any non-full action may be chosen".
 - **Q3:** C13 tiebreak by "reached that score first" — confirm the move-number reading.
+- ~~O-1/O-2/O-3 (spec)~~ resolved 2026-11-14: building supply unlimited per type; multi-street Lines evaluated one street at a time; markers exhausted in mandatory passes → skipped (user confirmed, see RULES_SPEC.md).
 
 ### Backlog
 Should-fix and minor findings, tagged with the phase that found them. `/close-phase` appends here.
