@@ -169,6 +169,22 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 
 **Phase 1 — Engine (the whole game, 3–5 players)**
 - Constants, actions, setup, selection, all seven resolutions, end and scoring, both `returns`; observer with RL-ready tensor; `action_meta`; scenario loader; invariant checker; `tools/play_text.py`, `tools/replay.py`, `tools/sim_stats.py`; golden playthroughs for 3 seeds.
+- [ ] 1. Constants, action IDs, board fixes (R-001–R-008; ACTIONS.md §2, §4; backlog: Layout hashable, bounds, negative parser tests, supplies to constants) — `spec-test-writer` → `implementer`
+- [ ] 2. State model and game registration (R-003, R-009, R-014, R-073; §5.2 params) — `spec-test-writer` → `implementer`
+- [ ] 3. Scenario loader and invariant checker (SCENARIOS.md, `S-*` codes, §6.3; backlog: `move_offset`, round-1 `waiting`, `S-STONES`) — `spec-test-writer` → `implementer`
+- [ ] 4. Line geometry ⚑ (R-035–R-039, R-041) — `spec-test-writer` → `implementer` → `rules-auditor`
+- [ ] 5. Setup phases (R-015–R-019, R-021) — `spec-test-writer` → `implementer`
+- [ ] 6. Action selection (R-020, R-022–R-028) — `spec-test-writer` → `implementer`
+- [ ] 7. Resolution framework and Buses ⚑ (R-029–R-034, R-043, R-044) — `spec-test-writer` → `implementer` → `rules-auditor`
+- [ ] 8. Lines resolution ⚑ (R-040, R-042) — `spec-test-writer` → `implementer` → `rules-auditor`
+- [ ] 9. Passengers and Buildings (R-045–R-049; R-049/R-066 wording amendment first, needs user OK) — `spec-test-writer` → `implementer`
+- [ ] 10. Clock and passenger movement ⚑ (R-050–R-055) — `spec-test-writer` → `implementer` → `rules-auditor`
+- [ ] 11. Vrrooomm! ⚑ (R-056–R-063) — `spec-test-writer` → `implementer` → `rules-auditor`
+- [ ] 12. Round end, game end, returns ⚑ (R-064–R-072) — `spec-test-writer` → `implementer` → `rules-auditor`
+- [ ] 13. Observer, `action_meta`, `forced_action`, `max_game_length` (§5.2; ACTIONS.md §3, §5, §6) — `spec-test-writer` → `implementer`
+- [ ] 14. Conformance and random sims (`random_sim_test` 3/4/5, 10,000 games slow) — `implementer`, `sim-runner`
+- [ ] 15. `tools/play_text.py`, `tools/replay.py` — `implementer`
+- [ ] 16. `tools/sim_stats.py`, golden playthroughs for 3 seeds — `implementer`, `sim-runner`
 - *Exit:* rule tests green; `random_sim_test` passes for 3, 4, 5 players; 10,000 random games with zero invariant violations; `sim_stats` report (end-type mix, rounds, scores, markers used); `rules-auditor` + `code-reviewer` pass.
 
 **Phase 2 — Server + polished board UI ✋ playtest #1**
