@@ -92,23 +92,33 @@ def test_INV_random_setup_buildings_playout_stays_clean(n: int, seed: int) -> No
     assert _check(s, None) == []
 
 
+# Fixtures that are hand-built positions with no legal action at a non-terminal node (the VD
+# fixture is a mid-Vrrooomm! snapshot the engine could not reach). Any new dead fixture must fail.
+EXPECTED_UNREACHABLE = {"resolve_vd"}
+
+
+def test_INV_dead_fixtures_are_exactly_the_expected_set() -> None:
+    """Non-terminal fixtures with no legal action are exactly EXPECTED_UNREACHABLE."""
+    dead = {
+        name
+        for name in H.fixture_names()
+        if not (s := H.load_fixture(name)).is_terminal() and not s.legal_actions()
+    }
+    assert dead == EXPECTED_UNREACHABLE
+
+
 @pytest.mark.parametrize("name", H.fixture_names())
 def test_INV_fixtures_other_than_unreachable_are_clean(name: str) -> None:
     """Fixtures that are reachable positions satisfy the single-state invariants, except the
-    deliberately unreachable one (tier skip). Non-terminal fixtures whose phase has no legal
-    actions yet are skipped (their legal-action invariant is covered by later units)."""
+    deliberately unreachable ones (tier skip; dead-end positions)."""
     s = H.load_fixture(name)
     out = _check(s)
     if name == "unreachable_tier_skip":
         assert out
         return
-    if not s.is_terminal() and s.phase not in ("SB",):
-        try:
-            has_actions = bool(s.legal_actions())
-        except Exception:  # phase not implemented yet
-            has_actions = False
-        if not has_actions:
-            pytest.skip("legal actions for this phase arrive in a later unit")
+    if name in EXPECTED_UNREACHABLE:
+        assert out == ["non-terminal state has no legal action"]
+        return
     assert out == []
 
 

@@ -14,7 +14,7 @@ Views (shape; scaling):
   line membership; site_type (T, 3) one-hot (all zero = empty); site_occupied (T) 0/1;
   supply (1) /15; clock (3) one-hot; stones_on_clock (1) /5; seat_stones (n) /5;
   seat_buses (n) /5; seat_markers_left (n) /20; seat_line_markers_left (n) /25;
-  seat_points (n) /10 (capped at 1; real games rarely pass 10); action_board (7, 6, n) 0/1 (action x letter x seat);
+  seat_points (n) /10 (capped at 1); action_board (7, 6, n) 0/1 (action x letter x seat);
   units_left (1) /6; moves_left (1) /5; cursor (6) one-hot letter while resolving;
   picked_node (N) one-hot in VD.
 """

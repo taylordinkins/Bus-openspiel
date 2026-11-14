@@ -66,7 +66,8 @@ class BusGame(pyspiel.Game):
             num_players=n,
             min_utility=low,
             max_utility=1.0,
-            utility_sum=0.0,
+            # ZERO_SUM only for win_loss (R-071); margin is GENERAL_SUM and declares no sum (R-072)
+            utility_sum=0.0 if returns == "win_loss" else None,
             max_game_length=MAX_GAME_LENGTH_PER_SEAT * n,
         )
         super().__init__(_game_type(returns), info, p)

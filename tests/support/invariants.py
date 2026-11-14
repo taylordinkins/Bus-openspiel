@@ -17,7 +17,7 @@ def _seat_view(state: Any) -> list[Any]:
     return [state.seat(p) for p in range(n)]
 
 
-# Phases whose rules exist; widen as units 5-12 land (a phase without rules has no legal actions).
+# Every phase has rules now; a non-terminal state in any of them must have a legal action.
 PLAYABLE_PHASES = ("SB", "L1", "L2", "SEL", "LN", "PX", "BD", "CK", "VP", "VD")
 
 
@@ -42,6 +42,8 @@ def check_invariants(state: Any, prev: Any = None) -> list[str]:
 
     # lines: valid trails, line markers + line length = 25
     for p, s in enumerate(seats):
+        if (s.last_score_move is None) != (s.points == 0):
+            out.append(f"seat {p}: last_score_move {s.last_score_move} vs points {s.points}")
         line = list(s.line)
         if len(set(line)) != len(line):
             out.append(f"seat {p}: line repeats a street")
@@ -72,8 +74,9 @@ def check_invariants(state: Any, prev: Any = None) -> list[str]:
     # legal actions / terminal returns
     if state.is_terminal():
         mode = state.get_game().get_parameters().get("returns", C.DEFAULT_RETURNS)
-        if mode == "win_loss" and abs(sum(state.returns())) > 1e-9:
-            out.append(f"win_loss returns sum to {sum(state.returns())}, not 0")
+        rets = list(state.returns())
+        if mode == "win_loss" and abs(sum(rets)) > 1e-9:
+            out.append(f"win_loss returns sum to {sum(rets)}, not 0")
     elif state.phase in PLAYABLE_PHASES and not state.legal_actions():
         out.append("non-terminal state has no legal action")
 
@@ -105,6 +108,12 @@ def _check_step(prev: Any, state: Any, n: int) -> list[str]:
         a, b = prev.seat(p), state.seat(p)
         if b.points < a.points:
             out.append(f"seat {p}: points fell from {a.points} to {b.points}")
+        if b.last_score_move != a.last_score_move and b.points == a.points:
+            out.append(f"seat {p}: last_score_move changed without a point change")
+        if b.points > a.points and (
+            b.last_score_move is None or b.last_score_move < (a.last_score_move or 0)
+        ):
+            out.append(f"seat {p}: last_score_move {b.last_score_move} not advanced on scoring")
         if b.action_markers > a.action_markers:
             out.append(
                 f"seat {p}: action markers rose from {a.action_markers} to {b.action_markers}"
