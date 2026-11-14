@@ -105,9 +105,18 @@ def _parse(raw: dict[str, Any]) -> Board:
     return Board(nodes, streets, sites, incident, node_sites)
 
 
+FRAME_SIZE = 1991  # map frame in px (data/board.yaml `map`), both axes
+
+
 def _validate(
     nodes: tuple[Node, ...], streets: tuple[Street, ...], sites: tuple[Site, ...]
 ) -> None:
+    points = [("node", n.id, n.x, n.y) for n in nodes]
+    points += [("site", s.id, s.x, s.y) for s in sites]
+    points += [("street via", st.id, x, y) for st in streets for x, y in st.via]
+    for kind, ident, x, y in points:
+        if not (0 <= x <= FRAME_SIZE and 0 <= y <= FRAME_SIZE):
+            raise ValueError(f"{kind} {ident} at ({x}, {y}) lies outside the map frame")
     for kind, items in (("node", nodes), ("street", streets), ("site", sites)):
         ids = [item.id for item in items]
         if ids != list(range(len(ids))):

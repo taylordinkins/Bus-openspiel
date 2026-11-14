@@ -161,7 +161,7 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 - [x] 2. Board digitized: `data/board.yaml`, `bus/board.py`, `tests/data/test_board.py`, overlay `docs/board-check.png` (2026-11-14)
 - [x] 3. `docs/RULES_SPEC.md` from the rulebook and §4 — `implementer` (2026-11-14; R-001–R-073)
 - [x] 4. `docs/ACTIONS.md` and `docs/SCENARIOS.md` — `implementer` (2026-11-14; 376 action ids)
-- [ ] 5. Spec audit vs rulebook (user runs it from the CLI before implementation), board data audit vs map — `rules-auditor`, then fixes
+- [x] 5. Spec audit vs rulebook (user runs it from the CLI before implementation), board data audit vs map — `rules-auditor`, then fixes (2026-11-14; spec FAIL→fixed in 4ed05b6, board PASS)
 - [ ] 6. Board preview: `tools/render_board.py` draws `docs/board-preview.svg` (map layout, icons, sample lines, buses, passengers, action board) so the look is settled before Phase 2 — `implementer`
 - [ ] 7. ✋ You review the spec, §4 defaults, §9 questions and the preview; you set the spec Status to APPROVED
 - *Exit:* spec APPROVED; board data confirmed; preview look agreed.

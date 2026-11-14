@@ -55,3 +55,16 @@ def test_at_most_two_sites_per_intersection() -> None:
 def test_handshake() -> None:
     b = load_board()
     assert sum(len(i) for i in b.incident) == 2 * len(b.streets)
+
+
+def test_only_bend_streets_carry_via() -> None:
+    b = load_board()
+    with_via = {(min(s.a, s.b), max(s.a, s.b)) for s in b.streets if s.via}
+    assert with_via == {(3, 6), (28, 35)}
+
+
+def test_coordinates_inside_frame() -> None:
+    b = load_board()
+    pts = [(n.x, n.y) for n in b.nodes] + [(s.x, s.y) for s in b.sites]
+    pts += [p for s in b.streets for p in s.via]
+    assert all(0 <= x <= 1991 and 0 <= y <= 1991 for x, y in pts)
