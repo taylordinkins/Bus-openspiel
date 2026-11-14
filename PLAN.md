@@ -211,6 +211,8 @@ Opus spot audits only for units touching line-expansion validity, resolution ord
 ### Backlog
 Should-fix and minor findings, tagged with the phase that found them. `/close-phase` appends here.
 
+- [Phase 2, from Phase 0 preview review] Buses cell of the action board: each seat owns one row of the bus grid, and a seat's buses fill along its row as they are added (user, 2026-11-14). `layout.bus_grid` in `data/board.yaml` should be addressed as row-per-seat (5 cells per row = 5 buses max, R-043). The preview currently fills the grid in reading order across seats. The printed grid as digitized has 4 rows; check how a 5th seat's row is shown in 5-player games.
+
 ## 10. Risks
 
 | Risk | Mitigation |
