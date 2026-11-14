@@ -269,7 +269,7 @@ Example: M = 3, supply has 1 passenger, marker on a (power 3): one passenger is 
 Source: RB p.2 (Passengers); C8.
 
 ### R-046 — Passengers placed are waiting passengers
-A passenger placed by the Passengers action is a waiting passenger at the chosen station. It becomes available to Vrrooomm! (R-058) A passenger at a station never steps into a building by itself (stations have no sites, R-012); Vrrooomm! may carry it away (R-058, R-059).
+A passenger placed by the Passengers action is a waiting passenger at the chosen station. It becomes available to Vrrooomm! (R-058). A passenger at a station never steps into a building by itself (stations have no sites, R-012); Vrrooomm! may carry it away (R-058, R-059).
 Source: RB p.2 (Passengers; Vrrooomm! Example 2); C8.
 
 ---
@@ -286,7 +286,7 @@ The lowest open tier is recomputed before each individual build, including withi
 Source: RB p.2 (Buildings: "once the 1s are full, you must build on 2"); C9.
 
 ### R-049 — Sites full
-Builds with no empty site left are lost. A state where every site is occupied marks the game to end at the end of the current round (R-066). The remainder of the round still resolves.
+Builds with no empty site left are lost. A state where every site has a building marks the game to end at the end of the current round (R-066). The remainder of the round still resolves.
 Example: Buildings fills the last site during Phase 2. Clock, Vrrooomm! and Starting Player still resolve, then the game ends (R-066).
 Source: RB p.2 (Buildings: "the game ends at the end of this round"; End of the Game); C9, C13.
 
@@ -380,7 +380,7 @@ Source: RB p.2 (End of Phase 2: "Return all spent Action markers to the box"); C
 
 ### R-066 — The three end conditions
 The game ends when any of these conditions holds, checked as stated:
-1. **Sites full:** every site is occupied. The game ends at the end of that round, after Starting Player resolves and spent markers are removed (R-049, R-065).
+1. **Sites full:** every site has a building. The game ends at the end of that round, after Starting Player resolves and spent markers are removed (R-049, R-065).
 2. **Last time stone:** the last stone is taken from the clock. The game ends immediately (R-053).
 3. **Markers:** at the end of a round (after R-065), at most one player still has any Action markers ⚑. The rulebook says "only 1 player"; 0 is treated the same.
 Sites-full and markers can both hold at the same round end. The recorded end type is the set (list) of all conditions that held; the time-stone end is immediate, so it is always alone in the set.
@@ -438,3 +438,6 @@ None open.
 - ~~O-4~~ (R-070) resolved 2026-11-14: zero-point ties are shared, same decision as Q3 (user confirmed).
 - ~~Q-A~~ (R-033) resolved 2026-11-14: with 5 players the Lines +1 is added first, then the power ≤ 0 check (user decision).
 - ~~Q-B~~ (R-034, R-040, R-042) resolved 2026-11-14: Lines markers are resolved maximally; only choices that keep the maximum achievable number of remaining placements reachable are legal (user decision).
+
+### Amendments
+- 2026-11-14 (Phase 1 unit 9, user-approved): R-049 and R-066 say "every site has a building" instead of "every site is occupied" ("occupied" means a passenger inside, R-062); R-046 punctuation. Wording only, no change in meaning.
