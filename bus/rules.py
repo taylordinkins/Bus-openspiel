@@ -132,6 +132,10 @@ def legal_actions(core: Core) -> list[int]:
     """Sorted legal action ids, dispatched by phase."""
     if core.phase == PHASE_SB:
         return _sb_legal(core)
+    if core.phase == PHASE_L1:
+        return _l1_legal()
+    if core.phase == PHASE_L2:
+        return _l2_legal(core)
     return []
 
 
@@ -139,6 +143,8 @@ def apply(core: Core, action: int) -> Core:
     """Apply a legal action, dispatched by phase."""
     if core.phase == PHASE_SB:
         return replace(_sb_apply(core, action), move_number=core.move_number + 1)
+    if core.phase in (PHASE_L1, PHASE_L2):
+        return replace(_line_apply(core, action), move_number=core.move_number + 1)
     raise ValueError(f"phase {core.phase} not implemented")
 
 
@@ -170,8 +176,9 @@ def _sb_apply(core: Core, action: int) -> Core:
     current = p
     if placed % SETUP_BUILDINGS_PER_SEAT == 0:
         if nxt >= core.players:
-            phase = PHASE_L1  # unit 5 continues from here
+            phase = PHASE_L1
             current = order[0]
+            placed = 0  # `done` restarts for L1
         else:
             current = order[nxt]
     return replace(
@@ -181,4 +188,52 @@ def _sb_apply(core: Core, action: int) -> Core:
         setup_placed=placed,
         phase=phase,
         current=current,
+    )
+
+
+def _l1_legal() -> list[int]:
+    """Implements R-017: EXTEND(0, s) for every street, occupied or not (ACTIONS 3.2)."""
+    from bus.actions import encode_extend
+
+    return [encode_extend(0, s) for s in range(len(board().streets))]
+
+
+def _l2_legal(core: Core) -> list[int]:
+    """Implements R-018, R-038, R-039: encoded legal extensions of the one-street line."""
+    from bus.actions import encode_extend
+    from bus.lines import legal_extensions
+
+    lines = tuple(s.line for s in core.seats)
+    return sorted(encode_extend(e, s) for e, s in legal_extensions(board(), lines, core.current))
+
+
+def _line_apply(core: Core, action: int) -> Core:
+    """Implements R-017, R-018, R-019, R-021: place a setup marker and advance the order."""
+    from bus.lines import extend
+
+    legal = _l1_legal() if core.phase == PHASE_L1 else _l2_legal(core)
+    if action not in legal:
+        raise ValueError(f"illegal action {action} in {core.phase}")
+    kind, (e, street) = decode_action(action)
+    assert kind == "extend"
+    p = core.current
+    seats = list(core.seats)
+    line = (street,) if core.phase == PHASE_L1 else extend(board(), seats[p].line, e, street)
+    seats[p] = replace(seats[p], line=line, line_markers=seats[p].line_markers - 1)
+    placed = core.setup_placed + 1
+    order = turn_order(core)
+    phase = core.phase
+    rnd = core.round
+    if placed >= core.players:
+        placed = 0
+        if phase == PHASE_L1:
+            phase, current = PHASE_L2, order[-1]
+        else:
+            phase, current, rnd = PHASE_SEL, order[0], 1
+    elif phase == PHASE_L1:
+        current = order[placed]
+    else:
+        current = order[core.players - 1 - placed]
+    return replace(
+        core, seats=tuple(seats), setup_placed=placed, phase=phase, current=current, round=rnd
     )

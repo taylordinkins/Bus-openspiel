@@ -278,10 +278,7 @@ def test_SCN5_legal_excludes_rejects_a_legal_action() -> None:
 
 @pytest.mark.parametrize(
     "name",
-    [
-        pytest.param(n, marks=pytest.mark.pending("R-017")) if n == "setup_l1_mid" else n
-        for n in FIXTURES
-    ],
+    FIXTURES,
 )
 def test_SCN5_fixture_expect_blocks_hold(name: str) -> None:
     """SCENARIOS §5/§8: every fixture loads and its own expect block holds (harness.run_fixture)."""

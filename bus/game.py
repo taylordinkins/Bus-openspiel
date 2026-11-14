@@ -8,7 +8,8 @@ import pyspiel
 
 from bus import constants as C
 from bus import rules
-from bus.actions import NUM_DISTINCT_ACTIONS, action_to_string, decode_action
+from bus.actions import NUM_DISTINCT_ACTIONS, action_to_string, decode_action, street_ref
+from bus.lines import line_ends
 from bus.observer import BusObserver, observation_string
 from bus.rules import Core, Seat
 
@@ -144,10 +145,17 @@ class BusState(pyspiel.State):
         self.core = rules.apply(self.core, action)
 
     def _action_to_string(self, player: int, action: int) -> str:
-        kind, _ = decode_action(action)
+        kind, params = decode_action(action)
         if kind == "extend":
-            # Hook: state-dependent EXTEND wording arrives with unit 5 (ACTIONS section 4).
-            return action_to_string(player, action)
+            e, street = params
+            b = rules.board()
+            if self.core.phase == rules.PHASE_L1:
+                return f"P{player}: start line on {street_ref(street)}"
+            line = self.core.seats[player].line
+            st = b.streets[street]
+            if line and line_ends(b, line)[e] in (st.a, st.b):
+                new_end = st.other(line_ends(b, line)[e])
+                return f"P{player}: extend end {e} via {street_ref(street)} to n{new_end}"
         return action_to_string(player, action)
 
     def returns(self) -> list[float]:
