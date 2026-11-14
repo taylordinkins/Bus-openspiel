@@ -377,32 +377,126 @@ def _piece_layer(board: Board) -> list[str]:
     return out
 
 
+FONT_HEAD = "'Arial Narrow', 'Helvetica Neue', Helvetica, Arial, sans-serif"
+# Source crops (art px) of the faded illustrations used behind each panel, one per seat.
+PANEL_CROPS = (
+    (25, 470, 2.4),
+    (1728, 880, 3.0),
+    (25, 700, 2.4),
+    (1728, 1130, 3.0),
+    (25, 930, 2.4),
+)
+
+
+def _badge(cx: float, cy: float, label: str, size: int = 30, w: float = 52, h: float = 44) -> str:
+    return (
+        f'<g class="badge"><rect x="{_f(cx - w / 2)}" y="{_f(cy - h / 2)}" width="{_f(w)}" '
+        f'height="{_f(h)}" rx="9" fill="{RED}" stroke="{INK}" stroke-width="4"/>'
+        f"{_text(cx, cy + 1, label, size, SLOT_TEXT)}</g>"
+    )
+
+
+def _seal(cx: float, cy: float, r: float = 34) -> str:
+    """Our own red 'Stone' seal: scalloped red disc with a cream ring."""
+    pts: list[str] = []
+    for i in range(24):
+        a = math.pi * 2 * i / 24
+        rr = r if i % 2 == 0 else r * 0.88
+        pts.append(f"{_f(cx + rr * math.cos(a))},{_f(cy + rr * math.sin(a))}")
+    return (
+        f'<g class="stone-seal"><polygon points="{" ".join(pts)}" fill="{RED}" '
+        f'stroke="{INK}" stroke-width="3"/>'
+        f'<circle cx="{_f(cx)}" cy="{_f(cy)}" r="{_f(r * 0.76)}" fill="{PAPER}" stroke="{INK}" '
+        f'stroke-width="2"/><circle cx="{_f(cx)}" cy="{_f(cy)}" r="{_f(r * 0.64)}" fill="{RED}"/>'
+        f'<text x="{_f(cx)}" y="{_f(cy)}" font-family="{FONT_HEAD}" font-size="14" '
+        f'font-weight="bold" font-style="italic" fill="{PAPER}" text-anchor="middle" '
+        f'dominant-baseline="central" transform="rotate(-12 {_f(cx)} {_f(cy)})">Stone</text></g>'
+    )
+
+
+def _head(
+    x: float, y: float, s: str, size: int = 26, fill: str = INK, anchor: str = "start"
+) -> str:
+    return _text(x, y, s, size, fill, anchor).replace(
+        f'font-family="{FONT}"', f'font-family="{FONT_HEAD}"'
+    )
+
+
 def _player_strip() -> list[str]:
-    y0 = ART + 12
-    out: list[str] = []
     n = SAMPLE["seats"]
-    w = (WIDTH - 28 - 16 * (n - 1)) / n
+    y_top = ART + 10
+    fh = STRIP - 20
+    inner_x, inner_y, inner_w, inner_h = 22, y_top + 14, WIDTH - 44, fh - 28
+    w = inner_w / n
+    out = [
+        f'<rect class="strip-frame" x="8" y="{y_top}" width="{WIDTH - 16}" height="{fh}" rx="34" '
+        f'fill="{RED}"/>',
+        f'<rect x="{inner_x}" y="{inner_y}" width="{inner_w}" height="{inner_h}" rx="22" '
+        f'fill="{PAPER}"/>',
+        "<defs>",
+        *[
+            f'<clipPath id="panel-clip-{s}"><rect x="{_f(inner_x + s * w)}" y="{inner_y}" '
+            f'width="{_f(w)}" height="{inner_h}"/></clipPath>'
+            for s in range(n)
+        ],
+        "</defs>",
+    ]
+    placed = [0] * n
+    for _, lst in SAMPLE["markers"].items():
+        for _, seat in lst:
+            placed[seat] += 1
     for seat in range(n):
-        x = 14 + seat * (w + 16)
+        x = inner_x + seat * w
+        sx, sy, k = PANEL_CROPS[seat]
+        col = SEAT_COLORS[seat]
         out.append(
-            f'<g class="seat-area seat-{seat}"><rect x="{_f(x)}" y="{y0}" width="{_f(w)}" '
-            f'height="{STRIP - 24}" rx="18" fill="{PAPER}" stroke="{SEAT_COLORS[seat]}" '
-            f'stroke-width="8"/>'
+            f'<g class="seat-area seat-{seat}"><g clip-path="url(#panel-clip-{seat})">'
+            f'<rect x="{_f(x)}" y="{inner_y}" width="{_f(w)}" height="{inner_h}" fill="{PAPER}"/>'
+            f'<use class="panel-backdrop" href="#board-art" xlink:href="#board-art" '
+            f'transform="translate({_f(x)} {_f(inner_y)}) scale({k}) translate({-sx} {-sy})" '
+            f'opacity="0.75"/>'
+            f'<rect x="{_f(x)}" y="{inner_y}" width="{_f(w)}" height="{inner_h}" fill="{PAPER}" '
+            f'opacity="0.15"/></g>'
         )
-        out.append(marker(x + 40, y0 + 42, seat, 24))
-        out.append(_text(x + 78, y0 + 42, f"P{seat}", 30, INK, "start"))
-        out.append(_text(x + w - 16, y0 + 42, f"{SAMPLE['scores'][seat]} pts", 26, INK, "end"))
-        out.append(_text(x + 20, y0 + 100, "Buses", 20, RED_DARK, "start"))
+        if seat:
+            out.append(
+                f'<line x1="{_f(x)}" y1="{inner_y}" x2="{_f(x)}" y2="{inner_y + inner_h}" '
+                f'stroke="{RED}" stroke-width="5"/>'
+            )
+        # seat accent: a coloured line stripe, like the Lines cell
+        sy0 = inner_y + 76
+        out.append(
+            f'<rect x="{_f(x + 18)}" y="{sy0 - 5}" width="{_f(w - 36)}" height="12" '
+            f'fill="{INK}"/><rect x="{_f(x + 18)}" y="{sy0 - 3}" width="{_f(w - 36)}" height="8" '
+            f'fill="{col}"/>'
+        )
+        r0 = inner_y + 40
+        out.append(marker(x + 46, r0, seat, 26))
+        out.append(_head(x + 84, r0, f"P{seat}", 38))
+        out.append(_head(x + w - 102, r0, "Score", 24, INK, "end"))
+        out.append(_badge(x + w - 58, r0, str(SAMPLE["scores"][seat]), 32, 66, 48))
+        r1 = inner_y + 124
+        out.append(_head(x + 18, r1, "Buses", 24))
         for b in range(5):
             has = b < SAMPLE["buses"][seat]
             out.append(
-                bus_glyph(x + 40 + b * 52, y0 + 142, 0.65, SEAT_COLORS[seat] if has else "#D8CFB8")
+                bus_glyph(x + 136 + b * 50, r1, 0.85, col if has else "#BDB39A")
+                if has
+                else bus_glyph(x + 136 + b * 50, r1, 0.85, INK).replace(
+                    'class="bus-glyph"', 'class="bus-glyph empty" opacity="0.28"'
+                )
             )
-        out.append(_text(x + 20, y0 + 200, "Markers left", 20, RED_DARK, "start"))
-        out.append(_text(x + w - 16, y0 + 200, "25 lines, 20 actions", 17, RED_DARK, "end"))
-        out.append(_text(x + 20, y0 + 245, "Stones held", 20, RED_DARK, "start"))
+        r2 = inner_y + 172
+        out.append(_head(x + 18, r2, "Bus Line markers left", 22))
+        out.append(_badge(x + w - 44, r2, str(25 - SAMPLE["line_lengths"][seat]), 28, 54, 40))
+        r3 = inner_y + 216
+        out.append(_head(x + 18, r3, "Action markers left", 22))
+        out.append(_badge(x + w - 44, r3, str(20 - placed[seat]), 28, 54, 40))
         held = 1 if seat == SAMPLE["stone_holder"] else 0
-        out.append(_text(x + w - 16, y0 + 245, str(held), 24, INK, "end"))
+        r4 = inner_y + 260
+        out.append(_seal(x + 46, r4 - 2, 30))
+        out.append(_head(x + 92, r4, "Stones held", 22))
+        out.append(_badge(x + w - 44, r4, str(held), 28, 54, 36))
         out.append("</g>")
     return out
 
