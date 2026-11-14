@@ -175,12 +175,12 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 - [x] 4. Line geometry ⚑ (R-035–R-039, R-041) — `spec-test-writer` → `implementer` → `rules-auditor` (2026-11-14; audit PASS)
 - [x] 5. Setup phases (R-015–R-019, R-021; plus state-aware EXTEND `action_to_string`) — `spec-test-writer` → `implementer` (2026-11-14)
 - [x] 6. Action selection (R-020, R-022–R-028) — `spec-test-writer` → `implementer` (2026-11-14)
-- [ ] 7. Resolution framework and Buses ⚑ (R-029–R-034, R-043, R-044; owns `start_resolution` — replace unit 6's placeholder when only Buses/Starting Player hold markers) — `spec-test-writer` → `implementer` → `rules-auditor`
+- [x] 7. Resolution framework and Buses ⚑ (R-029–R-034, R-043, R-044; owns `start_resolution` — replace unit 6's placeholder when only Buses/Starting Player hold markers) — `spec-test-writer` → `implementer` → `rules-auditor` (2026-11-14; audit PASS after R-027 hand-off fix)
 - [ ] 8. Lines resolution ⚑ (R-040, R-042; must include a state-level O-2 test: unit k+1's legal set reflects the street placed in unit k, per unit 4 audit) — `spec-test-writer` → `implementer` → `rules-auditor`
 - [ ] 9. Passengers and Buildings (R-045–R-049; R-049/R-066 wording amendment first, needs user OK) — `spec-test-writer` → `implementer`
 - [ ] 10. Clock and passenger movement ⚑ (R-050–R-055) — `spec-test-writer` → `implementer` → `rules-auditor`
-- [ ] 11. Vrrooomm! ⚑ (R-056–R-063) — `spec-test-writer` → `implementer` → `rules-auditor`
-- [ ] 12. Round end, game end, returns ⚑ (R-064–R-072) — `spec-test-writer` → `implementer` → `rules-auditor`
+- [ ] 11. Vrrooomm! ⚑ (R-056–R-063; add a reachable Vrrooomm!-first fixture with moves > 0 — `resolve_vp` may be unreachable) — `spec-test-writer` → `implementer` → `rules-auditor`
+- [ ] 12. Round end, game end, returns ⚑ (R-064–R-072; fill the `end_round` stub: R-065 bookkeeping, R-066 checks incl. no seat with markers) — `spec-test-writer` → `implementer` → `rules-auditor`
 - [ ] 13. Observer, `action_meta`, `forced_action`, `max_game_length` (§5.2; ACTIONS.md §3, §5, §6) — `spec-test-writer` → `implementer`
 - [ ] 14. Conformance and random sims (`random_sim_test` 3/4/5, 10,000 games slow) — `implementer`, `sim-runner`
 - [ ] 15. `tools/play_text.py`, `tools/replay.py` — `implementer`

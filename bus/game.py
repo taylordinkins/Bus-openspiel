@@ -115,6 +115,22 @@ class BusState(pyspiel.State):
         return self.core.end_types
 
     @property
+    def bus_max(self) -> int:
+        return rules.bus_max(self.core)
+
+    @property
+    def cursor_letter(self) -> int:
+        return self.core.cursor
+
+    @property
+    def units_left(self) -> int:
+        return self.core.units_left
+
+    @property
+    def moves_left(self) -> int:
+        return self.core.moves_left
+
+    @property
     def returns_mode(self) -> str:
         return self._returns_mode
 

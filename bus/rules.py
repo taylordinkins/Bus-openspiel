@@ -243,18 +243,6 @@ def _line_apply(core: Core, action: int) -> Core:
     )
 
 
-# Phase code of the resolution of each action kind; Buses and Starting Player have none (ACTIONS 3).
-_RESOLVE_PHASE: tuple[str | None, ...] = (
-    PHASE_LN,
-    None,
-    PHASE_PX,
-    PHASE_BD,
-    PHASE_CK,
-    PHASE_VP,
-    None,
-)
-
-
 def _sel_placed(core: Core, seat: int) -> int:
     return sum(row.count(seat) for row in core.action_board)
 
@@ -280,6 +268,8 @@ def _sel_legal(core: Core) -> list[int]:
     """Implements R-023..R-027, ACTIONS 3.4."""
     from bus.actions import DROP_OUT, encode_select
 
+    if core.seats[core.current].action_markers <= 0:  # R-027 guard
+        return [DROP_OUT]
     free = [
         encode_select(a) for a, row in enumerate(core.action_board) if len(row) < C.ACTION_SPACES[a]
     ]
@@ -316,15 +306,154 @@ def _sel_apply(core: Core, action: int) -> Core:
     return replace(core, current=nxt[0], sel_pass=nxt[1])
 
 
-def start_resolution(core: Core) -> Core:
-    """Selection is over (R-028): hand over to Phase 2 at the first action with markers (R-029).
+ACT_LINES, ACT_BUSES, ACT_PASSENGERS, ACT_BUILDINGS, ACT_CLOCK, ACT_VRROOOMM, ACT_STARTING = range(
+    NUM_ACTION_KINDS
+)
+_DESCENDING = (ACT_LINES, ACT_BUILDINGS)  # R-030: highest letter first
 
-    Unit 7 owns this. For now: the first action in resolution order that has markers and a phase
-    code, letter 0, no power computation. Buses and Starting Player have no phase code.
+
+def bus_max(core: Core) -> int:
+    """M: the largest bus count of any seat, read now. Implements R-032."""
+    return max(s.buses for s in core.seats)
+
+
+def marker_power(core: Core, action: int, letter: int) -> int:
+    """Dwindling power M - k, +1 for Lines at 5 players. Implements R-031, R-033."""
+    p = bus_max(core) - letter
+    if action == ACT_LINES and core.players == C.MAX_PLAYERS:
+        p += 1
+    return p
+
+
+def _positions(core: Core) -> list[tuple[int, int]]:
+    """Markers to resolve as (action, letter), in resolution order. Implements R-029, R-030.
+
+    Starting Player is not listed: it is handled by ``end_round``.
     """
-    for a, row in enumerate(core.action_board):
-        code = _RESOLVE_PHASE[a]
-        if row and code is not None:
-            return replace(core, phase=code, cursor=0, current=row[0], sel_pass=0, dropped=())
-    # Only code-less actions (or none) on the board: unit 7 decides; placeholder stays in LN.
-    return replace(core, phase=PHASE_LN, cursor=0, sel_pass=0, dropped=())
+    out: list[tuple[int, int]] = []
+    for a in range(ACT_STARTING):
+        letters = range(len(core.action_board[a]))
+        out.extend((a, k) for k in (reversed(letters) if a in _DESCENDING else letters))
+    return out
+
+
+def _line_nodes(core: Core, seat: int) -> set[int]:
+    from bus.lines import line_nodes
+
+    line = core.seats[seat].line
+    return set(line_nodes(board(), line)) if line else set()
+
+
+def vrrooomm_moves(core: Core, seat: int) -> int:
+    """Forced move count of a Vrrooomm! marker. Implements R-060."""
+    nodes = _line_nodes(core, seat)
+    waiting = sum(core.waiting[n] for n in nodes)
+    sites = board().sites
+    free = sum(
+        1
+        for t, ty in enumerate(core.site_types)
+        if ty == core.clock and t not in core.occupied and sites[t].node in nodes
+    )
+    return min(core.seats[seat].buses, waiting, free)
+
+
+def _enter(core: Core, action: int, letter: int) -> Core | None:
+    """Start the marker (action, letter). Returns the node state, or None if it is automatic."""
+    owner = core.action_board[action][letter]
+    power = marker_power(core, action, letter)
+    base = replace(core, cursor=letter, current=owner, units_left=0, moves_left=0, picked_node=-1)
+    if action == ACT_LINES:
+        from bus.lines import legal_extensions
+
+        lines = tuple(s.line for s in core.seats)
+        if power <= 0 or core.seats[owner].line_markers <= 0:
+            return None
+        if not legal_extensions(board(), lines, owner):
+            return None
+        return replace(base, phase=PHASE_LN, units_left=power)
+    if action == ACT_PASSENGERS:
+        if power <= 0 or core.supply <= 0:
+            return None
+        return replace(base, phase=PHASE_PX, units_left=power)
+    if action == ACT_BUILDINGS:
+        if power <= 0 or not lowest_open_tier_sites(core):
+            return None
+        return replace(base, phase=PHASE_BD, units_left=power)
+    if action == ACT_CLOCK:
+        return replace(base, phase=PHASE_CK)
+    if action == ACT_VRROOOMM:
+        moves = vrrooomm_moves(core, owner)
+        return replace(base, phase=PHASE_VP, moves_left=moves) if moves > 0 else None
+    raise ValueError(f"action {action} has no decision node")
+
+
+def _resolve_buses(core: Core, owner: int) -> Core:
+    """Implements R-043, R-044: +1 bus below 5, otherwise nothing."""
+    seat = core.seats[owner]
+    if seat.buses >= C.BUSES_PER_PLAYER:
+        return core
+    seats = (*core.seats[:owner], replace(seat, buses=seat.buses + 1), *core.seats[owner + 1 :])
+    return replace(core, seats=seats)
+
+
+def _resolve_from(core: Core, index: int) -> Core:
+    """Resolve markers from position ``index`` on until a decision node or the round's end."""
+    positions = _positions(core)
+    for a, k in positions[index:]:
+        if a == ACT_BUSES:
+            core = _resolve_buses(core, core.action_board[a][k])
+            continue
+        node = _enter(core, a, k)
+        if node is not None:
+            return node
+    return end_round(core)
+
+
+def start_resolution(core: Core) -> Core:
+    """Selection is over (R-028): resolve from the first marker. Implements R-029."""
+    return _resolve_from(replace(core, sel_pass=0, dropped=()), 0)
+
+
+def advance(core: Core) -> Core:
+    """The current marker is finished: go on to the next one. Implements R-029, R-030.
+
+    Units 8-11 call this from their step when ``units_left`` / ``moves_left`` reach zero.
+    """
+    action = _PHASE_ACTION[core.phase]
+    return _resolve_from(core, _positions(core).index((action, core.cursor)) + 1)
+
+
+_PHASE_ACTION = {
+    PHASE_LN: ACT_LINES,
+    PHASE_PX: ACT_PASSENGERS,
+    PHASE_BD: ACT_BUILDINGS,
+    PHASE_CK: ACT_CLOCK,
+    PHASE_VP: ACT_VRROOOMM,
+    PHASE_VD: ACT_VRROOOMM,
+}
+
+
+def end_round(core: Core) -> Core:
+    """Starting Player and round end. Implements R-064 only; unit 12 adds R-065..R-067.
+
+    TODO(unit 12): end checks (R-066) and the END phase.
+    """
+    row = core.action_board[ACT_STARTING]
+    start = row[0] if row else (core.start_player + 1) % core.players
+    nxt = replace(
+        core,
+        phase=PHASE_SEL,
+        round=core.round + 1,
+        start_player=start,
+        current=start,
+        action_board=((),) * NUM_ACTION_KINDS,
+        sel_pass=0,
+        dropped=(),
+        cursor=0,
+        units_left=0,
+        moves_left=0,
+        picked_node=-1,
+    )
+    # R-027: selection opens with the first seat in turn order that still has markers.
+    first = _sel_next(nxt)
+    return replace(nxt, current=first[0]) if first else nxt
