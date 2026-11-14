@@ -18,7 +18,7 @@ def _seat_view(state: Any) -> list[Any]:
 
 
 # Phases whose rules exist; widen as units 5-12 land (a phase without rules has no legal actions).
-PLAYABLE_PHASES = ("SB", "L1", "L2")
+PLAYABLE_PHASES = ("SB", "L1", "L2", "SEL")
 
 
 def check_invariants(state: Any, prev: Any = None) -> list[str]:

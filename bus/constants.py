@@ -19,6 +19,11 @@ INITIAL_BOARD_PASSENGERS = 4
 
 TIME_STONES_BY_PLAYERS: dict[int, int] = {3: 4, 4: 5, 5: 5}  # R-006
 
+# Spaces per action, in resolution order (R-022): Lines, Buses, Passengers, Buildings, Clock,
+# Vrrooomm!, Starting Player.
+ACTION_SPACES = (6, 1, 6, 6, 1, 6, 1)
+MANDATORY_PASSES = 2  # R-023
+
 BUILDING_TYPES = ("house", "office", "pub")  # R-007, clock-cycle order
 
 

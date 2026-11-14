@@ -136,6 +136,8 @@ def legal_actions(core: Core) -> list[int]:
         return _l1_legal()
     if core.phase == PHASE_L2:
         return _l2_legal(core)
+    if core.phase == PHASE_SEL:
+        return _sel_legal(core)
     return []
 
 
@@ -145,6 +147,8 @@ def apply(core: Core, action: int) -> Core:
         return replace(_sb_apply(core, action), move_number=core.move_number + 1)
     if core.phase in (PHASE_L1, PHASE_L2):
         return replace(_line_apply(core, action), move_number=core.move_number + 1)
+    if core.phase == PHASE_SEL:
+        return replace(_sel_apply(core, action), move_number=core.move_number + 1)
     raise ValueError(f"phase {core.phase} not implemented")
 
 
@@ -237,3 +241,90 @@ def _line_apply(core: Core, action: int) -> Core:
     return replace(
         core, seats=tuple(seats), setup_placed=placed, phase=phase, current=current, round=rnd
     )
+
+
+# Phase code of the resolution of each action kind; Buses and Starting Player have none (ACTIONS 3).
+_RESOLVE_PHASE: tuple[str | None, ...] = (
+    PHASE_LN,
+    None,
+    PHASE_PX,
+    PHASE_BD,
+    PHASE_CK,
+    PHASE_VP,
+    None,
+)
+
+
+def _sel_placed(core: Core, seat: int) -> int:
+    return sum(row.count(seat) for row in core.action_board)
+
+
+def _sel_active(core: Core, seat: int) -> bool:
+    return seat not in core.dropped and core.seats[seat].action_markers > 0
+
+
+def _sel_next(core: Core) -> tuple[int, int] | None:
+    """Next (seat, pass) to act, or None when everyone is out. Implements R-023, R-024, R-027."""
+    order = turn_order(core)
+    pass_ = core.sel_pass
+    if not any(_sel_active(core, p) for p in order):
+        return None
+    while True:
+        for p in order:
+            if _sel_active(core, p) and _sel_placed(core, p) <= pass_:
+                return p, pass_
+        pass_ += 1
+
+
+def _sel_legal(core: Core) -> list[int]:
+    """Implements R-023..R-027, ACTIONS 3.4."""
+    from bus.actions import DROP_OUT, encode_select
+
+    free = [
+        encode_select(a) for a, row in enumerate(core.action_board) if len(row) < C.ACTION_SPACES[a]
+    ]
+    if core.sel_pass >= C.MANDATORY_PASSES or not free:
+        return [*free, DROP_OUT]
+    return free
+
+
+def _sel_apply(core: Core, action: int) -> Core:
+    """Implements R-023..R-028: place a marker or drop out, then advance to the next seat."""
+    from bus.actions import DROP_OUT
+
+    if action not in _sel_legal(core):
+        raise ValueError(f"illegal action {action} in {core.phase}")
+    p = core.current
+    seats = core.seats
+    board_ = core.action_board
+    dropped = core.dropped
+    if action == DROP_OUT:
+        dropped = tuple(sorted((*dropped, p)))
+    else:
+        kind, (a,) = decode_action(action)
+        assert kind == "select"
+        board_ = board_[:a] + (board_[a] + (p,),) + board_[a + 1 :]
+        seats = (
+            *seats[:p],
+            replace(seats[p], action_markers=seats[p].action_markers - 1),
+            *seats[p + 1 :],
+        )
+    core = replace(core, seats=seats, action_board=board_, dropped=dropped)
+    nxt = _sel_next(core)
+    if nxt is None:
+        return start_resolution(core)
+    return replace(core, current=nxt[0], sel_pass=nxt[1])
+
+
+def start_resolution(core: Core) -> Core:
+    """Selection is over (R-028): hand over to Phase 2 at the first action with markers (R-029).
+
+    Unit 7 owns this. For now: the first action in resolution order that has markers and a phase
+    code, letter 0, no power computation. Buses and Starting Player have no phase code.
+    """
+    for a, row in enumerate(core.action_board):
+        code = _RESOLVE_PHASE[a]
+        if row and code is not None:
+            return replace(core, phase=code, cursor=0, current=row[0], sel_pass=0, dropped=())
+    # Only code-less actions (or none) on the board: unit 7 decides; placeholder stays in LN.
+    return replace(core, phase=PHASE_LN, cursor=0, sel_pass=0, dropped=())
