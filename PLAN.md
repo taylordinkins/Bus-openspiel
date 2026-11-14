@@ -8,7 +8,7 @@
 **Prior art:** `lignum` — agents, hooks, skills, server and web shell are ported from it (D3). The earlier `BusRL` repo is not used (D4).
 
 ### Progress
-- [ ] Phase 0 — Scaffold, board data, rules spec, board look ✋ *you review spec, §4 defaults and the board preview*
+- [x] Phase 0 — Scaffold, board data, rules spec, board look ✋ *you review spec, §4 defaults and the board preview*
 - [ ] Phase 1 — Engine: the full game, 3–5 players
 - [ ] Phase 2 — Server + polished board UI ✋ *playtest #1*
 - [ ] Phase 3 — Bots (random, heuristic, MCTS) ✋ *playtest #2*
@@ -52,6 +52,7 @@ A faithful, well-tested implementation of *Bus* as a **Python OpenSpiel game**, 
 | D12 | Spec lock | `docs/RULES_SPEC.md` Status DRAFT → APPROVED → AMENDING; a hook blocks edits while APPROVED; only you change the Status line | As lignum D16 |
 | D13 | Tests ahead of code | `@pytest.mark.pending("R-0xx")` (non-strict xfail); `spec-test-writer` can't read `bus/` source (hook) | As lignum D17 |
 | D14 | Model use | Sonnet workhorses, Haiku search and sims, Opus audits at phase close and spot checks (§8); main session defaults to Sonnet | As lignum D15 |
+| D15 | Board art (2026-11-14) | The UI uses the user's art `assets/map/bus_map_reworked_v2.png` as the background for both the map and the placement section (action board, clock, stones, score track); only pieces are drawn on top, positioned from `data/board.yaml` (topology plus a `layout` block for action spaces, bus grid, clock, stone slots, score cells) | User decision; replaces the redrawn-board reading of §5.5 |
 
 ## 4. Rules clarifications
 
@@ -134,7 +135,7 @@ About 380 decision ids, no chance ids.
 
 ### 5.5 Server and web
 
-Ported (D3): the action history is the source of truth; Back, Rewind (dev), Report, replay export/import; the action-list fallback stays as a debug panel. The Bus plugin draws the board as SVG from `data/board.yaml`, following the reworked map's layout and palette: our own house / office / pub icons as on the map, generic pieces for line markers (coloured offset strokes so shared streets show every line), buses, passengers, time stones and the clock. Click targets: line ends then streets, sites then a type picker, stations, passengers then buildings. The action board, clock, stones, scores and markers-left sit beside the map as on the printed board.
+Ported (D3): the action history is the source of truth; Back, Rewind (dev), Report, replay export/import; the action-list fallback stays as a debug panel. The Bus plugin shows the user's map art as the background (D15) and draws pieces over it as SVG from `data/board.yaml`: generic pieces for line markers (coloured offset strokes so shared streets show every line), buses, passengers, time stones and the clock. Click targets: line ends then streets, sites then a type picker, stations, passengers then buildings. The action board, clock, stones, scores and markers-left sit beside the map as on the printed board.
 
 ### 5.6 Bots
 
@@ -159,11 +160,11 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 **Phase 0 — Scaffold, board data, rules spec, board look ✋**
 - [x] 1. Scaffold: `uv` project, pins, ruff, pyright, pytest, CI, `CLAUDE.md`, `.claude/` ported from lignum (agents, skills, hooks, rules), `docs/OPENSPIEL_NOTES.md`, hook tests green (2026-11-14)
 - [x] 2. Board digitized: `data/board.yaml`, `bus/board.py`, `tests/data/test_board.py`, overlay `docs/board-check.png` (2026-11-14)
-- [ ] 3. `docs/RULES_SPEC.md` from the rulebook and §4 — `implementer`
-- [ ] 4. `docs/ACTIONS.md` and `docs/SCENARIOS.md` — `implementer`
-- [ ] 5. Spec audit vs rulebook (user runs it from the CLI before implementation), board data audit vs map — `rules-auditor`, then fixes
-- [ ] 6. Board preview: `tools/render_board.py` draws `docs/board-preview.svg` (map layout, icons, sample lines, buses, passengers, action board) so the look is settled before Phase 2 — `implementer`
-- [ ] 7. ✋ You review the spec, §4 defaults, §9 questions and the preview; you set the spec Status to APPROVED
+- [x] 3. `docs/RULES_SPEC.md` from the rulebook and §4 — `implementer` (2026-11-14; R-001–R-073)
+- [x] 4. `docs/ACTIONS.md` and `docs/SCENARIOS.md` — `implementer` (2026-11-14; 376 action ids)
+- [x] 5. Spec audit vs rulebook (user runs it from the CLI before implementation), board data audit vs map — `rules-auditor`, then fixes (2026-11-14; spec FAIL→fixed in 4ed05b6, board PASS)
+- [x] 6. Board preview: `tools/render_board.py` draws `docs/board-preview.svg` (map layout, icons, sample lines, buses, passengers, action board) so the look is settled before Phase 2 — `implementer` (2026-11-14)
+- [x] 7. ✋ You review the spec, §4 defaults, §9 questions and the preview; you set the spec Status to APPROVED (2026-11-14; approved by the user)
 - *Exit:* spec APPROVED; board data confirmed; preview look agreed.
 
 **Phase 1 — Engine (the whole game, 3–5 players)**
@@ -201,11 +202,26 @@ Opus spot audits only for units touching line-expansion validity, resolution ord
 ## 9. Open questions
 
 - ~~Q1 (board)~~ resolved 2026-11-14: the B/C pair below node 8 belongs to node 8 and the A/C pair below node 26 to node 26 (user confirmed).
-- **Q2:** confirm C5's per-end reading of "unoccupied street if you can" (taken from the Red C/D example) and C4's "any non-full action may be chosen".
-- **Q3:** C13 tiebreak by "reached that score first" — confirm the move-number reading.
+- ~~Q2~~ resolved 2026-11-14: C5's per-end reading and C4's any-free-action confirmed (user confirmed).
+- ~~Q3~~ resolved 2026-11-14: move-number tiebreak and shared surviving ties confirmed, including O-4 (user confirmed).
+- ~~Q-A~~ resolved 2026-11-14: 5-player Lines +1 is added before the power ≤ 0 check (R-033).
+- ~~Q-B~~ resolved 2026-11-14: Lines markers must be resolved maximally; only (end, street) choices that keep the maximum remaining placements reachable are legal (R-040, R-042).
+- ~~O-1/O-2/O-3 (spec)~~ resolved 2026-11-14: building supply unlimited per type; multi-street Lines evaluated one street at a time; markers exhausted in mandatory passes → skipped (user confirmed, see RULES_SPEC.md).
 
 ### Backlog
 Should-fix and minor findings, tagged with the phase that found them. `/close-phase` appends here.
+
+- [Phase 2, from Phase 0 preview review] Buses cell of the action board: each seat owns one row of the bus grid, and a seat's buses fill along its row as they are added (user, 2026-11-14). `layout.bus_grid` in `data/board.yaml` should be addressed as row-per-seat (5 cells per row = 5 buses max, R-043). The preview currently fills the grid in reading order across seats. The printed grid as digitized has 4 rows; check how a 5th seat's row is shown in 5-player games.
+- [Phase 0, code-reviewer, should-fix] `bus/board.py` `Layout` holds plain dicts, so the frozen cached `Board` is unhashable and mutable (`hash(load_board())` raises). Store tuples/`MappingProxyType` or exclude `layout` from hash/compare before Phase 1 caches on the board.
+- [Phase 0, code-reviewer, should-fix] `tests/data/test_board.py`: frame/letter/count tests only re-check data `load_board()` already validates; add negative tests feeding bad raw dicts to the parser (out-of-frame point, letters a–e, 19 bus cells, missing clock segment) expecting `ValueError`.
+- [Phase 0, code-reviewer, minor] `bus/board.py` bounds check accepts 1991 (`<=` vs `<` FRAME_SIZE); tests repeat the literal 1991. `_parse_layout` accepts unknown action keys, non-positive clock hand/radius, 3-element or float points.
+- [Phase 0, code-reviewer, minor] `tools/render_board.py`: clock order re-listed instead of `CLOCK_SEGMENTS`; supplies 25/20 are literals (move to `bus/constants.py` in Phase 1); scores >20 clamped silently (preview only); `BG_HREF` is docs/-relative, so a non-`--embed` render elsewhere has a broken background.
+- [Phase 0, code-reviewer, minor] `tests/data/test_board.py:62` names node pairs (3,6) and (28,35) — the only ids outside board.yaml; acceptable for a data test.
+- [Phase 0, rules-auditor, should-fix] ACTIONS.md:26 / SCENARIOS.md:53 (R-062, R-070): move numbers are history length, but scenarios can set `last_score_move` before load; define a scenario move-number origin (`move_offset`, or default to the max `last_score_move`) so the tiebreak stays correct for editor games and fixtures.
+- [Phase 0, rules-auditor, should-fix, needs AMENDING] RULES_SPEC.md R-049, R-066: "every site is occupied" means every site has a building, but "occupied" means passenger-inside elsewhere (R-062, SCENARIOS `occupied`); reword to "every site has a building" at the next amendment.
+- [Phase 0, rules-auditor, minor] SCENARIOS.md: `waiting` defaults to `{}` outside setup, so the round-1 shorthand drops the 4 roundabout passengers (R-015) — document or require it; S-STONES should reject `stones_on_clock` 0 unless phase `END`.
+- [Phase 0, rules-auditor, minor, needs AMENDING] RULES_SPEC.md R-046: missing full stop after "(R-058)".
+- [Phase 0, both reviewers] `layout.bus_grid` validation requires exactly 20 cells; revisit with the row-per-seat item above (5 seats × 5 buses).
 
 ## 10. Risks
 
