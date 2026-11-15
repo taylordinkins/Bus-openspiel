@@ -51,7 +51,9 @@ export default function PromptBar({
         {bot && (
           <span className="bus-prompt-wait">
             {game.bot_thinking && <span className="spinner" aria-hidden="true" />}
-            Waiting for {seatTypeName(kind)} bot{game.bot_thinking ? " (thinking…)" : ""} ·{" "}
+            <span className="bus-prompt-wait-text">
+              Waiting for {seatTypeName(kind)} bot{game.bot_thinking ? " (thinking…)" : ""}
+            </span>
           </span>
         )}
         <strong>{parts.title}</strong>

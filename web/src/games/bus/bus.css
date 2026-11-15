@@ -216,12 +216,24 @@
 .bus-prompt[data-phase="END"] .bus-prompt-text strong {
   color: var(--ink);
 }
+/* the bot-wait note gets its own line above the phase title, clipped rather than overlapping it */
 .bus-prompt-wait {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  margin-bottom: 1px;
+  font-size: var(--fs-sm);
   color: var(--ink-muted);
   font-style: italic;
+}
+.bus-prompt-wait-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 0.15em; /* room for the italic overhang */
 }
 .bus-prompt-wait .spinner {
   width: 14px;

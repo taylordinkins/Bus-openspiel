@@ -104,6 +104,24 @@ describe("prompt bar per phase", () => {
     renderAll(patched);
     expect(screen.getByTestId("bus-prompt")).toHaveTextContent(/Waiting for Random bot \(thinking…\)/);
   });
+
+  it("keeps the bot-wait note on its own line, apart from the phase title", () => {
+    const g = asGame({ ...logGame, seats: ["random", "random", "random", "random"] });
+    const inner = busInner(g) as { prompt: { actor: number | null } };
+    const patched = {
+      ...g,
+      view: { ...g.view, view: { ...inner, prompt: { phase: "LN", actor: 1, units_left: 1, power: 1, context: {} } } },
+      bot_thinking: true,
+    } as unknown as GameView;
+    renderAll(patched);
+    const bar = screen.getByTestId("bus-prompt");
+    const wait = bar.querySelector(".bus-prompt-wait");
+    const title = bar.querySelector(".bus-prompt-text strong");
+    expect(wait?.querySelector(".bus-prompt-wait-text")).toHaveTextContent("Waiting for Random bot (thinking…)");
+    // the title is a sibling after the note, not inside it (the note is a block row; see bus.css)
+    expect(wait?.contains(title ?? null)).toBe(false);
+    expect(wait?.nextElementSibling).toBe(title);
+  });
 });
 
 describe("seat panels", () => {
