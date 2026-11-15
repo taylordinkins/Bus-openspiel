@@ -25,5 +25,10 @@ def default_adapters() -> dict[str, GameAdapter]:
     return {name: factory() for name, factory in _FACTORIES.items()}
 
 
-# unit 2: import the Bus adapter module here so it registers "bus", e.g.
-#   importlib.import_module("server.adapters.bus")
+def _register_builtin() -> None:
+    from server.adapters.bus import BusAdapter
+
+    register_adapter("bus", BusAdapter)
+
+
+_register_builtin()

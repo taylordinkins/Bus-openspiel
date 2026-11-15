@@ -14,6 +14,8 @@ class GameAdapter(ABC):
     """Maps one OpenSpiel game to JSON for clients."""
 
     name: str
+    # None: the view payload is merged into the GameView envelope; else it is nested under this key.
+    view_key: str | None = None
 
     @abstractmethod
     def load(self, params: dict[str, Any]) -> pyspiel.Game:
@@ -30,6 +32,11 @@ class GameAdapter(ABC):
     @abstractmethod
     def action_meta(self, state: pyspiel.State, action_id: int) -> JSON:
         """Metadata for an action: at least a `label`; optional game-specific keys."""
+
+    def winners(self, state: pyspiel.State) -> list[int]:
+        """Winning seats of a terminal state (default: the seats with the highest return)."""
+        returns = list(state.returns())
+        return [p for p, r in enumerate(returns) if r == max(returns)]
 
     def chance_label(self, state: pyspiel.State, action_id: int) -> str:
         """Label for a chance outcome, given the state at the chance node (override per game)."""

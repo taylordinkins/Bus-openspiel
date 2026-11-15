@@ -86,11 +86,49 @@ Only legal streets are highlighted in `LN`; streets excluded by maximal resoluti
 - Action box: the markers on it, in resolution order, and the power each will have (M − k, R-031) when computable from the view.
 - Seat panel: highlights the seat's line, buses and markers.
 
-## 6. Data the adapter adds (Phase 2 units 2–3)
+## 6. Adapter view contract (`server/adapters/bus.py`)
 
-- `view.prompt`: `{phase, actor, unit, units_total, context}` (e.g. clock type, picked node, supply, pass index) so the status bar never parses strings.
-- `view.targets`: legal ids grouped by target (`street`, `site`, `station`, `node`, `action`, `clock`, `button`) built from `action_meta`.
-- `events` per applied action: the automatic steps that followed (bus added, passengers stepped out/in, seats skipped, markers spent at power ≤ 0, round end, start player), computed by the adapter from the state before and after, for animation and the log.
+The server's `GameView.view` for Bus is a dict with four keys. Seats are 0-based everywhere.
+
+### 6.1 `state` — the position as scenario JSON
+A dict in the format of `docs/SCENARIOS.md` (`format: 1`, `parameters`, `round`, `phase`, `current_player`, `start_player`, `clock`, `stones_on_clock`, `seats`, `buildings`, `waiting`, `supply`, `action_board`, `pending`, `end` at END, `move_offset`), with no `history`/`expect`. **Contract:** loading `view.state` with the scenario loader gives a state whose observer string equals the viewed state's (the round trip of D11 and unit 10). Canonical forms: `seats` as a list; `buildings` sorted by site; `waiting` with string node keys and counts ≥ 1; `action_board` keyed by the action names `lines`, `buses`, `passengers`, `buildings`, `clock`, `vrrooomm`, `starting_player` (as in `layout.actions` of `data/board.yaml`) with every list at full length (6 or 1) and `null` for free spaces; `move_offset` = the scenario move number of the viewed position (history length plus the original offset).
+
+### 6.2 `derived` — facts the UI would otherwise recompute
+- `seats[i]`: `line_markers_left` (25 − line length), `line_nodes` (ordered node ids of the line; `[]` when no line), `ends` (`[node, node]`, or `null` with no line), `dropped` (bool, this round's SEL).
+- `street_lines`: map street id (string) → list of seats whose line uses it, ascending seat order (drives the per-seat offsets on shared streets).
+- `open_tier`: letter of the lowest tier with an empty site, or `null` when all sites are built (R-010).
+- `resolving`: `null` outside resolution, else `{action, letter, owner, power}` — `action` a name as above, `letter` 0-based, `power` the marker's power under R-031/R-033 (`null` for actions without dwindling power).
+- `result`: `null` before END; at END `game_result(state)` (`end_types`, `winners`, `final_scores`, `returns`).
+
+### 6.3 `prompt` — what the status bar says
+`{phase, actor, units_left, power, context}`: `phase` the code; `actor` = current seat (`null` at END); `units_left` from `pending` (`units_left`, or `moves_left` in VP/VD, else `null`); `power` as in `resolving`; `context` phase-specific: SB/L1/L2 `{done}`; SEL `{pass, mandatory (pass < 2), markers_left}`; PX `{supply}`; BD `{open_tier}`; CK `{clock, next_clock, stones_on_clock}`; VP/VD `{clock, moves_left, picked_node}` (picked_node `null` in VP); END `{}`.
+
+### 6.4 `targets` — legal ids grouped by what is clicked
+Built only from the legal actions and `action_meta`:
+- `streets`: street id (string) → list of `extend` ids on it (two ids only for the R-041 loop case, distinguished by `end`).
+- `sites`: site id (string) → list of `build` ids (one per building type) or one `deliver_to` id.
+- `stations`: node id (string) → `passenger_to` id.
+- `nodes`: node id (string) → `pick_passenger` id.
+- `actions`: action name → `select` id.
+- `clock`: `{advance: id|null, pause: id|null}`.
+- `buttons`: list of `{id, kind}` for ids with no board target (`drop_out`).
+**Contract:** every legal id appears exactly once across the groups, and no illegal id appears. At END every group is empty.
+
+`GameView.legal_actions[i]` carries `id`, `label` (ACTIONS §4 string, seats as `P0`…), `kind` and `params` (the rest of `action_meta`, ACTIONS §5). History entries use the label computed in the state the action was played in.
+
+### 6.5 Clarifications (unit 2 test hand-off)
+1. `LegalAction.params` is a dict (the server schema changes from `list[int]`). The adapter's `action_meta` returns `{"label", "kind", "params"}` with the ACTIONS §5 keys other than `id`, `kind`, `player`, `label` inside `params`.
+2. The four keys sit in `GameView.view`.
+3. Single-id groups (`stations`, `nodes`, `actions`) map to an int; `streets` and `sites` map to lists; `clock.advance`/`clock.pause` are int or null.
+4. `targets.actions` and `resolving.action` use the lowercase board names (`lines` … `starting_player`).
+5. `context` for LN is `{}`.
+6. SEL `markers_left` is the actor's Action markers in hand (int).
+7. `power` is the nominal power of the marker (R-031/R-033; M read now, R-032), not the units still to resolve; hand-built fixtures may have `units_left` > `power`.
+8. `derived.seats[i].dropped` is false outside SEL.
+9. `move_offset` follows SCENARIOS §2 (the loaded offset plus the history length since load).
+10. VD `picked_node` is a node id; `state.end` exists only at END as `{"types": [...]}`.
+11. `state.current_player` is absent at END (SCENARIOS §4: no actor), so the END round trip holds; `prompt.actor` is null there.
+12. Labels follow ACTIONS §4 verbatim; "Starting Player" is an action name, so the seat-name check is "no `Player <digit>`", not "no `Player`".
 
 ## 7. Hotseat, bots, undo
 

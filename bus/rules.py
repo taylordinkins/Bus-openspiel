@@ -644,6 +644,11 @@ _PHASE_ACTION = {
 }
 
 
+def resolving_action(core: Core) -> int | None:
+    """Action kind of the marker being resolved, or None outside resolution. Implements R-029."""
+    return _PHASE_ACTION.get(core.phase)
+
+
 def end_round(core: Core) -> Core:
     """Starting Player, spent markers, end checks. Implements R-064, R-065, R-066, R-067."""
     row = core.action_board[ACT_STARTING]

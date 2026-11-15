@@ -31,7 +31,7 @@ class Bot(Protocol):
 
 
 def bot_candidates(state: pyspiel.State) -> list[int]:
-    """Actions a random bot may pick. unit 2: filter pointless actions here if Bus needs it."""
+    """Actions a random bot may pick (every legal action; Bus has no pointless ones)."""
     return list(state.legal_actions())
 
 

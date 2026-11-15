@@ -362,7 +362,39 @@ class Session:
             raise SessionError(f"only {seen} player actions have been taken")
 
     def view(self, seat: int) -> JSON:
-        return self.adapter.view(self.state, seat)
+        """GameView.view: shell fields plus the adapter payload (nested under `view_key`)."""
+        state = self.state
+        terminal = state.is_terminal()
+        chance = state.is_chance_node()
+        current = None if terminal or chance else state.current_player()
+        legal: list[JSON] = []
+        if current is not None:
+            for a in state.legal_actions():
+                meta = dict(self.adapter.action_meta(state, a))
+                legal.append(
+                    {
+                        "id": a,
+                        "label": meta["label"],
+                        "kind": meta.get("kind"),
+                        "params": meta.get("params"),
+                    }
+                )
+        returns = list(state.returns()) if terminal else None
+        out: JSON = {
+            "seat": seat,
+            "current_player": current,
+            "is_terminal": terminal,
+            "legal_actions": legal,
+            "returns": returns,
+            "winners": self.adapter.winners(state) if terminal else None,
+        }
+        payload = self.adapter.view(state, seat)
+        key = self.adapter.view_key
+        if key is None:
+            out.update(payload)
+        else:
+            out[key] = payload
+        return out
 
     def history_entries(self, seat: int) -> list[JSON]:
         """Labelled history as seen by `seat`: replay, labelling each action as it was when it

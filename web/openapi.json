@@ -405,10 +405,8 @@
           "params": {
             "anyOf": [
               {
-                "items": {
-                  "type": "integer"
-                },
-                "type": "array"
+                "additionalProperties": true,
+                "type": "object"
               },
               {
                 "type": "null"

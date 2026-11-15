@@ -34,7 +34,7 @@ class GameParams(BaseModel):
 
 
 class CreateGameRequest(BaseModel):
-    game: str = "bus"  # unit 2: the Bus adapter registers under this name
+    game: str = "bus"
     params: GameParams = Field(default_factory=GameParams)
     seats: list[SeatType]
     seed: int | None = None
@@ -50,7 +50,7 @@ class LegalAction(BaseModel):
     id: int
     label: str
     kind: str | None = None
-    params: list[int] | None = None  # unit 2: extend with Bus action fields if the UI needs them
+    params: dict[str, Any] | None = None
 
 
 class HistoryEntry(BaseModel):
