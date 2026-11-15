@@ -195,7 +195,7 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 
 **Phase 2 — Server + polished board UI ✋ playtest #1**
 - Port server and shell (D3); Bus adapter (views, labels, `action_meta`); SVG board plugin per §5.5 and the agreed preview; scenario JSON load/export (editor deferred, D20); random seats; Playwright test that finishes a game; CI web + e2e jobs.
-- [ ] 1. Port the server shell (lignum `server/`: app, sessions, random bots, reports, schemas, `adapters/base.py`; toy adapter and game-agnostic server tests; fastapi/uvicorn/httpx deps) — `implementer`
+- [x] 1. Port the server shell (lignum `server/`: app, sessions, random bots, reports, schemas, `adapters/base.py`; toy adapter and game-agnostic server tests; fastapi/uvicorn/httpx deps) — `implementer` (2026-11-14; 90 server tests)
 - [ ] 2. Bus adapter: `view`, labels, `prompt`, `targets` (UI_DESIGN §6; ACTIONS §5) — done: every legal action in random 3/4/5-player games has a label and a target; view matches fixtures — `spec-test-writer` → `implementer`
 - [ ] 3. Bus adapter: per-action automatic-step `events`, board-geometry endpoint, strict scenario load (backlog: reject non-terminal no-legal-action states), random seats — done: all-random game to END via the API; events match state diffs — `implementer`
 - [ ] 4. Bus grid by seat column (D19) and seat palette from the art's Lines stripes (D21) in `board-palette.md` and `tools/render_board.py` — done: data tests green, preview regenerated and reviewed — `implementer`
