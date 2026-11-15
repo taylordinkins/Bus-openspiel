@@ -192,3 +192,25 @@ export function motionLength(plan: { walks: Walk[]; floats: Float[] }, scale: nu
   for (const f of plan.floats) end = Math.max(end, f.delay + f.duration);
   return end;
 }
+
+/**
+ * Upper bound (ms) on how long a change's motion runs on the board, from its events alone (no
+ * geometry needed): walks and floats as in `motionPlan`, plus the ease-in of pieces that wait
+ * for a walker. The shell holds the hotseat hand-off until it has passed (UI_DESIGN §7).
+ */
+export function motionDuration(events: readonly GameEvent[], scale: number): number {
+  const place = T_PLACE * scale;
+  const move = T_MOVE * scale;
+  const short = move * 0.6;
+  let end = place;
+  for (const e of events) {
+    if (e.type === "scored") {
+      end = Math.max(end, move + place, move * 0.8 + T_FLOAT * scale);
+    } else if (e.type === "passengers_moved") {
+      const n = (v: unknown) => (Array.isArray(v) ? v.length : 0);
+      const walk = (n(e.exited) > 0 ? short : 0) + (n(e.entered) > 0 ? short : 0);
+      if (walk > 0) end = Math.max(end, walk + place);
+    }
+  }
+  return end;
+}

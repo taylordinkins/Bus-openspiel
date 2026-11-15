@@ -97,7 +97,10 @@ SCENARIOS_MANIFEST = Path(__file__).resolve().parents[2] / "data" / "scenarios.y
 
 @cache
 def _named_scenarios(manifest: Path = SCENARIOS_MANIFEST) -> list[JSON]:
-    """Lobby scenarios from `data/scenarios.yaml`, each loaded strictly (UI_DESIGN 6.9)."""
+    """Lobby scenarios from `data/scenarios.yaml` (files in `data/scenarios/`), loaded strictly.
+
+    UI_DESIGN 6.9. The files are copies of test fixtures; production code never reads `tests/`.
+    """
     raw: JSON = yaml.safe_load(manifest.read_text())
     base = manifest.parent.parent / raw["dir"]
     out: list[JSON] = []

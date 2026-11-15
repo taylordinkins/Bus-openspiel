@@ -1,0 +1,91 @@
+{
+  "format": 1,
+  "parameters": {
+    "players": 4
+  },
+  "round": 1,
+  "buildings": [
+    {
+      "site": 0,
+      "type": "house"
+    },
+    {
+      "site": 1,
+      "type": "office"
+    },
+    {
+      "site": 2,
+      "type": "pub"
+    },
+    {
+      "site": 3,
+      "type": "house"
+    },
+    {
+      "site": 4,
+      "type": "office"
+    },
+    {
+      "site": 5,
+      "type": "pub"
+    },
+    {
+      "site": 6,
+      "type": "house"
+    },
+    {
+      "site": 7,
+      "type": "office"
+    }
+  ],
+  "seats": [
+    {
+      "line": [
+        16,
+        18
+      ]
+    },
+    {
+      "line": [
+        37,
+        38
+      ]
+    },
+    {
+      "line": [
+        46,
+        47
+      ]
+    },
+    {
+      "line": [
+        62,
+        65
+      ]
+    }
+  ],
+  "waiting": {
+    "13": 1,
+    "17": 1,
+    "18": 1,
+    "21": 1
+  },
+  "description": "Round-1 selection, shorthand (SCENARIOS 7).",
+  "expect": {
+    "phase": "SEL",
+    "current_player": 0,
+    "supply": 11,
+    "waiting": {
+      "13": 1,
+      "17": 1,
+      "18": 1,
+      "21": 1
+    },
+    "points": [
+      0,
+      0,
+      0,
+      0
+    ]
+  }
+}

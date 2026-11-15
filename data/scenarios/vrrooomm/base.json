@@ -1,0 +1,136 @@
+{
+ "format": 1,
+ "description": "Vrrooomm! base position (round 1, tier order not strict). Lines: P0 nodes 6,7,8; P1 nodes 16,19,20; P2 nodes 22,21,26; P3 nodes 28,29,30. Clock house. Waiting: one each at n16 n19 n20 (P1), n21 n22 n26 (P2), n13 n17 n18 (off every line). Tests build the Vrrooomm! markers around this via helper.",
+ "parameters": {
+  "players": 4
+ },
+ "round": 1,
+ "clock": "house",
+ "buildings": [
+  {
+   "site": 17,
+   "type": "house"
+  },
+  {
+   "site": 39,
+   "type": "house"
+  },
+  {
+   "site": 8,
+   "type": "house"
+  },
+  {
+   "site": 27,
+   "type": "house"
+  },
+  {
+   "site": 9,
+   "type": "house"
+  },
+  {
+   "site": 10,
+   "type": "house"
+  },
+  {
+   "site": 18,
+   "type": "house"
+  },
+  {
+   "site": 41,
+   "type": "house"
+  },
+  {
+   "site": 20,
+   "type": "house"
+  },
+  {
+   "site": 43,
+   "type": "house"
+  },
+  {
+   "site": 36,
+   "type": "house"
+  },
+  {
+   "site": 35,
+   "type": "house"
+  },
+  {
+   "site": 15,
+   "type": "house"
+  },
+  {
+   "site": 25,
+   "type": "house"
+  },
+  {
+   "site": 22,
+   "type": "house"
+  },
+  {
+   "site": 2,
+   "type": "house"
+  },
+  {
+   "site": 11,
+   "type": "office"
+  },
+  {
+   "site": 30,
+   "type": "office"
+  },
+  {
+   "site": 40,
+   "type": "office"
+  },
+  {
+   "site": 28,
+   "type": "pub"
+  },
+  {
+   "site": 31,
+   "type": "pub"
+  },
+  {
+   "site": 29,
+   "type": "pub"
+  }
+ ],
+ "seats": [
+  {
+   "line": [
+    16,
+    18
+   ]
+  },
+  {
+   "line": [
+    37,
+    38
+   ]
+  },
+  {
+   "line": [
+    46,
+    47
+   ]
+  },
+  {
+   "line": [
+    62,
+    65
+   ]
+  }
+ ],
+ "waiting": {
+  "16": 1,
+  "19": 1,
+  "20": 1,
+  "21": 1,
+  "22": 1,
+  "26": 1,
+  "13": 1,
+  "17": 1,
+  "18": 1
+ }
+}

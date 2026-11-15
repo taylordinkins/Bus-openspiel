@@ -6,7 +6,16 @@ import geometry from "./fixtures/geometry.json";
 import midView from "./fixtures/mid.json";
 import { parseGeometry } from "./geometry";
 import { parseBusView, type BusViewData } from "./model";
-import { deliveryPath, freshKeys, motionLength, motionPlan, pointAlong, T_MOVE } from "./motion";
+import {
+  deliveryPath,
+  freshKeys,
+  motionDuration,
+  motionLength,
+  motionPlan,
+  pointAlong,
+  T_MOVE,
+  T_PLACE,
+} from "./motion";
 
 const geo = parseGeometry(geometry.geometry)!;
 const mid = parseBusView(midView.view) as BusViewData;
@@ -70,6 +79,31 @@ describe("unit9 motion plan (UI_DESIGN 3 motion, 6.6 events)", () => {
     expect(motionLength(plan, 1)).toBeGreaterThan(T_MOVE);
     const fast = motionPlan(geo, mid, [{ type: "scored", seat: 0, points: 3, node: from, site: dest.id }], 0.4, 8);
     expect(fast.walks[0]!.duration).toBeCloseTo(T_MOVE * 0.4);
+  });
+
+  it("motionDuration bounds the plan's length from events alone (hand-off hold, UI_DESIGN 7)", () => {
+    const evs = [
+      [],
+      [{ type: "round_started", round: 2 }],
+      [{ type: "scored", seat: 0, points: 3, node: from, site: dest.id }],
+      [{ type: "passengers_moved", exited: [{ site: 3, node: geo.sites[3]!.node }], entered: [] }],
+      [
+        { type: "scored", seat: 0, points: 3, node: from, site: dest.id },
+        {
+          type: "passengers_moved",
+          exited: [{ site: 3, node: geo.sites[3]!.node }],
+          entered: [{ site: 0, node: geo.sites[0]!.node }],
+        },
+      ],
+    ];
+    for (const scale of [1, 0.4])
+      for (const ev of evs) {
+        const plan = motionPlan(geo, mid, ev, scale, 9);
+        const d = motionDuration(ev, scale);
+        expect(d).toBeGreaterThanOrEqual(motionLength(plan, scale));
+        expect(d).toBeLessThanOrEqual(motionLength(plan, scale) + T_PLACE * scale);
+      }
+    expect(motionDuration([], 1)).toBe(T_PLACE);
   });
 
   it("pointAlong interpolates by length", () => {

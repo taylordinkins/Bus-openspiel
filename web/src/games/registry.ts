@@ -45,6 +45,8 @@ export interface GamePlugin {
   /** The board is the main control (UI_DESIGN §1.3): the generic action list starts collapsed. */
   boardDriven?: boolean;
   seatStyle?(seat: number): { fill: string; ink: string };
+  /** How long (ms) the board animates `motion`; the hotseat hand-off waits for it (UI_DESIGN §7). */
+  motionMs?(motion: BoardMotion): number;
   actionLabel?(game: GameView, action: LegalAction): string;
   actionHelp?(game: GameView, action: LegalAction): string | undefined;
 }

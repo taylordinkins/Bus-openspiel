@@ -4,7 +4,7 @@ import { api } from "../api/client";
 import Curtain from "./Curtain";
 import ActionLog from "./ActionLog";
 import ImportButton from "./ImportButton";
-import { getPlugin, type BoardUi } from "../games/registry";
+import { getPlugin, type BoardMotion, type BoardUi } from "../games/registry";
 import ReportDialog from "./ReportDialog";
 import TabBar, { type ScreenTab } from "./TabBar";
 import YourMove from "./YourMove";
@@ -115,18 +115,37 @@ export default function GameScreen({
   // Bot moves are shown one at a time at the bot pace (UI_DESIGN §7); `raw` is the shown view.
   const pb = usePlayback(latest, { pace: settings.botPace, fetchFrame });
   const behind = pb.behind;
-  useEffect(() => setHoldAuto(behind), [behind]);
   const raw = pb.shown;
   // Data rendered for another seat than the viewed one is treated as loading (no private leak).
   const game = raw !== null && viewSeat !== null && raw.seat !== viewSeat ? null : raw;
   const mismatch = raw !== null && game === null;
   if (raw && raw.game !== gameName) setGameName(raw.game);
+  const boardMotion: BoardMotion | null =
+    pb.motion && settings.animation !== "off"
+      ? { ...pb.motion, speed: settings.animation, scale: SPEED_SCALE[settings.animation] }
+      : null;
+  // The latest change's animation is still running (none with animation off or pace 0).
+  const [doneSeq, setDoneSeq] = useState<number | null>(null);
+  const motionMs =
+    boardMotion && settings.botPace > 0 ? (getPlugin(gameName).motionMs?.(boardMotion) ?? 0) : 0;
+  const motionSeq = boardMotion?.seq ?? null;
+  const animating = motionSeq !== null && motionMs > 0 && motionSeq !== doneSeq;
+  useEffect(() => {
+    if (!animating || motionSeq === null) return;
+    const t = setTimeout(() => setDoneSeq(motionSeq), motionMs);
+    return () => clearTimeout(t);
+  }, [animating, motionSeq, motionMs]);
+  const hotseat = raw !== null && raw.seats.filter((s) => s === "human").length > 1;
   const derivedSeat = raw ? deriveViewSeat(raw, viewSeat) : null;
-  if (derivedSeat !== null && derivedSeat !== viewSeat) setViewSeat(derivedSeat);
+  // Hotseat hand-off waits for the mover's animation: the viewed seat (and so the curtain)
+  // changes only once it has played; no input meanwhile (UI_DESIGN §7).
+  const handoffWait =
+    hotseat && animating && viewSeat !== null && derivedSeat !== null && derivedSeat !== viewSeat;
+  if (derivedSeat !== null && derivedSeat !== viewSeat && !handoffWait) setViewSeat(derivedSeat);
+  useEffect(() => setHoldAuto(behind || handoffWait), [behind, handoffWait]);
   // Hotseat curtain: covered whenever the viewed human seat differs from the last acknowledged one.
   const [ackSeat, setAckSeat] = useState<number | null>(null);
   if (viewSeat !== null && ackSeat === null) setAckSeat(viewSeat);
-  const hotseat = raw !== null && raw.seats.filter((s) => s === "human").length > 1;
   const covered =
     hotseat && !isTerminalGame(raw) && viewSeat !== null && ackSeat !== null && viewSeat !== ackSeat;
   const showBoard = revealed && !covered;
@@ -146,7 +165,7 @@ export default function GameScreen({
   const over = game !== null && isTerminal(game);
   const cp = game ? currentPlayer(game) : null;
   const humanTurn =
-    game !== null && cp !== null && game.seats[cp] === "human" && !game.bot_thinking && !behind;
+    game !== null && cp !== null && game.seats[cp] === "human" && !game.bot_thinking && !behind && !handoffWait;
   const botThinking = game !== null && !over && (game.bot_thinking || behind);
   const canSkip =
     game !== null && !over && (behind || latest?.bot_thinking === true) && game.seats.includes("human");
@@ -161,10 +180,7 @@ export default function GameScreen({
         onBack: () => goBack(),
         canBack: game.history_length > 0 && !over && !busy,
         viewSeat,
-        motion:
-          pb.motion && settings.animation !== "off"
-            ? { ...pb.motion, speed: settings.animation, scale: SPEED_SCALE[settings.animation] }
-            : null,
+        motion: boardMotion,
       }
     : undefined;
 

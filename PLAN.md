@@ -272,7 +272,7 @@ Should-fix and minor findings, tagged with the phase that found them. `/close-ph
 - [Phase 1, orchestrator, minor] `tools/replay.py` rejects golden playthrough files (`tests/playthroughs/*.json`, S-SCHEMA); accept them (parameters + history) or document the two formats.
 - [Phase 1, orchestrator, minor] `play_text` prints the state as one ~1,000-character line; a multi-line human view would help terminal play.
 - [Phase 0, both reviewers] `layout.bus_grid` validation requires exactly 20 cells; that is correct (5 seat columns × 4 added buses, D19) — keep it, and add the column-per-seat accessor in Phase 2 unit 4.
-- [Phase 2 unit 9, implementer, should-fix] Hotseat curtain contradicts UI_DESIGN §7 ("hotseat has no curtain"): the shell still shows a hand-off curtain right after each move, hiding the mover's animation. Decide with the user which is right (change the doc or the shell), then fix.
+- [x] *(done Phase 2: curtain kept by user decision, UI_DESIGN §7 rewritten; it now waits for the mover's animation)* [Phase 2 unit 9, implementer, should-fix] Hotseat curtain contradicts UI_DESIGN §7 ("hotseat has no curtain"): the shell still shows a hand-off curtain right after each move, hiding the mover's animation. Decide with the user which is right (change the doc or the shell), then fix.
 - [Phase 2 unit 9, implementer, minor] vitest prints React `act()` warnings (`shell.test.tsx` 12, `pacing.test.tsx` 2, `useGame.test.tsx` auto-advance tests, ~170 in total); source of most not traced and not checked against pre-unit-9. Tests pass; wrap the state updates in `act`/`waitFor` or silence deliberately.
 
 ## 10. Risks

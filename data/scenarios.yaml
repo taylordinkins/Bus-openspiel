@@ -1,8 +1,10 @@
 # Named scenarios offered in the lobby (GET /api/scenarios; docs/UI_DESIGN.md section 6.9).
-# A curated subset of the rule-test fixtures: `file` is relative to `dir` (repo root based) and
-# the scenario's own `description` is shown under `title`. Every entry must load with the
-# server's strict loader (require_legal); tests/server/test_scenarios_api.py checks this.
-dir: tests/scenarios
+# A curated subset of the rule-test fixtures, copied byte for byte from tests/scenarios/ into
+# data/scenarios/ (same relative layout) so the server never reads tests/: `file` is relative to
+# `dir` (repo root based) and the scenario's own `description` is shown under `title`. Every entry
+# must load with the server's strict loader (require_legal); tests/server/test_scenarios_api.py
+# checks this, and tests/server/test_scenario_files.py checks the copies match their originals.
+dir: data/scenarios
 scenarios:
   - id: fresh_4p
     file: fresh_4p.json

@@ -3,6 +3,7 @@ import type { GamePlugin } from "../registry";
 import BusLog from "./BusLog";
 import BusPanel, { BusSide } from "./BusPanel";
 import { busInner, seatFill, seatInk } from "./model";
+import { motionDuration } from "./motion";
 
 /**
  * Bus: the shell's action list still does the playing (unit 8 adds board clicks); the board is the
@@ -18,6 +19,8 @@ export const busPlugin: GamePlugin = {
     return typeof prompt?.phase === "string" ? prompt.phase : undefined;
   },
   seatStyle: (seat) => ({ fill: seatFill(seat), ink: seatInk(seat) }),
+  // margin as BusBoard's walk cleanup timer (+60 ms)
+  motionMs: (m) => motionDuration(m.events, m.scale) + 60,
   renderBoard: (g, ui) => createElement(BusPanel, { game: g, ui }),
   renderSide: (g) => createElement(BusSide, { game: g }),
   renderLog: (g) => createElement(BusLog, { game: g }),
