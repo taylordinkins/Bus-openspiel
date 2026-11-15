@@ -239,3 +239,21 @@ def test_INV_result_is_a_list_of_strings() -> None:
     out = _check(_initial(4), None)
     assert isinstance(out, list)
     json.dumps(out)
+
+
+def test_clone_is_independent_of_original():
+    """Sharing the immutable Core on clone must not let a clone's moves leak back."""
+    import pyspiel
+
+    game = pyspiel.load_game("python_bus", {"players": 4})
+    state = game.new_initial_state()
+    for _ in range(40):
+        state.apply_action(state.legal_actions()[0])
+    before = str(state)
+    legal = state.legal_actions()
+    copy = state.clone()
+    for _ in range(10):
+        copy.apply_action(copy.legal_actions()[-1])
+    assert str(state) == before
+    assert state.legal_actions() == legal
+    assert str(copy) != before

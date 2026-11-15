@@ -7,7 +7,7 @@ Unit 2 implements only the setup-buildings step (SB); later units extend ``legal
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-from functools import cache
+from functools import cache, lru_cache
 
 from bus import constants as C
 from bus.actions import NUM_ACTION_KINDS, decode_action, encode_extend
@@ -57,6 +57,12 @@ class Seat:
     line: tuple[int, ...] = ()
     last_score_move: int | None = None  # R-062, R-070
 
+    def __copy__(self) -> Seat:
+        return self
+
+    def __deepcopy__(self, memo: dict[int, object]) -> Seat:
+        return self  # frozen, tuples and ints only
+
 
 @dataclass(frozen=True)
 class Core:
@@ -84,6 +90,12 @@ class Core:
     picked_node: int = -1  # VD: node of the picked passenger
     occupied: tuple[int, ...] = ()  # sorted sites whose building holds a passenger
     end_types: tuple[str, ...] = ()  # END: R-066 end types
+
+    def __copy__(self) -> Core:
+        return self
+
+    def __deepcopy__(self, memo: dict[int, object]) -> Core:
+        return self  # frozen, tuples and ints only: sharing is safe (speeds up state.clone)
 
 
 @cache
@@ -422,14 +434,21 @@ def _enter(core: Core, action: int, letter: int) -> Core | None:
     raise ValueError(f"action {action} has no decision node")
 
 
-def _ln_legal(core: Core) -> list[int]:
-    """Implements R-040, R-042: maximal-resolution extensions for the current unit."""
+@lru_cache(maxsize=4096)
+def _ln_legal_cached(
+    lines: tuple[tuple[int, ...], ...], current: int, units_left: int, supply: int
+) -> tuple[int, ...]:
     from bus.lines import maximal_extensions
 
+    found = maximal_extensions(board(), lines, current, units_left, supply)
+    return tuple(sorted(encode_extend(e, s) for e, s in found))
+
+
+def _ln_legal(core: Core) -> list[int]:
+    """Implements R-040, R-042: maximal-resolution extensions for the current unit."""
     seat = core.seats[core.current]
     lines = tuple(s.line for s in core.seats)
-    found = maximal_extensions(board(), lines, core.current, core.units_left, seat.line_markers)
-    return sorted(encode_extend(e, s) for e, s in found)
+    return list(_ln_legal_cached(lines, core.current, core.units_left, seat.line_markers))
 
 
 def _ln_apply(core: Core, action: int) -> Core:

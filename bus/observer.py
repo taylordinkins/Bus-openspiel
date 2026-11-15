@@ -21,7 +21,7 @@ Views (shape; scaling):
 
 from __future__ import annotations
 
-from functools import cache
+from functools import lru_cache
 from typing import Any
 
 import numpy as np
@@ -62,7 +62,7 @@ _RESOLVING = (PHASE_LN, PHASE_PX, PHASE_BD, PHASE_CK, PHASE_VP, PHASE_VD)
 _BOARD = load_board()
 
 
-@cache
+@lru_cache(maxsize=8192)
 def _nodes_of(line: tuple[int, ...]) -> tuple[int, ...]:
     return tuple(line_nodes(_BOARD, line)) if line else ()
 
