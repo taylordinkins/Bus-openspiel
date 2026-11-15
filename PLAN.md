@@ -246,6 +246,7 @@ Opus spot audits only for units touching line-expansion validity, resolution ord
 ### Backlog
 Should-fix and minor findings, tagged with the phase that found them. `/close-phase` appends here.
 
+- [Phase 2 unit 8b, implementer, should-fix] Theme weaknesses: hotseat "P3's turn" toast never shows (curtain remounts the turn frame); side column scrolls at END at 1280×720 (log below the fold); L1 glow low-contrast when every street is legal (add an ink keyline); long CK/SEL prompts wrap to two lines; "⚑" and "→" fall back to a system font; lobby map crop clips its top labels; game id truncated in the status line; under-900 px layouts unreviewed.
 - [x] (done Phase 2 unit 4) [Phase 2, from Phase 0 preview review] Buses cell of the action board: the printed 4×5 grid is **one column per seat** (5 columns × 4 cells), not one row per seat — see D19. The preview currently fills it in reading order across seats; fix in Phase 2 unit 4. No 5th row is needed and the art is not changed.
 - [Phase 0, code-reviewer, should-fix] `bus/board.py` `Layout` holds plain dicts, so the frozen cached `Board` is unhashable and mutable (`hash(load_board())` raises). Store tuples/`MappingProxyType` or exclude `layout` from hash/compare before Phase 1 caches on the board.
 - [Phase 0, code-reviewer, should-fix] `tests/data/test_board.py`: frame/letter/count tests only re-check data `load_board()` already validates; add negative tests feeding bad raw dicts to the parser (out-of-frame point, letters a–e, 19 bus cells, missing clock segment) expecting `ValueError`.
