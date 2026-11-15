@@ -3,7 +3,13 @@ import { api } from "../api/client";
 import type { components } from "../api/schema";
 import { getPlugin } from "../games/registry";
 import { IconUpload } from "../theme/icons";
-import { SEAT_PRESETS } from "./seatTypes";
+import {
+  DEFAULT_THINK_TIME_S,
+  MAX_THINK_TIME_S,
+  MIN_THINK_TIME_S,
+  SEAT_PRESETS,
+  isMctsSeat,
+} from "./seatTypes";
 import { parseStartDoc, type StartDoc } from "./startDoc";
 import { errorText, type SeatType } from "./useGame";
 
@@ -46,6 +52,7 @@ export default function Lobby({ onCreated }: Props) {
   const [seats, setSeats] = useState<SeatType[]>(["human", "random", "random", "random", "random"]);
   const [returns, setReturns] = useState<"win_loss" | "margin">("win_loss");
   const [seed, setSeed] = useState("");
+  const [thinkTime, setThinkTime] = useState(String(DEFAULT_THINK_TIME_S));
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [text, setTextRaw] = useState("");
@@ -136,16 +143,17 @@ export default function Lobby({ onCreated }: Props) {
       const trimmed = seed.trim();
       const seedPart = trimmed !== "" ? { seed: Number(trimmed) } : {};
       const chosen = seats.slice(0, n);
+      const thinkPart = chosen.some(isMctsSeat) ? { bot_think_time_s: Number(thinkTime) } : {};
       const res =
         parsed?.kind === "replay"
           ? await api.POST("/api/games/import", {
-              body: { ...(parsed.doc as unknown as GameExport), seats: chosen },
+              body: { ...(parsed.doc as unknown as GameExport), seats: chosen, ...thinkPart },
             })
           : await api.POST("/api/games", {
               body:
                 parsed?.kind === "scenario"
-                  ? { game: "bus", seats: chosen, scenario: parsed.doc, ...seedPart }
-                  : { game: "bus", params: { num_players: players, returns }, seats: chosen, ...seedPart },
+                  ? { game: "bus", seats: chosen, scenario: parsed.doc, ...seedPart, ...thinkPart }
+                  : { game: "bus", params: { num_players: players, returns }, seats: chosen, ...seedPart, ...thinkPart },
             });
       if (res.data) onCreated(res.data.id);
       else setError(errorText(res.error));
@@ -157,6 +165,10 @@ export default function Lobby({ onCreated }: Props) {
   }
 
   const seedBad = seed.trim() !== "" && !Number.isInteger(Number(seed.trim()));
+  const thinkNum = Number(thinkTime);
+  const thinkBad =
+    thinkTime.trim() === "" || !(thinkNum >= MIN_THINK_TIME_S && thinkNum <= MAX_THINK_TIME_S);
+  const hasMcts = seats.slice(0, n).some(isMctsSeat);
   const humans = seats.slice(0, n).filter((s) => s === "human").length;
   const isReplay = parsed?.kind === "replay";
 
@@ -294,6 +306,21 @@ export default function Lobby({ onCreated }: Props) {
               ? "One person against bots."
               : "Bots only: the game plays itself to the end."}
         </p>
+        {hasMcts && (
+          <label className="field lobby-think">
+            <span className="field-label">Think time (seconds per move)</span>{" "}
+            <input
+              type="number"
+              min={MIN_THINK_TIME_S}
+              max={MAX_THINK_TIME_S}
+              step="any"
+              value={thinkTime}
+              onChange={(e) => setThinkTime(e.target.value)}
+              aria-invalid={thinkBad || undefined}
+            />
+            <small> MCTS bots stop searching at this limit, even before their simulation count.</small>
+          </label>
+        )}
       </fieldset>
       {!isReplay && (
         <label className="field lobby-seed">
@@ -309,7 +336,7 @@ export default function Lobby({ onCreated }: Props) {
         </label>
       )}
       <div className="lobby-submit">
-        <button type="submit" className="btn-primary btn-lg" disabled={busy || (seedBad && !isReplay)}>
+        <button type="submit" className="btn-primary btn-lg" disabled={busy || (seedBad && !isReplay) || (hasMcts && thinkBad)}>
           Create game
         </button>
         {busy && <span className="spinner" aria-hidden="true" />}

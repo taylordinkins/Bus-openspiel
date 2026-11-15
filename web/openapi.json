@@ -56,6 +56,20 @@
       },
       "CreateGameRequest": {
         "properties": {
+          "bot_think_time_s": {
+            "anyOf": [
+              {
+                "maximum": 60.0,
+                "minimum": 0.1,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Per-move think-time cap in seconds for search bots (mcts seats); default 5.",
+            "title": "Bot Think Time S"
+          },
           "game": {
             "default": "bus",
             "title": "Game",
@@ -135,6 +149,20 @@
       "GameExport": {
         "description": "Replay file: everything needed to rebuild a game by replaying `history`.",
         "properties": {
+          "bot_think_time_s": {
+            "anyOf": [
+              {
+                "maximum": 60.0,
+                "minimum": 0.1,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Per-move think-time cap in seconds for search bots (mcts seats); default 5.",
+            "title": "Bot Think Time S"
+          },
           "game": {
             "title": "Game",
             "type": "string"
@@ -227,6 +255,18 @@
             ],
             "description": "Set when the bot worker failed; POST bots/retry to retry.",
             "title": "Bot Error"
+          },
+          "bot_think_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Think-time cap in seconds for search bot seats.",
+            "title": "Bot Think Time S"
           },
           "bot_thinking": {
             "description": "A bot seat is to move and has not failed (false in the error state).",

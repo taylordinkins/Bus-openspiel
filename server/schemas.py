@@ -50,6 +50,12 @@ class CreateGameRequest(BaseModel):
         default=None,
         description="Optional scenario JSON (docs/SCENARIOS.md); the game starts from it.",
     )
+    bot_think_time_s: float | None = Field(
+        default=None,
+        ge=0.1,
+        le=60,
+        description="Per-move think-time cap in seconds for search bots (mcts seats); default 5.",
+    )
 
 
 class LegalAction(BaseModel):
@@ -102,6 +108,9 @@ class GameView(BaseModel):
     bot_error: str | None = Field(
         default=None, description="Set when the bot worker failed; POST bots/retry to retry."
     )
+    bot_think_time_s: float | None = Field(
+        default=None, description="Think-time cap in seconds for search bot seats."
+    )
     seat: int
     history_length: int
     history: list[HistoryEntry] = Field(description="Labelled action history, oldest first.")
@@ -137,6 +146,12 @@ class GameExport(BaseModel):
     history: list[int]
     scenario: dict[str, Any] | None = Field(
         default=None, description="Scenario the game started from, if any."
+    )
+    bot_think_time_s: float | None = Field(
+        default=None,
+        ge=0.1,
+        le=60,
+        description="Per-move think-time cap in seconds for search bots (mcts seats); default 5.",
     )
 
 

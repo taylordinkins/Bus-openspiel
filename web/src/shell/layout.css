@@ -129,8 +129,16 @@
 .lobby-seat select {
   width: 100%;
 }
-.lobby-seats .lobby-hint {
+.lobby-seats .lobby-hint,
+.lobby-seats .lobby-think {
   grid-column: 1 / -1;
+}
+.lobby-think input {
+  width: 6em;
+}
+.lobby-think small {
+  color: var(--ink-muted);
+  font-size: var(--fs-sm);
 }
 .lobby-hint {
   color: var(--ink-muted);

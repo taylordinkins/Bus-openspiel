@@ -20,6 +20,7 @@ from server.bots import bot_rng, get_bot, is_valid_seat_type
 
 log = logging.getLogger(__name__)
 
+DEFAULT_THINK_TIME_S = 5.0
 CHANCE = -1  # actor marker for chance outcomes in `Session.actors`
 
 
@@ -60,8 +61,10 @@ class Session:
         scenario: dict[str, Any] | None = None,
         inline_bots: bool = True,
         salt: str = "",
+        bot_think_time_s: float = DEFAULT_THINK_TIME_S,
     ) -> None:
         self.id = session_id
+        self.bot_think_time_s = bot_think_time_s
         # inline_bots: mutations play bot turns synchronously (tests/tools). Otherwise a
         # background worker does it off the lock (D28).
         self.inline_bots = inline_bots
@@ -145,6 +148,25 @@ class Session:
                 self._worker_running = False
             raise
 
+    def _choose(self, seat_type: str, state: pyspiel.State, rng: random.Random) -> int:
+        """Ask the seat's bot for an action, within this game's think-time cap.
+
+        A search bot (one with `with_time_limit`) that raises or returns an illegal action falls
+        back to the heuristic bot; other bots' errors propagate.
+        """
+        bot = get_bot(seat_type)
+        limit = getattr(bot, "with_time_limit", None)
+        if limit is None:
+            return bot.choose(state, rng)
+        try:
+            a = limit(self.bot_think_time_s).choose(state, rng)
+            if a in state.legal_actions():
+                return a
+            log.warning("bot %r returned illegal action %s; using heuristic", seat_type, a)
+        except Exception:
+            log.exception("bot %r failed in session %s; using heuristic", seat_type, self.id)
+        return get_bot("heuristic").choose(state, bot_rng(self.seed, len(self.history), self.salt))
+
     def _bot_worker(self) -> None:
         # The flag is cleared only under the lock together with the "nothing pending" check, and
         # mutators call schedule_bots() under the lock, so a mutation either is seen by the next
@@ -161,7 +183,7 @@ class Session:
                     clone = self.state.clone()
                     rng = bot_rng(self.seed, len(self.history), self.salt)
                 try:
-                    a = get_bot(seat_type).choose(clone, rng)  # slow part, outside the lock
+                    a = self._choose(seat_type, clone, rng)  # slow part, outside the lock
                 except Exception as e:
                     log.exception("bot %r failed in session %s", seat_type, self.id)
                     # Check the version and record the error in one locked block: a Back/Rewind/
@@ -211,8 +233,8 @@ class Session:
         steps = 0
         while self.pending_bot and (max_steps is None or steps < max_steps):
             seat = self.state.current_player()
-            a = get_bot(self.seats[seat]).choose(
-                self.state, bot_rng(self.seed, len(self.history), self.salt)
+            a = self._choose(
+                self.seats[seat], self.state, bot_rng(self.seed, len(self.history), self.salt)
             )
             if a not in self.state.legal_actions():
                 raise IllegalAction(f"bot {self.seats[seat]!r} chose illegal action {a}")
@@ -453,6 +475,7 @@ class SessionStore:
         history: Sequence[int] = (),
         scenario: dict[str, Any] | None = None,
         salt: str = "",
+        bot_think_time_s: float = DEFAULT_THINK_TIME_S,
     ) -> Session:
         """New session; a non-empty `history` (import) is validated by replay."""
         if game not in self.adapters:
@@ -467,6 +490,7 @@ class SessionStore:
             scenario,
             self.inline_bots,
             salt,
+            bot_think_time_s,
         )
         with self._lock:
             self.sessions[session.id] = session
