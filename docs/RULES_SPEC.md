@@ -1,6 +1,6 @@
 # Bus — Rules Specification
 
-**Status:** AMENDING
+**Status:** APPROVED
 
 Contract between the rulebook and the engine. Every rule behaviour in `bus/` must trace to an entry here (CLAUDE.md). Only the user changes the Status line (D12). Entries marked ⚑ are defaults the user may veto during the Phase 0 review.
 
