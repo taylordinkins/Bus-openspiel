@@ -22,7 +22,7 @@
    "round": 4,
    "phase": "END",
    "start_player": 3,
-   "clock": "office",
+   "clock": "pub",
    "stones_on_clock": 3,
    "seats": [
     {
@@ -96,7 +96,7 @@
     {
      "site": 2,
      "type": "office",
-     "occupied": true
+     "occupied": false
     },
     {
      "site": 3,
@@ -106,12 +106,12 @@
     {
      "site": 4,
      "type": "office",
-     "occupied": true
+     "occupied": false
     },
     {
      "site": 5,
      "type": "pub",
-     "occupied": false
+     "occupied": true
     },
     {
      "site": 6,
@@ -121,7 +121,7 @@
     {
      "site": 7,
      "type": "pub",
-     "occupied": false
+     "occupied": true
     },
     {
      "site": 8,
@@ -176,7 +176,7 @@
     {
      "site": 18,
      "type": "office",
-     "occupied": true
+     "occupied": false
     },
     {
      "site": 19,
@@ -216,7 +216,8 @@
    ],
    "waiting": {
     "5": 6,
-    "18": 1,
+    "13": 1,
+    "22": 1,
     "25": 5
    },
    "supply": 0,

@@ -107,26 +107,53 @@ export function deliveryPath(geo: BusGeometry, data: BusViewData, seat: number, 
   return pts;
 }
 
-/** Walks and floats for one shown change's events, timed by `scale` (1 = normal speed). */
+/** The clock hand turning one space at the automatic Clock step (`clock_advanced`, D22). */
+export interface Turn {
+  from: string;
+  to: string;
+  delay: number;
+  duration: number;
+}
+
+/** Clockwise angle (degrees, 0..360) the hand sweeps from `from` to `to` on the clock face. */
+export function turnDegrees(angles: Readonly<Record<string, number>>, from: string, to: string): number {
+  const d = (angles[to] ?? 0) - (angles[from] ?? 0);
+  return ((d % 360) + 360) % 360;
+}
+
+/** Walks, floats and the clock turn for one shown change's events, timed by `scale`. */
 export function motionPlan(
   geo: BusGeometry,
   data: BusViewData,
   events: readonly GameEvent[],
   scale: number,
   seq: number,
-): { walks: Walk[]; floats: Float[] } {
+): { walks: Walk[]; floats: Float[]; turn: Turn | null } {
   const walks: Walk[] = [];
   const floats: Float[] = [];
+  let turn: Turn | null = null;
   const move = T_MOVE * scale;
+  // passengers walk after the hand has turned when the Clock step was automatic
+  let after = 0;
   events.forEach((e, n) => {
-    if (e.type === "scored") {
+    if (e.type === "clock_advanced" && typeof e.from === "string" && typeof e.to === "string") {
+      turn = { from: e.from, to: e.to, delay: 0, duration: move * 0.6 };
+      after = move * 0.6;
+    } else if (e.type === "scored") {
       const seat = Number(e.seat);
       const node = Number(e.node);
       const site = Number(e.site);
       const pts = deliveryPath(geo, data, seat, node, site);
       if (pts.length >= 2)
-        walks.push({ key: `${seq}:${n}:d`, kind: "deliver", pts, delay: 0, duration: move, seat, site });
-      floats.push({ key: `${seq}:${n}:f`, seat, site, points: Number(e.points), delay: move * 0.8, duration: T_FLOAT * scale });
+        walks.push({ key: `${seq}:${n}:d`, kind: "deliver", pts, delay: after, duration: move, seat, site });
+      floats.push({
+        key: `${seq}:${n}:f`,
+        seat,
+        site,
+        points: Number(e.points),
+        delay: after + move * 0.8,
+        duration: T_FLOAT * scale,
+      });
     } else if (e.type === "passengers_moved") {
       const list = (v: unknown) => (Array.isArray(v) ? (v as { site: number; node: number }[]) : []);
       const exited = list(e.exited);
@@ -136,7 +163,7 @@ export function motionPlan(
         const s = geo.sites[p.site];
         const nd = ptOf(geo, p.node);
         if (s && nd)
-          walks.push({ key: `${seq}:${n}:x${p.site}`, kind: "exit", pts: [[s.x, s.y], nd], delay: 0, duration: short, site: p.site });
+          walks.push({ key: `${seq}:${n}:x${p.site}`, kind: "exit", pts: [[s.x, s.y], nd], delay: after, duration: short, site: p.site });
       }
       for (const p of entered) {
         const s = geo.sites[p.site];
@@ -146,14 +173,14 @@ export function motionPlan(
             key: `${seq}:${n}:e${p.site}`,
             kind: "enter",
             pts: [nd, [s.x, s.y]],
-            delay: exited.length ? short : 0,
+            delay: after + (exited.length ? short : 0),
             duration: short,
             site: p.site,
           });
       }
     }
   });
-  return { walks, floats };
+  return { walks, floats, turn };
 }
 
 /** Point at fraction `t` (0..1) of the polyline's length. */
@@ -186,8 +213,12 @@ export function pointAlong(pts: readonly Pt[], t: number): Pt {
 export const easeInOut = (t: number): number => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
 
 /** How long the change's motion lasts (ms): the latest end of a walk, float or placement. */
-export function motionLength(plan: { walks: Walk[]; floats: Float[] }, scale: number): number {
+export function motionLength(
+  plan: { walks: Walk[]; floats: Float[]; turn?: Turn | null },
+  scale: number,
+): number {
   let end = T_PLACE * scale;
+  if (plan.turn) end = Math.max(end, plan.turn.delay + plan.turn.duration);
   for (const w of plan.walks) end = Math.max(end, w.delay + w.duration);
   for (const f of plan.floats) end = Math.max(end, f.delay + f.duration);
   return end;
@@ -203,13 +234,16 @@ export function motionDuration(events: readonly GameEvent[], scale: number): num
   const move = T_MOVE * scale;
   const short = move * 0.6;
   let end = place;
+  const turned = events.some((e) => e.type === "clock_advanced");
+  const after = turned ? short : 0;
+  if (turned) end = Math.max(end, short);
   for (const e of events) {
     if (e.type === "scored") {
-      end = Math.max(end, move + place, move * 0.8 + T_FLOAT * scale);
+      end = Math.max(end, after + move + place, after + move * 0.8 + T_FLOAT * scale);
     } else if (e.type === "passengers_moved") {
       const n = (v: unknown) => (Array.isArray(v) ? v.length : 0);
       const walk = (n(e.exited) > 0 ? short : 0) + (n(e.entered) > 0 ? short : 0);
-      if (walk > 0) end = Math.max(end, walk + place);
+      if (walk > 0) end = Math.max(end, after + walk + place);
     }
   }
   return end;

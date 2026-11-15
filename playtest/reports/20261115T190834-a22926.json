@@ -1,0 +1,618 @@
+{
+  "report_id": "20261115T190834-a22926",
+  "created_at": "2026-11-15T19:08:34.352268+00:00",
+  "note": "Time clock should automatically advance if stone is not taken, if I recall correctly, during the 5 Clock resolution. Please check this with the rules. ",
+  "category": "engine",
+  "session_id": "e63c97ae41514ff0b2cedb9840ed57c4",
+  "game": "bus",
+  "params": {
+    "num_players": 3,
+    "returns": "win_loss"
+  },
+  "seats": [
+    "human",
+    "human",
+    "human"
+  ],
+  "seed": 187476009,
+  "salt": "65e402899674a0d74caa10dcbc0ddc4e",
+  "export": {
+    "game": "bus",
+    "params": {
+      "num_players": 3,
+      "returns": "win_loss"
+    },
+    "seats": [
+      "human",
+      "human",
+      "human"
+    ],
+    "history": [
+      154,
+      149,
+      173,
+      178,
+      166,
+      152,
+      31,
+      47,
+      41,
+      22,
+      122,
+      21,
+      5,
+      5,
+      5,
+      2,
+      0,
+      1,
+      7,
+      7,
+      7,
+      38,
+      289,
+      289,
+      298,
+      331
+    ]
+  },
+  "view": {
+    "id": "e63c97ae41514ff0b2cedb9840ed57c4",
+    "game": "bus",
+    "seats": [
+      "human",
+      "human",
+      "human"
+    ],
+    "seat_types": [
+      "human",
+      "human",
+      "human"
+    ],
+    "bot_thinking": false,
+    "bot_error": null,
+    "seat": 2,
+    "history_length": 26,
+    "history": [
+      {
+        "index": 0,
+        "actor": 0,
+        "id": 154,
+        "label": "P0: build house at site 2 (A, n13)",
+        "events": []
+      },
+      {
+        "index": 1,
+        "actor": 0,
+        "id": 149,
+        "label": "P0: build office at site 0 (A, n10)",
+        "events": []
+      },
+      {
+        "index": 2,
+        "actor": 1,
+        "id": 173,
+        "label": "P1: build office at site 8 (A, n20)",
+        "events": []
+      },
+      {
+        "index": 3,
+        "actor": 1,
+        "id": 178,
+        "label": "P1: build house at site 10 (A, n21)",
+        "events": []
+      },
+      {
+        "index": 4,
+        "actor": 2,
+        "id": 166,
+        "label": "P2: build house at site 6 (A, n18)",
+        "events": []
+      },
+      {
+        "index": 5,
+        "actor": 2,
+        "id": 152,
+        "label": "P2: build office at site 1 (A, n14)",
+        "events": []
+      },
+      {
+        "index": 6,
+        "actor": 0,
+        "id": 31,
+        "label": "P0: start line on s23 (n10-n13)",
+        "events": []
+      },
+      {
+        "index": 7,
+        "actor": 1,
+        "id": 47,
+        "label": "P1: start line on s39 (n17-n20)",
+        "events": []
+      },
+      {
+        "index": 8,
+        "actor": 2,
+        "id": 41,
+        "label": "P2: start line on s33 (n14-n18)",
+        "events": []
+      },
+      {
+        "index": 9,
+        "actor": 2,
+        "id": 22,
+        "label": "P2: extend end 0 via s14 (n5-n14) to n5",
+        "events": []
+      },
+      {
+        "index": 10,
+        "actor": 1,
+        "id": 122,
+        "label": "P1: extend end 1 via s44 (n20-n25) to n25",
+        "events": []
+      },
+      {
+        "index": 11,
+        "actor": 0,
+        "id": 21,
+        "label": "P0: extend end 0 via s13 (n5-n10) to n5",
+        "events": [
+          {
+            "type": "round_started",
+            "round": 1
+          }
+        ]
+      },
+      {
+        "index": 12,
+        "actor": 0,
+        "id": 5,
+        "label": "P0: select Vrrooomm!",
+        "events": []
+      },
+      {
+        "index": 13,
+        "actor": 1,
+        "id": 5,
+        "label": "P1: select Vrrooomm!",
+        "events": []
+      },
+      {
+        "index": 14,
+        "actor": 2,
+        "id": 5,
+        "label": "P2: select Vrrooomm!",
+        "events": []
+      },
+      {
+        "index": 15,
+        "actor": 0,
+        "id": 2,
+        "label": "P0: select Passengers",
+        "events": []
+      },
+      {
+        "index": 16,
+        "actor": 1,
+        "id": 0,
+        "label": "P1: select Lines",
+        "events": []
+      },
+      {
+        "index": 17,
+        "actor": 2,
+        "id": 1,
+        "label": "P2: select Buses",
+        "events": []
+      },
+      {
+        "index": 18,
+        "actor": 0,
+        "id": 7,
+        "label": "P0: drop out",
+        "events": []
+      },
+      {
+        "index": 19,
+        "actor": 1,
+        "id": 7,
+        "label": "P1: drop out",
+        "events": []
+      },
+      {
+        "index": 20,
+        "actor": 2,
+        "id": 7,
+        "label": "P2: drop out",
+        "events": [
+          {
+            "type": "selection_ended"
+          }
+        ]
+      },
+      {
+        "index": 21,
+        "actor": 1,
+        "id": 38,
+        "label": "P1: extend end 0 via s30 (n13-n17) to n13",
+        "events": [
+          {
+            "type": "bus_added",
+            "seat": 2,
+            "buses": 2
+          }
+        ]
+      },
+      {
+        "index": 22,
+        "actor": 0,
+        "id": 289,
+        "label": "P0: passenger to station n5",
+        "events": []
+      },
+      {
+        "index": 23,
+        "actor": 0,
+        "id": 289,
+        "label": "P0: passenger to station n5",
+        "events": []
+      },
+      {
+        "index": 24,
+        "actor": 0,
+        "id": 298,
+        "label": "P0: pick passenger at n5",
+        "events": []
+      },
+      {
+        "index": 25,
+        "actor": 0,
+        "id": 331,
+        "label": "P0: deliver to site 2 (A, n13)",
+        "events": [
+          {
+            "type": "scored",
+            "seat": 0,
+            "points": 1,
+            "node": 5,
+            "site": 2
+          },
+          {
+            "type": "marker_skipped",
+            "action": "vrrooomm",
+            "letter": 1,
+            "owner": 1
+          }
+        ]
+      }
+    ],
+    "dev_mode": false,
+    "current_player": 2,
+    "is_terminal": false,
+    "legal_actions": [
+      {
+        "id": 298,
+        "label": "P2: pick passenger at n5",
+        "kind": "pick_passenger",
+        "params": {
+          "node": 5,
+          "waiting": 1
+        }
+      },
+      {
+        "id": 311,
+        "label": "P2: pick passenger at n18",
+        "kind": "pick_passenger",
+        "params": {
+          "node": 18,
+          "waiting": 1
+        }
+      }
+    ],
+    "returns": null,
+    "winners": null,
+    "view": {
+      "seat": 2,
+      "current_player": 2,
+      "is_terminal": false,
+      "legal_actions": [
+        {
+          "id": 298,
+          "label": "P2: pick passenger at n5",
+          "kind": "pick_passenger",
+          "params": {
+            "node": 5,
+            "waiting": 1
+          }
+        },
+        {
+          "id": 311,
+          "label": "P2: pick passenger at n18",
+          "kind": "pick_passenger",
+          "params": {
+            "node": 18,
+            "waiting": 1
+          }
+        }
+      ],
+      "returns": null,
+      "winners": null,
+      "view": {
+        "state": {
+          "format": 1,
+          "parameters": {
+            "players": 3,
+            "returns": "win_loss"
+          },
+          "round": 1,
+          "phase": "VP",
+          "current_player": 2,
+          "start_player": 0,
+          "clock": "house",
+          "stones_on_clock": 4,
+          "seats": [
+            {
+              "points": 1,
+              "stones": 0,
+              "buses": 1,
+              "markers_left": 18,
+              "line": [
+                13,
+                23
+              ],
+              "last_score_move": 26
+            },
+            {
+              "points": 0,
+              "stones": 0,
+              "buses": 1,
+              "markers_left": 18,
+              "line": [
+                30,
+                39,
+                44
+              ],
+              "last_score_move": null
+            },
+            {
+              "points": 0,
+              "stones": 0,
+              "buses": 2,
+              "markers_left": 18,
+              "line": [
+                14,
+                33
+              ],
+              "last_score_move": null
+            }
+          ],
+          "buildings": [
+            {
+              "site": 0,
+              "type": "office",
+              "occupied": false
+            },
+            {
+              "site": 1,
+              "type": "office",
+              "occupied": false
+            },
+            {
+              "site": 2,
+              "type": "house",
+              "occupied": true
+            },
+            {
+              "site": 6,
+              "type": "house",
+              "occupied": false
+            },
+            {
+              "site": 8,
+              "type": "office",
+              "occupied": false
+            },
+            {
+              "site": 10,
+              "type": "house",
+              "occupied": false
+            }
+          ],
+          "waiting": {
+            "5": 1,
+            "13": 1,
+            "17": 1,
+            "18": 1,
+            "21": 1
+          },
+          "supply": 9,
+          "action_board": {
+            "lines": [
+              1,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "buses": [
+              2
+            ],
+            "passengers": [
+              0,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "buildings": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "clock": [
+              null
+            ],
+            "vrrooomm": [
+              0,
+              1,
+              2,
+              null,
+              null,
+              null
+            ],
+            "starting_player": [
+              null
+            ]
+          },
+          "pending": {
+            "cursor": {
+              "letter": 2
+            },
+            "moves_left": 1
+          },
+          "move_offset": 26
+        },
+        "derived": {
+          "seats": [
+            {
+              "line_markers_left": 23,
+              "line_nodes": [
+                5,
+                10,
+                13
+              ],
+              "ends": [
+                5,
+                13
+              ],
+              "dropped": false
+            },
+            {
+              "line_markers_left": 22,
+              "line_nodes": [
+                13,
+                17,
+                20,
+                25
+              ],
+              "ends": [
+                13,
+                25
+              ],
+              "dropped": false
+            },
+            {
+              "line_markers_left": 23,
+              "line_nodes": [
+                5,
+                14,
+                18
+              ],
+              "ends": [
+                5,
+                18
+              ],
+              "dropped": false
+            }
+          ],
+          "street_lines": {
+            "13": [
+              0
+            ],
+            "23": [
+              0
+            ],
+            "30": [
+              1
+            ],
+            "39": [
+              1
+            ],
+            "44": [
+              1
+            ],
+            "14": [
+              2
+            ],
+            "33": [
+              2
+            ]
+          },
+          "open_tier": "A",
+          "resolving": {
+            "action": "vrrooomm",
+            "letter": 2,
+            "owner": 2,
+            "power": null
+          },
+          "result": null
+        },
+        "prompt": {
+          "phase": "VP",
+          "actor": 2,
+          "units_left": 1,
+          "power": null,
+          "context": {
+            "clock": "house",
+            "moves_left": 1,
+            "picked_node": null
+          }
+        },
+        "targets": {
+          "streets": {},
+          "street_ends": {},
+          "sites": {},
+          "stations": {},
+          "nodes": {
+            "5": 298,
+            "18": 311
+          },
+          "actions": {},
+          "clock": {
+            "advance": null,
+            "pause": null
+          },
+          "buttons": []
+        }
+      }
+    }
+  },
+  "history": [
+    154,
+    149,
+    173,
+    178,
+    166,
+    152,
+    31,
+    47,
+    41,
+    22,
+    122,
+    21,
+    5,
+    5,
+    5,
+    2,
+    0,
+    1,
+    7,
+    7,
+    7,
+    38,
+    289,
+    289,
+    298,
+    331
+  ],
+  "resolution": {
+    "class": "spec gap (user ruling D22)",
+    "rules": "Spec change (user decision D22, 2026-11-15): the Clock step runs every round and advances automatically when no Clock marker is placed; R-029, R-050..R-053. Regression: tests/regressions/test_report_a22926.py.",
+    "commit": "D22 engine commit"
+  }
+}

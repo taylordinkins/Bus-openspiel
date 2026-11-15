@@ -140,6 +140,21 @@ def test_INV_non_terminal_state_without_legal_action_is_flagged() -> None:
     assert _check(p)
 
 
+def test_INV_vrrooomm_states_are_post_clock_step() -> None:
+    """R-055/D22 (playtest 2b0b32): while Vrrooomm! resolves, no passenger waits beside an empty
+    building of the clock's type (proxy: one more passenger at the node of resolve_vp's empty
+    house s0) and every occupied building is of the clock's type (proxy: office s1 occupied)."""
+    s = H.load_fixture("resolve_vp")
+    assert s.phase == "VP" and s.clock == "house" and s.site_building(0) == "house"
+    assert not [x for x in _check(s) if x.startswith("Clock step")]
+    node0 = B.sites[0].node
+    p = Proxy(s, waiting_at=lambda n: s.waiting_at(n) + (n == node0))
+    assert any(x.startswith("Clock step: a passenger waits") for x in _check(p))
+    assert s.site_building(1) == "office"
+    q = Proxy(s, is_occupied=lambda t: s.is_occupied(t) or t == 1)
+    assert any(x.startswith("Clock step: site 1") for x in _check(q))
+
+
 def test_INV_win_loss_returns_must_sum_to_zero() -> None:
     """PLAN §6.3: win_loss returns sum to 0 at a terminal state."""
     p = Proxy(H.load_fixture("end_sites_full"), returns=[1.0, 1.0, 0.0, 0.0])

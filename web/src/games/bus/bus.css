@@ -804,6 +804,22 @@
     opacity: 1;
   }
 }
+/* the automatic Clock step (clock_advanced, D22): the hand sweeps clockwise from its old type;
+   duration and delay are set inline from the motion plan, the origin is the clock's centre */
+.bus-svg .clock-hand[data-anim="turn"] {
+  transform-box: view-box;
+  animation-name: bus-turn;
+  animation-timing-function: var(--ease-move);
+  animation-fill-mode: both;
+}
+@keyframes bus-turn {
+  from {
+    transform: rotate(var(--turn-from, 0deg));
+  }
+  to {
+    transform: none;
+  }
+}
 .bus-walker {
   filter: drop-shadow(0 2px 1px rgba(40, 20, 4, 0.35));
 }

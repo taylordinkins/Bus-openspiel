@@ -19,7 +19,8 @@
     },
     {
       "site": 3,
-      "type": "house"
+      "type": "house",
+      "occupied": true
     },
     {
       "site": 4,
@@ -31,7 +32,8 @@
     },
     {
       "site": 6,
-      "type": "house"
+      "type": "house",
+      "occupied": true
     },
     {
       "site": 7,
@@ -130,5 +132,5 @@
     "phase": "VD",
     "current_player": 1
   },
-  "description": "Vrrooomm! deliver step after picking the passenger at one node."
+  "description": "Vrrooomm! deliver step after picking the passenger at one node. Clock house after the Clock step (S-CLOCKSTEP, D22): the houses at n13 and n18 hold a passenger each and one more waits at each of those nodes."
 }

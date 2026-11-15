@@ -275,6 +275,8 @@ Should-fix and minor findings, tagged with the phase that found them. `/close-ph
 - [Phase 0, both reviewers] `layout.bus_grid` validation requires exactly 20 cells; that is correct (5 seat columns × 4 added buses, D19) — keep it, and add the column-per-seat accessor in Phase 2 unit 4.
 - [x] *(done Phase 2: curtain kept by user decision, UI_DESIGN §7 rewritten; it now waits for the mover's animation)* [Phase 2 unit 9, implementer, should-fix] Hotseat curtain contradicts UI_DESIGN §7 ("hotseat has no curtain"): the shell still shows a hand-off curtain right after each move, hiding the mover's animation. Decide with the user which is right (change the doc or the shell), then fix.
 - [Phase 2 unit 9, implementer, minor] vitest prints React `act()` warnings (`shell.test.tsx` 12, `pacing.test.tsx` 2, `useGame.test.tsx` auto-advance tests, ~170 in total); source of most not traced and not checked against pre-unit-9. Tests pass; wrap the state updates in `act`/`waitFor` or silence deliberately.
+- [Phase 2 unit 11 / D22, rules-auditor, minor] `web/src/games/bus/fixtures/interaction/VP.lone.json` is hand-made and shows a VP state S-CLOCKSTEP would reject (waiting passengers at n13/n18 beside empty houses); rebuild it as a valid post-Clock-step state.
+- [D22, implementer, minor] Only the automatic Clock step sweeps the clock hand; a Clock marker's own advance still fades. Consider sweeping both.
 
 ## 10. Risks
 

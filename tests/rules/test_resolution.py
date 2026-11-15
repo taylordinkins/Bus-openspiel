@@ -300,8 +300,10 @@ def test_R030_buildings_chain_c_b_a() -> None:
 def test_R030_vrrooomm_letter_a_first() -> None:
     """R-030: Vrrooomm! resolves a first, then b.  Position vrrooomm/base: a = P2, b = P1, both
     with a waiting passenger and an empty house on their line (count 1 each), so the first node
-    is VP for letter a (P2); after P2's move comes letter b (P1)."""
+    is VP for letter a (P2); after P2's move comes letter b (P1).  The SEL position starts at pub
+    so that the automatic Clock step (R-050, no Clock marker) turns it to house for Vrrooomm!."""
     base = H.load_doc("vrrooomm/base")
+    base["clock"] = "pub"
     s = enter(make_doc(board={VRROOOMM: [2, 1], STARTING: [1]}, base=base, pad=False))
     assert s.phase == "VP"
     assert node(s)[1] == 0

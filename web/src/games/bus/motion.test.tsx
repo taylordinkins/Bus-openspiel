@@ -15,6 +15,7 @@ import {
   pointAlong,
   T_MOVE,
   T_PLACE,
+  turnDegrees,
 } from "./motion";
 
 const geo = parseGeometry(geometry.geometry)!;
@@ -106,6 +107,33 @@ describe("unit9 motion plan (UI_DESIGN 3 motion, 6.6 events)", () => {
     expect(motionDuration([], 1)).toBe(T_PLACE);
   });
 
+  it("clock_advanced (automatic Clock step, D22) -> a clockwise turn, then the passengers walk", () => {
+    const ev = [
+      { type: "clock_advanced", from: "house", to: "office" },
+      {
+        type: "passengers_moved",
+        exited: [{ site: 3, node: geo.sites[3]!.node }],
+        entered: [{ site: 0, node: geo.sites[0]!.node }],
+      },
+    ];
+    const plan = motionPlan(geo, mid, ev, 1, 11);
+    expect(plan.turn).toEqual({ from: "house", to: "office", delay: 0, duration: T_MOVE * 0.6 });
+    expect(plan.walks.map((w) => [w.kind, w.delay])).toEqual([
+      ["exit", T_MOVE * 0.6],
+      ["enter", T_MOVE * 1.2],
+    ]);
+    expect(motionPlan(geo, mid, ev.slice(1), 1, 12).turn).toBeNull();
+    for (const scale of [1, 0.4]) {
+      const d = motionDuration(ev, scale);
+      expect(d).toBeGreaterThanOrEqual(motionLength(motionPlan(geo, mid, ev, scale, 13), scale));
+      expect(motionDuration(ev.slice(0, 1), scale)).toBeGreaterThanOrEqual(T_MOVE * 0.6 * scale);
+    }
+    const angles = geo.layout.clock.angles;
+    const deg = turnDegrees(angles, "pub", "house");
+    expect(deg).toBeGreaterThan(0);
+    expect(deg).toBeLessThan(360);
+  });
+
   it("pointAlong interpolates by length", () => {
     const pts: [number, number][] = [
       [0, 0],
@@ -186,6 +214,26 @@ describe("unit9 BusBoard motion", () => {
     expect(container.querySelectorAll('[data-testid="walker"]')).toHaveLength(0);
     expect(document.querySelectorAll('[data-testid="score-float"]')).toHaveLength(0);
     unmount();
+  });
+
+  it("the automatic Clock step turns the hand from its old type (D22)", () => {
+    const from = mid.state.clock;
+    const order = ["house", "office", "pub"];
+    const to = order[(order.indexOf(from) + 1) % 3]!;
+    const next = clone(mid);
+    next.state.clock = to;
+    const { container, rerender } = render(<BusBoard geo={geo} data={mid} />);
+    rerender(<BusBoard geo={geo} data={next} motion={motion(1, [{ type: "clock_advanced", from, to }])} />);
+    const hand = container.querySelector(".clock-hand") as SVGGElement;
+    expect(hand.getAttribute("data-clock")).toBe(to);
+    expect(hand.getAttribute("data-anim")).toBe("turn");
+    expect(hand.getAttribute("data-from")).toBe(from);
+    expect(hand.style.getPropertyValue("--turn-from")).toBe(`${-turnDegrees(geo.layout.clock.angles, from, to)}deg`);
+    // a Clock marker's own advance (no event) keeps the plain ease-in
+    const again = clone(next);
+    again.state.clock = from;
+    rerender(<BusBoard geo={geo} data={again} motion={motion(2)} />);
+    expect(container.querySelector(".clock-hand")?.getAttribute("data-anim")).toBe("in");
   });
 
   it("legal targets stay clickable during motion (the motion layer takes no pointer events)", () => {

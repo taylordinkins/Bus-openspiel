@@ -1,5 +1,5 @@
 {
- "id": "3fffc6e7bba84c00bdd13374790a2598",
+ "id": "b4b1bd1b385e420287d76d8035e9d6e5",
  "game": "bus",
  "seats": [
   "human",
@@ -44,19 +44,6 @@
    }
   },
   {
-   "id": 346,
-   "label": "P1: deliver to site 17 (B, n16)",
-   "kind": "deliver_to",
-   "params": {
-    "site": 17,
-    "node": 16,
-    "tier": "B",
-    "building_type": "house",
-    "picked_node": 16,
-    "same_node": true
-   }
-  },
-  {
    "id": 368,
    "label": "P1: deliver to site 39 (D, n19)",
    "kind": "deliver_to",
@@ -88,19 +75,6 @@
      "building_type": "house",
      "picked_node": 16,
      "same_node": false
-    }
-   },
-   {
-    "id": 346,
-    "label": "P1: deliver to site 17 (B, n16)",
-    "kind": "deliver_to",
-    "params": {
-     "site": 17,
-     "node": 16,
-     "tier": "B",
-     "building_type": "house",
-     "picked_node": 16,
-     "same_node": true
     }
    },
    {
@@ -197,7 +171,7 @@
      {
       "site": 3,
       "type": "house",
-      "occupied": false
+      "occupied": true
      },
      {
       "site": 4,
@@ -212,7 +186,7 @@
      {
       "site": 6,
       "type": "house",
-      "occupied": false
+      "occupied": true
      },
      {
       "site": 7,
@@ -221,11 +195,6 @@
      },
      {
       "site": 8,
-      "type": "house",
-      "occupied": false
-     },
-     {
-      "site": 17,
       "type": "house",
       "occupied": false
      },
@@ -240,8 +209,6 @@
      "16": 1,
      "17": 1,
      "18": 1,
-     "19": 1,
-     "20": 1,
      "21": 1
     },
     "supply": 8,
@@ -404,9 +371,6 @@
     "sites": {
      "8": [
       337
-     ],
-     "17": [
-      346
      ],
      "39": [
       368

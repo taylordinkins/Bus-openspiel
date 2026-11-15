@@ -239,6 +239,13 @@ describe("log", () => {
     expect(log.querySelectorAll("li").length).toBe(logGame.history.length + logGame.history.flatMap((h) => h.events.filter((e) => e.type !== "round_started")).length);
   });
 
+  it("names the automatic Clock step (D22): clock_advanced has no seat", () => {
+    expect(describeEvent({ type: "clock_advanced", from: "house", to: "office" })).toEqual({
+      text: "Clock advances House → Office (no Clock marker)",
+      hl: {},
+    });
+  });
+
   it("falls back to a readable line for an unknown event type", () => {
     expect(describeEvent({ type: "sparkle", x: 1 }).text).toBe('Unhandled event "sparkle": {"type":"sparkle","x":1}');
     const rows = logRows([{ index: 0, actor: 1, id: 3, label: "Do", events: [{ type: "sparkle" }] }]);

@@ -48,7 +48,7 @@ import {
 import { IconFit, IconMinus, IconPlus } from "../../theme/icons";
 import type { BoardMotion } from "../registry";
 import { FloatLayer, WalkLayer } from "./BusMotion";
-import { freshKeys, motionLength, motionPlan, type Float, type Walk } from "./motion";
+import { freshKeys, motionLength, motionPlan, turnDegrees, type Float, type Walk } from "./motion";
 
 const NO_KEYS: ReadonlySet<string> = new Set();
 
@@ -644,8 +644,23 @@ export default function BusBoard({
     const angle = ((lay.clock.angles[st.clock] ?? 0) * Math.PI) / 180;
     const hx = lay.clock.x + lay.clock.hand * Math.cos(angle);
     const hy = lay.clock.y + lay.clock.hand * Math.sin(angle);
+    // The automatic Clock step (`clock_advanced`, D22) sweeps the hand clockwise from its old
+    // type instead of fading it in.
+    const turn = plan?.turn && plan.turn.to === st.clock && fresh.has(`clock:${st.clock}`) ? plan.turn : null;
+    const handAnim = turn
+      ? {
+          "data-anim": "turn",
+          "data-from": turn.from,
+          style: {
+            transformOrigin: `${lay.clock.x}px ${lay.clock.y}px`,
+            "--turn-from": `${-turnDegrees(lay.clock.angles, turn.from, turn.to)}deg`,
+            animationDuration: `${Math.round(turn.duration)}ms`,
+            animationDelay: `${Math.round(turn.delay)}ms`,
+          } as CSSProperties,
+        }
+      : animIn(`clock:${st.clock}`);
     const clockEl = (
-      <g className="clock-hand" data-clock={st.clock} {...animIn(`clock:${st.clock}`)}>
+      <g className="clock-hand" data-clock={st.clock} {...handAnim}>
         <line x1={lay.clock.x} y1={lay.clock.y} x2={hx} y2={hy} stroke={PAPER} strokeWidth={14} strokeLinecap="round" />
         <line x1={lay.clock.x} y1={lay.clock.y} x2={hx} y2={hy} stroke={INK} strokeWidth={8} strokeLinecap="round" />
         <circle cx={lay.clock.x} cy={lay.clock.y} r={11} fill={INK} stroke={PAPER} strokeWidth={3} />

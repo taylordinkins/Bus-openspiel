@@ -132,7 +132,7 @@ The owner gets +1 bus if they have fewer than 5; otherwise nothing. No decision,
 - **Who:** the marker owner; letter a first. Not dwindling (R-056).
 - **Forced count** (R-060): `moves = min(buses, waiting passengers on the owner's line, empty buildings of the clock's type on the owner's line)`, computed when the marker starts. If it is 0 no node is emitted. Each move reduces all three quantities by 1, so the count is always achievable whatever the owner picks; the owner cannot stop early.
 - **`VP` legal:** `PICK_PASSENGER(n)` for each node `n` that is on the owner's line (R-058) and has at least one waiting passenger. Passengers inside buildings are not eligible.
-- **`VD` legal:** `DELIVER_TO(t)` where `t` is the **canonical site**: for every node `m` on the owner's line that has at least one empty building of the clock's type, the **lowest site id** among those empty buildings at `m` (R-059, R-063). The passenger's own node is allowed (R-061).
+- **`VD` legal:** `DELIVER_TO(t)` where `t` is the **canonical site**: for every node `m` on the owner's line that has at least one empty building of the clock's type, the **lowest site id** among those empty buildings at `m` (R-059, R-063). The picked passenger's own node never qualifies: after the Clock step it has no empty building of the clock's type (R-055), and loaded states where it would are rejected (`S-CLOCKSTEP`), so every delivery goes elsewhere on the line (R-061 retired, D22).
 - **Pending state:** `moves_left` (1..5), `picked_node` (none in `VP`, set in `VD`), the owner. `DELIVER_TO` moves the passenger, fills the building, adds 1 point, sets `last_score_move[owner]` to the move number (R-062), decrements `moves_left`; the next node is `VP` while `moves_left > 0`.
 - No sequence of moves is ever blocked: after any `PICK_PASSENGER` at least one `DELIVER_TO` is legal.
 
@@ -178,7 +178,7 @@ Returns a JSON-serialisable dict for any legal action (and, via `decode_action`,
 | `clock_advance` | `from` and `to` clock types |
 | `clock_pause` | `stones_left_after`, `ends_game` (bool) |
 | `pick_passenger` | `node`, `waiting` (count there) |
-| `deliver_to` | `site`, `node`, `tier`, `building_type`, `picked_node`, `same_node` (bool) |
+| `deliver_to` | `site`, `node`, `tier`, `building_type`, `picked_node`, `same_node` (bool; always false for a legal delivery since D22 retired R-061, kept so the metadata shape is stable) |
 
 The UI makes every legal action reachable by clicking: streets for `extend`, sites for `build` (type chosen in a popover, `building_type` per id), station nodes for `passenger_to`, the clock for `clock_*`, passenger nodes then site nodes for `pick`/`deliver`, and the action board for `select`/`drop_out` (D9).
 

@@ -49,6 +49,9 @@ def _apply_events(state: Json, events: list[Json]) -> None:
                 if state["waiting"][k] == 0:
                     del state["waiting"][k]
                 occupied.add(x["site"])
+        elif t == "clock_advanced":  # the automatic Clock step (R-050, D22)
+            assert state["clock"] == e["from"]
+            state["clock"] = e["to"]
         elif t == "round_started":
             state["round"] = e["round"]
         elif t == "game_ended":
@@ -57,7 +60,7 @@ def _apply_events(state: Json, events: list[Json]) -> None:
         b["occupied"] = b["site"] in occupied
 
 
-def _compare(pred: Json, nxt: Json, *, waiting: bool) -> None:
+def _compare(pred: Json, nxt: Json, *, waiting: bool, clock: bool = False) -> None:
     for i, (a, b) in enumerate(zip(pred["seats"], nxt["seats"], strict=True)):
         assert a["buses"] == b["buses"], f"seat {i} buses"
         assert a["points"] == b["points"], f"seat {i} points"
@@ -70,6 +73,8 @@ def _compare(pred: Json, nxt: Json, *, waiting: bool) -> None:
     assert occ(pred) == occ(nxt)
     if waiting:
         assert pred["waiting"] == nxt["waiting"]
+    if clock:
+        assert pred["clock"] == nxt["clock"]
     if nxt["phase"] == "END":
         assert pred["phase"] == "END"
     else:
@@ -93,10 +98,13 @@ def test_events_match_state_diffs_direct(n: int) -> None:
         seen.update(e["type"] for e in events)
         if meta["kind"] == "passenger_to":
             pred["waiting"][str(meta["node"])] = pred["waiting"].get(str(meta["node"]), 0) + 1
+        if meta["kind"] == "clock_advance":  # the CK decision itself moves the hand
+            pred["clock"] = meta["to"]
         _apply_events(pred, events)
         nxt = dump_scenario(state)
-        # Round end resets nothing else we track; waiting only changes via the three sources.
-        _compare(pred, nxt, waiting=True)
+        # Round end resets nothing else we track; waiting only changes via the three sources,
+        # the clock only via CLOCK_ADVANCE or the automatic Clock step's event.
+        _compare(pred, nxt, waiting=True, clock=True)
     assert {"round_started", "round_ended", "game_ended"} <= seen
 
 
@@ -119,6 +127,7 @@ def test_event_types_seen_in_random_games() -> None:
         "round_ended",
         "game_ended",
         "passengers_moved",
+        "clock_advanced",
     } <= seen
     assert "bus_added" in seen or "marker_skipped" in seen
 
@@ -238,3 +247,25 @@ def test_valid_scenario_creates_game() -> None:
     r = c.post("/api/games", json={"game": "bus", "seats": ["human"] * n, "scenario": doc})
     assert r.status_code == 200, r.text
     assert r.json()["view"]["view"]["prompt"]["phase"] == "BD"
+
+
+def test_automatic_clock_step_emits_clock_advanced_before_vrrooomm() -> None:
+    """R-029, R-050, R-051 (D22): playtest 2b0b32's round 1 has no Clock marker.  The transition
+    out of the last Passengers decision runs the automatic Clock step: one ``clock_advanced``
+    event house -> office, no ``passengers_moved`` (nobody stands at an office), and the next
+    state is P0's Vrrooomm! pick."""
+    history = [154, 149, 173, 178, 166, 152, 31, 47, 41, 22, 122, 21]
+    history += [5, 5, 5, 2, 0, 1, 7, 7, 7, 38, 289, 289]
+    ad = BusAdapter()
+    state = ad.load({"num_players": 3}).new_initial_state()
+    per_action: list[list[Json]] = []
+    for a in history:
+        before = state.clone()
+        state.apply_action(a)
+        per_action.append(ad.events(before, a, state))
+    clock = [(i, e) for i, ev in enumerate(per_action) for e in ev if e["type"] == "clock_advanced"]
+    assert clock == [
+        (len(history) - 1, {"type": "clock_advanced", "from": "house", "to": "office"})
+    ]
+    assert not any(e["type"] == "passengers_moved" for e in per_action[-1])
+    assert isinstance(state, BusState) and state.phase == "VP" and state.clock == "office"

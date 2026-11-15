@@ -219,9 +219,9 @@ describe("unit8 (3) building type popover (UI_DESIGN 4: SB, BD)", () => {
 
   it("unit8: deliver_to sites (VD) post at once and never open a popover", async () => {
     const { container, onAct } = await mountReady(HAND["VD.multi"]!);
-    fireEvent.click(byId(container, "#site-17"));
+    fireEvent.click(byId(container, "#site-39")); // DELIVER_TO(39); no same-node site since D22
     expect(screen.queryByTestId("type-popover")).toBeNull();
-    expect(onAct.mock.calls).toEqual([[346]]);
+    expect(onAct.mock.calls).toEqual([[368]]);
   });
 });
 
@@ -280,7 +280,8 @@ describe("unit8 (4) VP to VD (6.7d)", () => {
     const { container } = await mountReady(f);
     const m = screen.getByTestId("picked-node");
     expect(m.getAttribute("data-node")).toBe(String(inner(f).prompt.context.picked_node));
-    expect(legalEls(container).map((e) => e.id).sort()).toEqual(["site-17", "site-39", "site-8"]);
+    // D22: the fixture has no empty house beside the picked passenger at n16 (S-CLOCKSTEP)
+    expect(legalEls(container).map((e) => e.id).sort()).toEqual(["site-39", "site-8"]);
     fireEvent.click(byId(container, "#node-16")); // the picked node is not a legal target in VD
     expect(screen.queryByTestId("picked-node")).not.toBeNull();
   });

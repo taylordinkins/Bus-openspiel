@@ -610,7 +610,7 @@ def test_R070_last_score_move_is_recorded_through_play_and_decides() -> None:
     d["seats"][2]["markers_left"] = 0
     d["seats"][1]["markers_left"] = 1
     s = H.load_doc_state(d)
-    s.apply_action(PICK_PASSENGER_BASE + 22)
+    s.apply_action(PICK_PASSENGER_BASE + 25)  # P2's passenger waits at station n25 (base, D22)
     site = next(a for a in s.legal_actions() if a >= DELIVER_TO_BASE)
     s.apply_action(site)
     assert s.is_terminal(), "only P1 has a marker in hand: markers end"

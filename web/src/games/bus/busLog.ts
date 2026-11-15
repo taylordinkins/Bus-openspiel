@@ -1,6 +1,6 @@
 import type { components } from "../../api/schema";
 import type { BusHighlight } from "./hoverStore";
-import { ACTION_TITLE, END_TYPE_TEXT } from "./promptText";
+import { ACTION_TITLE, BUILDING_NAME, END_TYPE_TEXT } from "./promptText";
 
 type HistoryEntry = components["schemas"]["HistoryEntry"];
 type Event = components["schemas"]["Event"];
@@ -33,6 +33,11 @@ export function describeEvent(e: Event): { text: string; hl: Partial<BusHighligh
           sites: n(e.site) === null ? [] : [n(e.site) as number],
         },
       };
+    case "clock_advanced": {
+      // the automatic Clock step of a round with no Clock marker (D22, R-050)
+      const name = (v: unknown) => (typeof v === "string" ? (BUILDING_NAME[v] ?? v) : "?");
+      return { text: `Clock advances ${name(e.from)} → ${name(e.to)} (no Clock marker)`, hl: {} };
+    }
     case "passengers_moved": {
       const out = ids(e.exited, "site");
       const inn = ids(e.entered, "site");

@@ -1,5 +1,5 @@
 {
- "id": "9a944348c8cc43c9a0108e479ca92115",
+ "id": "d6584373608b47db98019c8be055b194",
  "game": "bus",
  "seats": [
   "human",
@@ -165,7 +165,7 @@
      {
       "site": 3,
       "type": "house",
-      "occupied": false
+      "occupied": true
      },
      {
       "site": 4,
@@ -180,7 +180,7 @@
      {
       "site": 6,
       "type": "house",
-      "occupied": false
+      "occupied": true
      },
      {
       "site": 7,
@@ -197,7 +197,7 @@
      "20": 1,
      "21": 1
     },
-    "supply": 8,
+    "supply": 6,
     "action_board": {
      "lines": [
       null,

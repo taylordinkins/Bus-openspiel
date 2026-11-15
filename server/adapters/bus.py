@@ -278,9 +278,8 @@ def _events(before: rules.Core, action: int, after: rules.Core) -> list[JSON]:
                 "site": t,
             }
         )
-    if before.phase == rules.PHASE_CK and not (
-        after.phase == rules.PHASE_END and after.end_types == ("last_stone",)
-    ):  # R-053: no movement
+
+    def moved() -> None:  # R-054, R-055: step-out of every building, then step-in
         entered = list(after.occupied)
         exited = list(before.occupied)
         if entered or exited:
@@ -291,6 +290,21 @@ def _events(before: rules.Core, action: int, after: rules.Core) -> list[JSON]:
                     "entered": [{"site": t, "node": b.sites[t].node} for t in entered],
                 }
             )
+
+    def clock_step() -> None:  # R-050, R-051: the automatic Clock step (no Clock marker, D22)
+        out.append(
+            {
+                "type": "clock_advanced",
+                "from": C.BUILDING_TYPES[before.clock],
+                "to": C.BUILDING_TYPES[after.clock],
+            }
+        )
+        moved()
+
+    if before.phase == rules.PHASE_CK and not (
+        after.phase == rules.PHASE_END and after.end_types == ("last_stone",)
+    ):  # R-053: no movement
+        moved()
     # Selection ending (R-028) and markers passed over without a decision (R-029, R-043).
     positions = rules.resolution_positions(before)
     start: int | None = None
@@ -317,7 +331,14 @@ def _events(before: rules.Core, action: int, after: rules.Core) -> list[JSON]:
         else:
             end = len(positions)
         buses = [s.buses for s in before.seats]
+        # R-029, R-050: without a Clock marker the step runs once, when resolution crosses the
+        # Clock slot (after Buildings, before Vrrooomm!), also when the round ends right there.
+        auto = not owners[rules.ACT_CLOCK]
+        prev = positions[start][0] if start >= 0 else -1
         for a, k in positions[start + 1 : end]:
+            if auto and prev < rules.ACT_CLOCK < a:
+                clock_step()
+            prev = a
             owner = owners[a][k]
             if a == rules.ACT_BUSES and buses[owner] < C.BUSES_PER_PLAYER:
                 buses[owner] += 1
@@ -331,6 +352,9 @@ def _events(before: rules.Core, action: int, after: rules.Core) -> list[JSON]:
                         "owner": owner,
                     }
                 )
+        nxt = positions[end][0] if end < len(positions) else rules.ACT_STARTING
+        if auto and prev < rules.ACT_CLOCK < nxt:
+            clock_step()
     if (
         before.phase not in rules.SETUP_PHASES
         and before.phase != rules.PHASE_END

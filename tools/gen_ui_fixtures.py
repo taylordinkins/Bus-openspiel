@@ -76,9 +76,10 @@ def _variants() -> dict[str, tuple[dict[str, Any], list[int]]]:
     ck = load("resolve_ck.json")
     vp = load("resolve_vp.json")
     vp["waiting"].update({"19": 1, "20": 1})  # several passengers on the line to pick from
-    vd = json.loads(json.dumps(vp))
-    # several sites to deliver to
-    vd["buildings"] += [{"site": t, "type": "house"} for t in (8, 17, 39)]
+    vd = load("resolve_vp.json")
+    # several sites to deliver to: empty houses at n19 and n20, none beside the waiting passenger
+    # at n16 (a VD position must be one the Clock step leaves behind, S-CLOCKSTEP / D22)
+    vd["buildings"] += [{"site": t, "type": "house"} for t in (8, 39)]
     return {
         "LN.ends": (load("resolve_ln.json"), []),
         "LN.fullloop": (load("lines/full_loop.json"), []),  # a real R-041 loop at one node
