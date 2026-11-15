@@ -1,11 +1,5 @@
 import { cloneElement, useId, useState, type ReactElement } from "react";
 
-const STYLE = `
-.lg-tip{position:fixed;z-index:50;max-width:min(18rem,calc(100vw - 16px));padding:6px 8px;border-radius:8px;
-background:#2b2312;color:#f7efdc;font-size:.82rem;font-weight:400;line-height:1.3;text-align:left;
-box-shadow:0 2px 8px rgba(0,0,0,.4);pointer-events:none;white-space:normal}
-.lg-tip-wrap{display:inline-flex}
-`;
 
 /**
  * Hover/focus tooltip around a single element. The popover is position:fixed (so scrolling panels do not
@@ -40,7 +34,6 @@ export default function Tip({
         if (e.key === "Escape") setPos(null);
       }}
     >
-      <style>{STYLE}</style>
       {cloneElement(children, pos ? { "aria-describedby": id } : {})}
       {pos && (
         <span role="tooltip" id={id} className="lg-tip" style={{ left: pos.left, top: pos.top }}>

@@ -1,0 +1,122 @@
+/*
+ * Bus design tokens (UI_DESIGN §3a). The single source of colour, type, spacing and depth for the
+ * web app. Palette values follow docs/board-palette.md (sampled from the reworked map art); seat
+ * colours are the Lines stripes (D21). Components read these custom properties; avoid raw hex
+ * values elsewhere.
+ */
+:root {
+  /* ---- paper (the map's cream stock) */
+  --paper: #fff4d6; /* PAPER: board background */
+  --paper-raised: #fffaeb; /* cards and dialogs sitting on the paper */
+  --paper-sunk: #f8e9c2; /* wells, inputs, table stripes */
+  --paper-deep: #f1dcaa; /* page margin around the board */
+  --paper-edge: #e3c98f; /* hairlines on paper */
+
+  /* ---- inks */
+  --ink: #1a1a1a; /* INK: icons, text */
+  --ink-soft: #3f3123; /* secondary text, about 11:1 on paper */
+  --ink-muted: #6a5640; /* captions and hints, about 6:1 on paper (AA) */
+  --ink-on-dark: #fff4d6;
+  --sepia: #d7a273; /* the art's line-drawn crowd */
+  --sepia-ink: #8a5a36; /* ornament rules, about 5:1 on paper */
+
+  /* ---- the map's reds (frames, letter tiles, streets) */
+  --red: #b00a0a; /* RED */
+  --red-dark: #7e0606; /* RED_DARK */
+  --red-hover: #c51515;
+  --red-tint: #f6d8c8;
+  --stone: #8c1d1d; /* STONE */
+
+  /* ---- the logo and the river */
+  --logo-red: #e8141b;
+  --logo-yellow: #ffc400;
+  --logo-blue: #2e8fdc;
+  --river: #8fe3ff; /* RIVER */
+  --river-edge: #14b4f0; /* RIVER_EDGE */
+
+  /* ---- district tints */
+  --district-outer: #e3d5f0;
+  --district-mid: #fde3d6;
+  --district-core: #cde39a;
+
+  /* ---- interaction */
+  --glow: #ffd24a; /* legal-target glow and hover highlight on the board */
+  --glow-soft: rgba(255, 210, 74, 0.35);
+  --focus: #0a5fa3; /* focus ring: dark river blue, 6:1 on paper, distinct from the reds */
+  --focus-ring: 0 0 0 2px var(--paper-raised), 0 0 0 5px var(--focus);
+  --danger: var(--red);
+  --ok: #1f6b1f;
+
+  /* ---- seats (D21: the art's Lines stripes) and the label ink on each */
+  --seat-0: #fe0000;
+  --seat-1: #007f00;
+  --seat-2: #fe6500;
+  --seat-3: #0065fe;
+  --seat-4: #fefefe;
+  --seat-ink-0: #ffffff;
+  --seat-ink-1: #ffffff;
+  --seat-ink-2: #1a1a1a;
+  --seat-ink-3: #ffffff;
+  --seat-ink-4: #1a1a1a;
+
+  /* ---- type: a condensed bold display face for the map's lettering, a plain sans for text */
+  --font-display: "Barlow Condensed", "Roboto Condensed", "Arial Narrow", "Helvetica Neue", Arial,
+    sans-serif;
+  --font-body: "Barlow", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --fs-2xs: 0.6875rem; /* 11px: tile captions only */
+  --fs-xs: 0.75rem; /* 12px */
+  --fs-sm: 0.8125rem; /* 13px */
+  --fs-base: 0.9375rem; /* 15px: body */
+  --fs-md: 1.0625rem; /* 17px */
+  --fs-lg: 1.25rem; /* 20px */
+  --fs-xl: 1.625rem; /* 26px */
+  --fs-2xl: 2.25rem; /* 36px */
+  --fs-hero: 4rem; /* 64px */
+  --lh-tight: 1.15;
+  --lh: 1.4;
+  --tracking-caps: 0.06em;
+
+  /* ---- space (4 px grid) */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+
+  /* ---- shape */
+  --r-xs: 3px;
+  --r-sm: 5px; /* the map's letter tiles */
+  --r: 8px;
+  --r-lg: 12px;
+  --r-pill: 999px;
+  --rule: 2px; /* standard ink rule */
+  --rule-heavy: 3px;
+
+  /* ---- depth: paper lying on paper, never glossy */
+  --shadow-1: 0 1px 0 rgba(126, 6, 6, 0.1), 0 1px 3px rgba(74, 40, 10, 0.12);
+  --shadow-2: 0 1px 0 rgba(126, 6, 6, 0.12), 0 4px 12px rgba(74, 40, 10, 0.16);
+  --shadow-3: 0 2px 0 rgba(126, 6, 6, 0.18), 0 14px 40px rgba(40, 20, 4, 0.32);
+  --inset: inset 0 1px 2px rgba(74, 40, 10, 0.18);
+  /* the map's framed panels: a red frame with a thin cream rule inside it */
+  --frame-red: 0 0 0 1px var(--red-dark), inset 0 0 0 2px var(--paper-raised), inset 0 0 0 3px var(--red);
+
+  /* ---- motion */
+  --t-fast: 0.12s;
+  --t: 0.2s;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* ---- layout */
+  --side-w: 22rem;
+  --page-pad: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-fast: 0s;
+    --t: 0s;
+  }
+}

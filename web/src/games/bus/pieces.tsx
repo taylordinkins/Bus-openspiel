@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { INK, PAPER, PASSENGER, RED, STONE, seatFill, seatInk } from "./model";
 
-const FONT = "Helvetica, Arial, sans-serif";
+/** The display face (tokens.css --font-display) so board labels match the chrome. */
+const FONT = "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif";
 
 export function Label({
   x,

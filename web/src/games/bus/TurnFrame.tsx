@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { GameView } from "../../shell/useGame";
-import { seatFill } from "./model";
+import { INK, seatFill } from "./model";
 import SeatBadge from "./SeatBadge";
 
 /**
@@ -38,7 +38,7 @@ export default function TurnFrame({
       className="bus-turn-frame"
       data-testid="turn-frame"
       data-seat={humanActor ?? ""}
-      style={{ borderColor: humanActor !== null ? seatFill(humanActor) : "#1A1A1A" }}
+      style={{ borderColor: humanActor !== null ? seatFill(humanActor) : INK }}
     >
       {toast !== null && (
         <div className="bus-toast" role="status">

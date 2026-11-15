@@ -1,13 +1,16 @@
 import { useState, type ChangeEvent } from "react";
 import { api } from "../api/client";
+import { IconUpload } from "../theme/icons";
 import { errorText } from "./useGame";
 
 interface Props {
   onImported: (gameId: string) => void;
+  /** Icon-only look for the game toolbar (the label stays "Import replay" for assistive tech). */
+  compact?: boolean;
 }
 
-/** File input that posts a replay export to /api/games/import. */
-export default function ImportButton({ onImported }: Props) {
+/** File input that posts a replay export to /api/games/import, styled as a button. */
+export default function ImportButton({ onImported, compact = false }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   async function pick(e: ChangeEvent<HTMLInputElement>) {
@@ -25,12 +28,22 @@ export default function ImportButton({ onImported }: Props) {
   }
 
   return (
-    <span>
-      <label>
-        Import replay{" "}
-        <input type="file" accept="application/json,.json" onChange={(e) => void pick(e)} />
+    <span className={`import${compact ? " import-compact" : ""}`}>
+      <label className={`btn import-btn${compact ? " btn-sm btn-ghost btn-icon" : ""}`} title="Import replay">
+        <IconUpload />
+        <span className={compact ? "sr-only" : undefined}>Import replay</span>{" "}
+        <input
+          className="sr-only"
+          type="file"
+          accept="application/json,.json"
+          onChange={(e) => void pick(e)}
+        />
       </label>
-      {error && <p role="alert">Import error: {error}</p>}
+      {error && (
+        <p role="alert" className="alert import-error">
+          Import error: {error}
+        </p>
+      )}
     </span>
   );
 }

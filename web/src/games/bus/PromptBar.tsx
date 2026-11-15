@@ -1,9 +1,11 @@
+import type { CSSProperties } from "react";
+import { IconUndo } from "../../theme/icons";
 import type { GameView } from "../../shell/useGame";
 import { seatTypeName } from "../../shell/seatTypes";
 import type { BoardUi } from "../registry";
 import type { BoardAct } from "./interaction";
 import type { BusViewData } from "./model";
-import { seatFill } from "./model";
+import { seatFill, seatInk } from "./model";
 import { BUILDING_NAME, promptParts } from "./promptText";
 import SeatBadge from "./SeatBadge";
 
@@ -41,38 +43,49 @@ export default function PromptBar({
       data-actor={actor ?? ""}
       role="status"
       aria-live="polite"
-      style={{ borderLeftColor: actor !== null ? seatFill(actor) : "#1A1A1A" }}
+      data-bot={bot || undefined}
+      style={actor !== null ? ({ "--seat": seatFill(actor), "--seat-ink": seatInk(actor) } as CSSProperties) : undefined}
     >
       {actor !== null && <SeatBadge seat={actor} />}
       <span className="bus-prompt-text">
-        {bot && <span className="bus-prompt-wait">Waiting for {seatTypeName(kind)} bot{game.bot_thinking ? " (thinking…)" : ""} · </span>}
+        {bot && (
+          <span className="bus-prompt-wait">
+            {game.bot_thinking && <span className="spinner" aria-hidden="true" />}
+            Waiting for {seatTypeName(kind)} bot{game.bot_thinking ? " (thinking…)" : ""} ·{" "}
+          </span>
+        )}
         <strong>{parts.title}</strong>
         {over ? " · " : ": "}
         {parts.instruction}
       </span>
-      {parts.details.map((d) => (
-        <span key={d} className="bus-chip">
-          {d}
+      {parts.details.length > 0 && (
+        <span className="bus-chips">
+          {parts.details.map((d) => (
+            <span key={d} className="bus-chip">
+              {d}
+            </span>
+          ))}
         </span>
-      ))}
+      )}
       <span className="bus-prompt-actions">
         {dropOut && (
-          <button type="button" disabled={!act} onClick={() => act?.post(dropOut.id)}>
+          <button type="button" className="btn-primary" disabled={!act} onClick={() => act?.post(dropOut.id)}>
             Drop out
           </button>
         )}
         {advance !== null && (
-          <button type="button" disabled={!act} onClick={() => act?.post(advance)}>
+          <button type="button" className="btn-primary" disabled={!act} onClick={() => act?.post(advance)}>
             Advance{next ? ` → ${BUILDING_NAME[next] ?? next}` : ""}
           </button>
         )}
         {pause !== null && (
-          <button type="button" disabled={!act} onClick={() => act?.pause()}>
+          <button type="button" className="btn-primary" disabled={!act} onClick={() => act?.pause()}>
             Take stone{stones !== null ? ` (${stones} left)` : ""}
           </button>
         )}
         {ui?.onBack && (
-          <button type="button" disabled={!ui.canBack} onClick={() => void ui.onBack?.()}>
+          <button type="button" className="bus-back" disabled={!ui.canBack} onClick={() => void ui.onBack?.()}>
+            <IconUndo />
             Back
           </button>
         )}

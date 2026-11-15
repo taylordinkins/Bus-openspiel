@@ -1,31 +1,35 @@
+import type { CSSProperties } from "react";
 import type { GameView } from "../../shell/useGame";
 import { seatTypeName } from "../../shell/seatTypes";
 import { highlightProps } from "./hoverStore";
-import { SEAT_NAME, at, seatFill, type BusViewData } from "./model";
+import { SEAT_NAME, at, seatFill, seatInk, type BusViewData } from "./model";
 import SeatBadge from "./SeatBadge";
 
 const BUSES = 5;
 
+/** Front-view bus, after the map's Buses grid: filled when owned, a dashed outline when not. */
 function BusIcons({ owned }: { owned: number }) {
   return (
     <span className="bus-icons" aria-label={`${owned} of ${BUSES} buses`} role="img">
       {Array.from({ length: BUSES }, (_, i) => (
-        <svg key={i} width="18" height="12" viewBox="0 0 18 12" data-owned={i < owned}>
-          <rect
-            x="1"
-            y="1"
-            width="16"
-            height="9"
-            rx="2"
-            fill={i < owned ? "#1A1A1A" : "none"}
-            stroke="#1A1A1A"
-            strokeWidth="1.5"
-          />
-          <circle cx="5" cy="10.5" r="1.4" fill="#1A1A1A" />
-          <circle cx="13" cy="10.5" r="1.4" fill="#1A1A1A" />
+        <svg key={i} width="17" height="18" viewBox="0 0 17 18" data-owned={i < owned} className="bus-icon">
+          <rect className="bus-icon-body" x="1.5" y="1.5" width="14" height="12.5" rx="2.5" />
+          <rect className="bus-icon-glass" x="3.5" y="3.5" width="10" height="5" rx="1" />
+          <rect className="bus-icon-wheel" x="3" y="14" width="3" height="3" rx="1" />
+          <rect className="bus-icon-wheel" x="11" y="14" width="3" height="3" rx="1" />
         </svg>
       ))}
     </span>
+  );
+}
+
+/** A taken time stone: the map's wax-seal stone in miniature. */
+function StoneIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" className="bus-stone-icon">
+      <circle cx="8" cy="8" r="7" />
+      <circle cx="8" cy="8" r="4" />
+    </svg>
   );
 }
 
@@ -51,7 +55,7 @@ export default function SeatPanels({ data, game }: { data: BusViewData; game: Ga
             data-dropped={dropped}
             tabIndex={0}
             {...highlightProps({ seats: [i] })}
-            style={{ borderLeftColor: seatFill(i) }}
+            style={{ "--seat": seatFill(i), "--seat-ink": seatInk(i) } as CSSProperties}
           >
             <header>
               <SeatBadge seat={i} />
@@ -66,16 +70,25 @@ export default function SeatPanels({ data, game }: { data: BusViewData; game: Ga
               {acting && <span className="bus-acting">to act</span>}
               {dropped && <span className="bus-dropped">dropped out</span>}
               <span className="bus-score" aria-label="Score">
-                {seat.points} pts
+                <b>{seat.points}</b> pts
               </span>
             </header>
             <div className="bus-panel-row">
               <BusIcons owned={seat.buses} />
-              {seat.stones > 0 && <span>{seat.stones} {seat.stones === 1 ? "stone" : "stones"}</span>}
+              {seat.stones > 0 && (
+                <span className="bus-stones">
+                  <StoneIcon />
+                  {seat.stones} {seat.stones === 1 ? "stone" : "stones"}
+                </span>
+              )}
             </div>
             <div className="bus-panel-row bus-small">
-              <span>Action markers: {seat.markers_left}</span>
-              <span>Line markers: {lineLeft}</span>
+              <span>
+                Action markers: <b>{seat.markers_left}</b>
+              </span>
+              <span>
+                Line markers: <b>{lineLeft}</b>
+              </span>
             </div>
           </section>
         );

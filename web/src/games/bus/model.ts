@@ -1,5 +1,9 @@
 import type { BusGeometry, Pt } from "./geometry";
 
+/*
+ * SVG mirror of the theme tokens (src/theme/tokens.css): the board is drawn with presentation
+ * attributes, which cannot read CSS custom properties, so the same values live here.
+ */
 /** Seat colours: the Lines stripes of the art (D21), P0..P4 = red, green, orange, blue, white. */
 export const SEAT_FILL = ["#FE0000", "#007F00", "#FE6500", "#0065FE", "#FEFEFE"] as const;
 export const SEAT_INK = ["#FFFFFF", "#FFFFFF", "#1A1A1A", "#FFFFFF", "#1A1A1A"] as const;
@@ -9,6 +13,8 @@ export const PAPER = "#FFF4D6";
 export const RED = "#B00A0A";
 export const STONE = "#8C1D1D";
 export const PASSENGER = "#3A3A3A";
+/** Legal-target glow and hover highlight (tokens.css --glow). */
+export const GLOW = "#FFD24A";
 export const LINE_GAP = 13;
 
 /** Indexed read that fails loudly (ids in the geometry are array indices). */

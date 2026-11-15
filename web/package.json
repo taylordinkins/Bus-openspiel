@@ -16,6 +16,8 @@
     "check:api": "(cd .. && uv run python -m tools.export_openapi --check) && openapi-typescript openapi.json -o src/api/.schema.check.d.ts && (cmp src/api/schema.d.ts src/api/.schema.check.d.ts || (echo 'src/api/schema.d.ts is stale; run: npm run gen:api' >&2; rm -f src/api/.schema.check.d.ts; exit 1)) && rm -f src/api/.schema.check.d.ts"
   },
   "dependencies": {
+    "@fontsource/barlow": "^5.3.0",
+    "@fontsource/barlow-condensed": "^5.3.0",
     "openapi-fetch": "^0.13.8",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

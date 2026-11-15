@@ -15,6 +15,7 @@ import { useHighlight, type BusHighlight } from "./hoverStore";
 import { ACTION_TITLE, BUILDING_NAME } from "./promptText";
 import { busInfo, markerInfo, nodeInfo, scoreInfo, siteInfo, streetInfo } from "./hoverInfo";
 import {
+  GLOW,
   INK,
   LINE_GAP,
   PAPER,
@@ -44,8 +45,9 @@ import {
   zoomAt,
   type Viewport,
 } from "./viewport";
+import { IconFit, IconMinus, IconPlus } from "../../theme/icons";
 
-const HL = "#FFD24A";
+const HL = GLOW;
 
 /** Streets to light: those named directly plus every street of a highlighted seat's line. */
 function hlStreets(data: BusViewData, hl: BusHighlight): number[] {
@@ -60,6 +62,9 @@ interface Hover {
   lines: string[];
   x: number;
   y: number;
+  /** Open the tooltip to the left / above the pointer when it is near the right / bottom edge. */
+  flipX?: boolean;
+  flipY?: boolean;
 }
 
 /** Group action_board entries per action in letter order. */
@@ -123,7 +128,9 @@ export default function BusBoard({
 
   const show = (lines: string[]) => (e: MouseEvent) => {
     const r = wrap.current?.getBoundingClientRect();
-    setHover({ lines, x: e.clientX - (r?.left ?? 0), y: e.clientY - (r?.top ?? 0) });
+    const x = e.clientX - (r?.left ?? 0);
+    const y = e.clientY - (r?.top ?? 0);
+    setHover({ lines, x, y, flipX: !!r && x > r.width * 0.62, flipY: !!r && y > r.height * 0.6 });
   };
   const hide = () => setHover(null);
   const hov = (lines: string[]) => ({ onMouseMove: show(lines), onMouseEnter: show(lines), onMouseLeave: hide });
@@ -595,11 +602,17 @@ export default function BusBoard({
 
   return (
     <div className="bus-board" ref={wrap}>
-      <div role="group" aria-label="Board zoom" style={{ display: "flex", gap: 4, marginBottom: 4 }}>
-        <button type="button" aria-label="Zoom in" onClick={zoomButton(1.25)} disabled={vp.scale >= 2.5}>+</button>
-        <button type="button" aria-label="Zoom out" onClick={zoomButton(1 / 1.25)} disabled={vp.scale <= 1}>−</button>
-        <button type="button" aria-label="Reset zoom" onClick={() => setVp(fitViewport(size))}>Fit</button>
-        <span data-testid="zoom-level" style={{ alignSelf: "center", fontSize: 12 }}>
+      <div role="group" aria-label="Board zoom" className="bus-zoom">
+        <button type="button" className="btn-icon" aria-label="Zoom in" title="Zoom in" onClick={zoomButton(1.25)} disabled={vp.scale >= 2.5}>
+          <IconPlus />
+        </button>
+        <button type="button" className="btn-icon" aria-label="Zoom out" title="Zoom out" onClick={zoomButton(1 / 1.25)} disabled={vp.scale <= 1}>
+          <IconMinus />
+        </button>
+        <button type="button" className="btn-icon" aria-label="Reset zoom" title="Fit the board" onClick={() => setVp(fitViewport(size))}>
+          <IconFit />
+        </button>
+        <span data-testid="zoom-level" className="bus-zoom-level">
           {Math.round(vp.scale * 100)}%
         </span>
       </div>
@@ -613,7 +626,8 @@ export default function BusBoard({
         data-cx={vp.cx}
         data-cy={vp.cy}
         viewBox={viewBoxOf(clampViewport(vp, size), size)}
-        style={{ touchAction: "none", cursor: "grab", background: "#2B2B2B" }}
+        className="bus-svg"
+        style={{ touchAction: "none" }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onClick={(e) => {
@@ -899,22 +913,17 @@ export default function BusBoard({
         <div
           role="tooltip"
           data-testid="bus-tooltip"
+          className="bus-tip"
           style={{
-            position: "absolute",
-            left: hover.x + 14,
-            top: hover.y + 14,
-            background: "#1A1A1A",
-            color: "#FFF4D6",
-            padding: "4px 8px",
-            borderRadius: 4,
-            fontSize: 12,
-            pointerEvents: "none",
-            whiteSpace: "nowrap",
-            zIndex: 5,
+            left: hover.x + (hover.flipX ? -14 : 14),
+            top: hover.y + (hover.flipY ? -14 : 14),
+            transform: `translate(${hover.flipX ? "-100%" : "0"}, ${hover.flipY ? "-100%" : "0"})`,
           }}
         >
           {hover.lines.map((l, i) => (
-            <div key={i}>{l}</div>
+            <div key={i} className={i === 0 ? "bus-tip-title" : undefined}>
+              {l}
+            </div>
           ))}
         </div>
       )}

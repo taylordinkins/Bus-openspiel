@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../api/client";
 import { errorText } from "./useGame";
 
@@ -15,6 +15,14 @@ export default function ReportDialog({ gameId, onClose }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [reportId, setReportId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -39,33 +47,56 @@ export default function ReportDialog({ gameId, onClose }: Props) {
   }
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="Report a problem">
-      <form onSubmit={(e) => void submit(e)}>
-        <h2>Report a problem</h2>
-        <label>
-          Category{" "}
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </label>
-        <div>
-          <label>
-            Note <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4} />
+    <div className="dlg-backdrop">
+      <div role="dialog" aria-modal="true" aria-label="Report a problem" className="dlg lg-report">
+        <form onSubmit={(e) => void submit(e)}>
+          <p className="eyebrow">Playtest feedback</p>
+          <h2>Report a problem</h2>
+          <p className="lg-report-lead">
+            The report saves this game&rsquo;s full history with your note, so the exact position can be replayed.
+          </p>
+          <label className="field">
+            <span className="field-label">Category</span>{" "}
+            <select value={category} onChange={(e) => setCategory(e.target.value)}>
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
           </label>
-        </div>
-        {reportId && <p role="status">Report sent. Report id: {reportId}</p>}
-        {error && <p role="alert">Error: {error}</p>}
-        <button type="submit" disabled={busy || reportId !== null}>
-          Submit report
-        </button>{" "}
-        <button type="button" onClick={onClose}>
-          Close report
-        </button>
-      </form>
+          <div>
+            <label className="field">
+              <span className="field-label">Note</span>{" "}
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={5}
+                placeholder="What happened, and what did you expect?"
+                autoFocus
+              />
+            </label>
+          </div>
+          {reportId && (
+            <p role="status" className="note lg-report-ok">
+              Report sent. Report id: {reportId}
+            </p>
+          )}
+          {error && (
+            <p role="alert" className="alert">
+              Error: {error}
+            </p>
+          )}
+          <div className="dlg-actions">
+            <button type="button" onClick={onClose}>
+              Close report
+            </button>{" "}
+            <button type="submit" className="btn-primary" disabled={busy || reportId !== null}>
+              Submit report
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

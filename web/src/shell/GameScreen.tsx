@@ -9,6 +9,8 @@ import ReportDialog from "./ReportDialog";
 import TabBar, { type ScreenTab } from "./TabBar";
 import YourMove from "./YourMove";
 import { thinkingText } from "./seatTypes";
+import Tip from "./Tip";
+import { IconArrowLeft, IconDownload, IconFlag, IconList, IconRewind, IconUndo } from "../theme/icons";
 import { deriveViewSeat, SeatViewContext } from "./viewSeat";
 import {
   errorText,
@@ -60,10 +62,12 @@ function GameOver({ game }: { game: GameView }) {
   const winners = game.winners ?? [];
   const final = game.view.final;
   return (
-    <div aria-label="Game over">
+    <div aria-label="Game over" className="lg-gameover">
       <h2>Game over</h2>
-      {winners.length === 1 && <p>P{winners[0]} wins</p>}
-      {winners.length > 1 && <p>Tie: {winners.map((p) => `P${p}`).join(", ")} win</p>}
+      {winners.length === 1 && <p className="lg-gameover-win">P{winners[0]} wins</p>}
+      {winners.length > 1 && (
+        <p className="lg-gameover-win">Tie: {winners.map((p) => `P${p}`).join(", ")} win</p>
+      )}
       {game.returns && (
         <p>Returns: {game.returns.map((r, i) => `P${i} ${r}`).join(", ")}</p>
       )}
@@ -113,6 +117,7 @@ export default function GameScreen({
   const [tab, setTab] = useState<ScreenTab>("play");
   const [hoverAction, setHoverAction] = useState<number | null>(null);
   const [reporting, setReporting] = useState(false);
+  const [listOpen, setListOpen] = useState(false);
   const [rewindTo, setRewindTo] = useState("0");
   const [exportError, setExportError] = useState<string | null>(null);
   const rewindValid = /^\d+$/.test(rewindTo.trim());
@@ -134,70 +139,128 @@ export default function GameScreen({
       }
     : undefined;
 
+  const boardDriven = plugin.boardDriven === true;
+  const moveArea = over ? (
+    <GameOver game={game} />
+  ) : (
+    cp !== null &&
+    game && (
+      <>
+        <YourMove
+          humanTurn={humanTurn && showBoard}
+          waitingFor={humanTurn ? null : `P${cp} (${game.seats[cp]})`}
+          phase={phase}
+          actions={legalActions(game)}
+          busy={busy}
+          onAct={(id) => void act(id)}
+          labelFor={(a) => plugin.actionLabel?.(game, a) ?? a.label}
+          onHover={setHoverAction}
+          describe={(a) => plugin.actionHelp?.(game, a)}
+        />
+        <p className="lg-current">
+          Current player: P{cp} ({game.seats[cp]})
+        </p>
+      </>
+    )
+  );
+
   return (
     <SeatViewContext.Provider value={{ viewSeat, revealed: showBoard }}>
       <section className="lg-screen" data-tab={tab}>
         <div className="lg-topbar">
-          {onExit && (
-            <button type="button" onClick={onExit}>
-              Lobby
-            </button>
-          )}
+          <div className="lg-topbar-row">
+            {onExit && (
+              <button type="button" className="btn-sm btn-ghost lg-lobby" onClick={onExit}>
+                <IconArrowLeft />
+                Lobby
+              </button>
+            )}
+            {game && (
+              <div role="toolbar" aria-label="Game tools" className="lg-tools">
+                <Tip text="Back: undo the last decision">
+                  <button
+                    type="button"
+                    className="btn-sm btn-ghost btn-icon"
+                    aria-label="Back"
+                    disabled={busy || game.history_length === 0}
+                    onClick={() => void goBack()}
+                  >
+                    <IconUndo />
+                  </button>
+                </Tip>
+                <Tip text="Export replay (JSON file)">
+                  <button
+                    type="button"
+                    className="btn-sm btn-ghost btn-icon"
+                    aria-label="Export replay"
+                    onClick={() => {
+                      setExportError(null);
+                      downloadExport(gameId).catch((e: unknown) =>
+                        setExportError(e instanceof Error ? e.message : "Export failed"),
+                      );
+                    }}
+                  >
+                    <IconDownload />
+                  </button>
+                </Tip>
+                {onImported && <ImportButton onImported={onImported} compact />}
+                <Tip text="Report a problem with this position">
+                  <button
+                    type="button"
+                    className="btn-sm btn-ghost btn-icon"
+                    aria-label="Report a problem"
+                    onClick={() => setReporting(true)}
+                  >
+                    <IconFlag />
+                  </button>
+                </Tip>
+              </div>
+            )}
+          </div>
           {game && (
-            <p className="lg-status-line">
+            <p className="lg-status-line" title={`Game ${game.id}`}>
               Game {game.id} · seats: {game.seats.map((s, i) => `P${i} ${s}`).join(", ")}
             </p>
           )}
-          {game && (
-            <div role="toolbar" aria-label="Game tools">
+          {game?.dev_mode && (
+            <div className="lg-rewind">
+              <label>
+                Rewind to player action{" "}
+                <input
+                  value={rewindTo}
+                  onChange={(e) => setRewindTo(e.target.value)}
+                  inputMode="numeric"
+                  size={4}
+                />
+              </label>{" "}
               <button
                 type="button"
-                disabled={busy || game.history_length === 0}
-                onClick={() => void goBack()}
+                className="btn-sm"
+                disabled={busy || !rewindValid}
+                onClick={() => void rewind(Number(rewindTo.trim()))}
               >
-                Back
-              </button>
-              {game.dev_mode && (
-                <span>
-                  <label>
-                    Rewind to player action{" "}
-                    <input
-                      value={rewindTo}
-                      onChange={(e) => setRewindTo(e.target.value)}
-                      inputMode="numeric"
-                      size={4}
-                    />
-                  </label>{" "}
-                  <button
-                    type="button"
-                    disabled={busy || !rewindValid}
-                    onClick={() => void rewind(Number(rewindTo.trim()))}
-                  >
-                    Rewind
-                  </button>
-                </span>
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  setExportError(null);
-                  downloadExport(gameId).catch((e: unknown) =>
-                    setExportError(e instanceof Error ? e.message : "Export failed"),
-                  );
-                }}
-              >
-                Export replay
-              </button>
-              {onImported && <ImportButton onImported={onImported} />}
-              <button type="button" onClick={() => setReporting(true)}>
-                Report a problem
+                <IconRewind />
+                Rewind
               </button>
             </div>
           )}
         </div>
-        {exportError && <p role="alert">Export error: {exportError}</p>}
-        {error && <p role="alert">Error: {error}</p>}
-        {!game && !error && !covered && <p>Loading…</p>}
+        {exportError && (
+          <p role="alert" className="alert lg-toast">
+            Export error: {exportError}
+          </p>
+        )}
+        {error && (
+          <p role="alert" className="alert lg-toast">
+            Error: {error}
+          </p>
+        )}
+        {!game && !error && !covered && (
+          <div className="lg-loading">
+            <span className="spinner" aria-hidden="true" />
+            <p>Loading…</p>
+          </div>
+        )}
         {raw && covered && viewSeat !== null && (
           <Curtain seat={viewSeat} accent={plugin.seatStyle?.(viewSeat)} disabled={mismatch} onReveal={() => setAckSeat(viewSeat)} />
         )}
@@ -207,49 +270,45 @@ export default function GameScreen({
             <TabBar value={tab} onChange={setTab} />
             <div className="lg-grid">
               <div className="lg-pane-board">
-                {showBoard ? plugin.renderBoard(game, ui) : <p>Board hidden.</p>}
+                {showBoard ? plugin.renderBoard(game, ui) : <p className="lg-board-hidden">Board hidden.</p>}
               </div>
               <div className="lg-side">
                 <div className="lg-pane-play">
                   {plugin.renderSide?.(game, ui)}
                   {botThinking && cp !== null && (
-                    <p role="status">{thinkingText(game.seats[cp] ?? "", cp)}</p>
+                    <p role="status" className="note lg-thinking">
+                      <span className="spinner" aria-hidden="true" />
+                      {thinkingText(game.seats[cp] ?? "", cp)}
+                    </p>
                   )}
                   {game.bot_error && !over && (
-                    <div role="alert">
+                    <div role="alert" className="alert">
                       Bot error: {game.bot_error}{" "}
-                      <button
-                        type="button"
-                        onClick={() => void retry()}
-                      >
+                      <button type="button" className="btn-sm" onClick={() => void retry()}>
                         Retry
                       </button>
                     </div>
                   )}
-                  {autoNote && !over && <p role="status">{autoNote} (only legal action)</p>}
-                  {over ? (
-                    <GameOver game={game} />
+                  {autoNote && !over && (
+                    <p role="status" className="note">
+                      {autoNote} (only legal action)
+                    </p>
+                  )}
+                  {boardDriven ? (
+                    <div className="lg-debug" data-open={listOpen}>
+                      <button
+                        type="button"
+                        className="btn-sm btn-ghost lg-debug-toggle"
+                        aria-expanded={listOpen}
+                        onClick={() => setListOpen((o) => !o)}
+                      >
+                        <IconList />
+                        {over ? "Server result" : `Action list (${legalActions(game).length})`}
+                      </button>
+                      <div className="lg-debug-body">{moveArea}</div>
+                    </div>
                   ) : (
-                    cp !== null && (
-                      <>
-                        <YourMove
-                          humanTurn={humanTurn && showBoard}
-                          waitingFor={
-                            humanTurn ? null : `P${cp} (${game.seats[cp]})`
-                          }
-                          phase={phase}
-                          actions={legalActions(game)}
-                          busy={busy}
-                          onAct={(id) => void act(id)}
-                          labelFor={(a) => plugin.actionLabel?.(game, a) ?? a.label}
-                          onHover={setHoverAction}
-                          describe={(a) => plugin.actionHelp?.(game, a)}
-                        />
-                        <p>
-                          Current player: P{cp} ({game.seats[cp]})
-                        </p>
-                      </>
-                    )
+                    moveArea
                   )}
                 </div>
                 <div className="lg-log lg-pane-log">

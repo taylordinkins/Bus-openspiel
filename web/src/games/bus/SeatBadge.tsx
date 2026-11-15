@@ -1,4 +1,4 @@
-import { SEAT_NAME, at, seatFill, seatInk } from "./model";
+import { INK, SEAT_NAME, at, seatFill, seatInk } from "./model";
 
 /** "P0" in the seat colour; the label is always text so identity never rests on colour (UI_DESIGN 8). */
 export default function SeatBadge({ seat }: { seat: number }) {
@@ -10,11 +10,7 @@ export default function SeatBadge({ seat }: { seat: number }) {
       style={{
         background: seatFill(seat),
         color: seatInk(seat),
-        border: "2px solid #1A1A1A",
-        borderRadius: 5,
-        padding: "0 0.4em",
-        fontWeight: 800,
-        letterSpacing: "0.02em",
+        border: `2px solid ${INK}`,
       }}
     >
       P{seat}

@@ -31,6 +31,8 @@ export interface GamePlugin {
   /** Whether the sole legal action on a human turn should be submitted automatically. */
   autoAdvance?(action: LegalAction, legalActions: LegalAction[]): boolean;
   phaseLabel?(game: GameView): string | undefined;
+  /** The board is the main control (UI_DESIGN §1.3): the generic action list starts collapsed. */
+  boardDriven?: boolean;
   seatStyle?(seat: number): { fill: string; ink: string };
   actionLabel?(game: GameView, action: LegalAction): string;
   actionHelp?(game: GameView, action: LegalAction): string | undefined;

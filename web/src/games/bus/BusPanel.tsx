@@ -14,7 +14,14 @@ import "./bus.css";
 /** Fetches the geometry once, only for views that carry board data. */
 function LoadedBoard({ data, act }: { data: BusViewData; act: BoardAct | null }) {
   const geo = useBusGeometry();
-  return geo ? <BusBoard geo={geo} data={data} act={act} /> : <p>Loading board…</p>;
+  return geo ? (
+    <BusBoard geo={geo} data={data} act={act} />
+  ) : (
+    <div className="bus-board-loading">
+      <span className="spinner" aria-hidden="true" />
+      <p>Loading board…</p>
+    </div>
+  );
 }
 
 /** R-053 confirm: taking the last stone ends the game, so it asks first. */
@@ -27,17 +34,21 @@ function LastStoneConfirm({ onConfirm, onCancel }: { onConfirm: () => void; onCa
     return () => document.removeEventListener("keydown", onKey);
   }, [onCancel]);
   return (
-    <div role="alertdialog" aria-modal="true" aria-labelledby="bus-confirm-text" className="bus-confirm">
-      <p id="bus-confirm-text" style={{ margin: 0 }}>
-        Taking the last stone ends the game now.
-      </p>
-      <div className="bus-confirm-buttons">
-        <button type="button" autoFocus onClick={onCancel}>
-          Cancel
-        </button>
-        <button type="button" className="primary" onClick={onConfirm}>
-          Confirm
-        </button>
+    <div className="dlg-backdrop">
+      <div role="alertdialog" aria-modal="true" aria-labelledby="bus-confirm-text" className="dlg bus-confirm">
+        <p className="eyebrow">Clock · last time stone</p>
+        <p id="bus-confirm-text" className="bus-confirm-text">
+          Taking the last stone ends the game now.
+        </p>
+        <p className="bus-confirm-sub">Final scores are counted at once: points minus time stones.</p>
+        <div className="dlg-actions">
+          <button type="button" autoFocus onClick={onCancel}>
+            Cancel
+          </button>
+          <button type="button" className="btn-primary" onClick={onConfirm}>
+            Confirm
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -55,7 +66,11 @@ function PlainPrompt({ prompt }: { prompt: RawPrompt }) {
   if (prompt.phase) parts.push(`Phase ${prompt.phase}`);
   if (typeof prompt.actor === "number") parts.push(`P${prompt.actor} to act`);
   if (typeof prompt.units_left === "number") parts.push(`${prompt.units_left} left`);
-  return parts.length > 0 ? <p data-testid="bus-prompt">{parts.join(" · ")}</p> : null;
+  return parts.length > 0 ? (
+    <p data-testid="bus-prompt" className="bus-prompt bus-prompt-plain">
+      {parts.join(" · ")}
+    </p>
+  ) : null;
 }
 
 /** Prompt bar, the Bus board (SVG over the map art) in the hotseat turn frame, and the raw view in a details box. */
@@ -99,7 +114,7 @@ export default function BusPanel({ game, ui }: { game: GameView; ui?: BoardUi })
           }}
         />
       )}
-      <details>
+      <details className="bus-raw">
         <summary>Raw view</summary>
         <pre aria-label="Game state">{JSON.stringify(game.view, null, 2)}</pre>
       </details>
@@ -111,10 +126,11 @@ export default function BusPanel({ game, ui }: { game: GameView; ui?: BoardUi })
 export function BusSide({ game }: { game: GameView }) {
   const data = parseBusView(busInner(game));
   if (!data) return null;
+  // at END the results lead; the seat panels follow
   return (
     <>
-      <SeatPanels data={data} game={game} />
       <EndResults data={data} />
+      <SeatPanels data={data} game={game} />
     </>
   );
 }

@@ -11,6 +11,7 @@ import { busInner, seatFill, seatInk } from "./model";
 export const busPlugin: GamePlugin = {
   id: "bus",
   title: "Bus",
+  boardDriven: true,
   phaseLabel: (g) => {
     const inner = busInner(g);
     const prompt = inner.prompt as { phase?: unknown } | undefined;
