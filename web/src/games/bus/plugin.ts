@@ -1,17 +1,20 @@
 import { createElement } from "react";
 import type { GamePlugin } from "../registry";
-import TextBoard from "./TextBoard";
+import BusPanel from "./BusPanel";
+import { seatFill, seatInk } from "./model";
 
 /**
- * Bus on the action-list fallback (Phase 2 unit 5): the shell's action list does the playing and
- * the "board" is the adapter view as text. The SVG board replaces it in unit 6.
+ * Bus: the shell's action list still does the playing (unit 8 adds board clicks); the board is the
+ * SVG over the map art (unit 6).
  */
 export const busPlugin: GamePlugin = {
   id: "bus",
   title: "Bus",
   phaseLabel: (g) => {
-    const prompt = g.view.prompt as { phase?: unknown } | undefined;
+    const inner = (g.view.view ?? g.view) as Record<string, unknown>;
+    const prompt = inner.prompt as { phase?: unknown } | undefined;
     return typeof prompt?.phase === "string" ? prompt.phase : undefined;
   },
-  renderBoard: (g) => createElement(TextBoard, { game: g }),
+  seatStyle: (seat) => ({ fill: seatFill(seat), ink: seatInk(seat) }),
+  renderBoard: (g) => createElement(BusPanel, { game: g }),
 };

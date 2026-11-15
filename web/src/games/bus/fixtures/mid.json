@@ -1,0 +1,387 @@
+{
+ "seat": 2,
+ "current_player": 2,
+ "is_terminal": false,
+ "legal_actions": [
+  {
+   "id": 0,
+   "label": "P2: select Lines",
+   "kind": "select",
+   "params": {
+    "action": 0,
+    "action_name": "Lines",
+    "space": 2
+   }
+  },
+  {
+   "id": 1,
+   "label": "P2: select Buses",
+   "kind": "select",
+   "params": {
+    "action": 1,
+    "action_name": "Buses",
+    "space": 0
+   }
+  },
+  {
+   "id": 2,
+   "label": "P2: select Passengers",
+   "kind": "select",
+   "params": {
+    "action": 2,
+    "action_name": "Passengers",
+    "space": 0
+   }
+  },
+  {
+   "id": 3,
+   "label": "P2: select Buildings",
+   "kind": "select",
+   "params": {
+    "action": 3,
+    "action_name": "Buildings",
+    "space": 2
+   }
+  },
+  {
+   "id": 5,
+   "label": "P2: select Vrrooomm!",
+   "kind": "select",
+   "params": {
+    "action": 5,
+    "action_name": "Vrrooomm!",
+    "space": 0
+   }
+  },
+  {
+   "id": 6,
+   "label": "P2: select Starting Player",
+   "kind": "select",
+   "params": {
+    "action": 6,
+    "action_name": "Starting Player",
+    "space": 0
+   }
+  }
+ ],
+ "returns": null,
+ "winners": null,
+ "view": {
+  "state": {
+   "format": 1,
+   "parameters": {
+    "players": 4,
+    "returns": "win_loss"
+   },
+   "round": 3,
+   "phase": "SEL",
+   "current_player": 2,
+   "start_player": 1,
+   "clock": "house",
+   "stones_on_clock": 3,
+   "seats": [
+    {
+     "points": 0,
+     "stones": 0,
+     "buses": 2,
+     "markers_left": 5,
+     "line": [
+      61,
+      58,
+      59
+     ],
+     "last_score_move": null
+    },
+    {
+     "points": 0,
+     "stones": 1,
+     "buses": 2,
+     "markers_left": 4,
+     "line": [
+      30,
+      31
+     ],
+     "last_score_move": null
+    },
+    {
+     "points": 0,
+     "stones": 1,
+     "buses": 1,
+     "markers_left": 9,
+     "line": [
+      11,
+      9,
+      6,
+      3,
+      0
+     ],
+     "last_score_move": null
+    },
+    {
+     "points": 0,
+     "stones": 0,
+     "buses": 1,
+     "markers_left": 14,
+     "line": [
+      8,
+      20
+     ],
+     "last_score_move": null
+    }
+   ],
+   "buildings": [
+    {
+     "site": 0,
+     "type": "house",
+     "occupied": false
+    },
+    {
+     "site": 1,
+     "type": "pub",
+     "occupied": false
+    },
+    {
+     "site": 2,
+     "type": "office",
+     "occupied": false
+    },
+    {
+     "site": 3,
+     "type": "house",
+     "occupied": true
+    },
+    {
+     "site": 4,
+     "type": "house",
+     "occupied": true
+    },
+    {
+     "site": 5,
+     "type": "office",
+     "occupied": false
+    },
+    {
+     "site": 6,
+     "type": "office",
+     "occupied": false
+    },
+    {
+     "site": 7,
+     "type": "pub",
+     "occupied": false
+    },
+    {
+     "site": 8,
+     "type": "office",
+     "occupied": false
+    },
+    {
+     "site": 9,
+     "type": "office",
+     "occupied": false
+    },
+    {
+     "site": 10,
+     "type": "office",
+     "occupied": false
+    },
+    {
+     "site": 11,
+     "type": "pub",
+     "occupied": false
+    },
+    {
+     "site": 20,
+     "type": "pub",
+     "occupied": false
+    }
+   ],
+   "waiting": {
+    "5": 2,
+    "18": 1,
+    "21": 1,
+    "25": 4
+   },
+   "supply": 5,
+   "action_board": {
+    "lines": [
+     3,
+     1,
+     null,
+     null,
+     null,
+     null
+    ],
+    "buses": [
+     null
+    ],
+    "passengers": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "buildings": [
+     1,
+     0,
+     null,
+     null,
+     null,
+     null
+    ],
+    "clock": [
+     2
+    ],
+    "vrrooomm": [
+     null,
+     null,
+     null,
+     null,
+     null,
+     null
+    ],
+    "starting_player": [
+     null
+    ]
+   },
+   "pending": {
+    "pass": 1,
+    "dropped": []
+   },
+   "move_offset": 89
+  },
+  "derived": {
+   "seats": [
+    {
+     "line_markers_left": 22,
+     "line_nodes": [
+      34,
+      27,
+      26,
+      33
+     ],
+     "ends": [
+      34,
+      33
+     ],
+     "dropped": false
+    },
+    {
+     "line_markers_left": 23,
+     "line_nodes": [
+      17,
+      13,
+      18
+     ],
+     "ends": [
+      17,
+      18
+     ],
+     "dropped": false
+    },
+    {
+     "line_markers_left": 20,
+     "line_nodes": [
+      4,
+      9,
+      3,
+      4,
+      1,
+      0
+     ],
+     "ends": [
+      4,
+      0
+     ],
+     "dropped": false
+    },
+    {
+     "line_markers_left": 23,
+     "line_nodes": [
+      3,
+      8,
+      9
+     ],
+     "ends": [
+      3,
+      9
+     ],
+     "dropped": false
+    }
+   ],
+   "street_lines": {
+    "58": [
+     0
+    ],
+    "59": [
+     0
+    ],
+    "61": [
+     0
+    ],
+    "30": [
+     1
+    ],
+    "31": [
+     1
+    ],
+    "0": [
+     2
+    ],
+    "3": [
+     2
+    ],
+    "6": [
+     2
+    ],
+    "9": [
+     2
+    ],
+    "11": [
+     2
+    ],
+    "8": [
+     3
+    ],
+    "20": [
+     3
+    ]
+   },
+   "open_tier": "B",
+   "resolving": null,
+   "result": null
+  },
+  "prompt": {
+   "phase": "SEL",
+   "actor": 2,
+   "units_left": null,
+   "power": null,
+   "context": {
+    "pass": 1,
+    "mandatory": true,
+    "markers_left": 9
+   }
+  },
+  "targets": {
+   "streets": {},
+   "sites": {},
+   "stations": {},
+   "nodes": {},
+   "actions": {
+    "lines": 0,
+    "buses": 1,
+    "passengers": 2,
+    "buildings": 3,
+    "vrrooomm": 5,
+    "starting_player": 6
+   },
+   "clock": {
+    "advance": null,
+    "pause": null
+   },
+   "buttons": []
+  }
+ }
+}
