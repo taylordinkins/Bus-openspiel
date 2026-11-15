@@ -583,6 +583,8 @@ export interface operations {
         parameters: {
             query?: {
                 seat?: number | null;
+                /** @description Render the state after the first `at` history entries (a read-only frame for client playback of bot turns); omitted = the current state. */
+                at?: number | null;
             };
             header?: never;
             path: {
@@ -603,6 +605,15 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

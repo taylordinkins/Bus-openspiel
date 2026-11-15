@@ -10,7 +10,19 @@ import TabBar, { type ScreenTab } from "./TabBar";
 import YourMove from "./YourMove";
 import { thinkingText } from "./seatTypes";
 import Tip from "./Tip";
-import { IconArrowLeft, IconDownload, IconFlag, IconList, IconRewind, IconUndo } from "../theme/icons";
+import {
+  IconArrowLeft,
+  IconDownload,
+  IconFlag,
+  IconList,
+  IconRewind,
+  IconSkip,
+  IconSliders,
+  IconUndo,
+} from "../theme/icons";
+import { usePlayback } from "./playback";
+import SettingsDialog from "./SettingsDialog";
+import { SPEED_SCALE, useSettings } from "./settings";
 import { deriveViewSeat, SeatViewContext } from "./viewSeat";
 import {
   errorText,
@@ -92,11 +104,19 @@ export default function GameScreen({
   const [gameName, setGameName] = useState("");
   // Seat whose view is requested (null = server default, i.e. the seat to move).
   const [viewSeat, setViewSeat] = useState<number | null>(null);
-  const { game: raw, error, busy, act, actBatch, goBack, rewind, retry, botThinking, autoNote } = useGame(
+  const [settings] = useSettings();
+  // Forced-move auto-advance waits until playback has caught up (no input while behind).
+  const [holdAuto, setHoldAuto] = useState(false);
+  const { game: latest, error, busy, act, actBatch, goBack, rewind, retry, autoNote, fetchFrame } = useGame(
     gameId,
     pollMs,
-    { autoAdvance: getPlugin(gameName).autoAdvance, seat: viewSeat },
+    { autoAdvance: holdAuto ? undefined : getPlugin(gameName).autoAdvance, seat: viewSeat },
   );
+  // Bot moves are shown one at a time at the bot pace (UI_DESIGN §7); `raw` is the shown view.
+  const pb = usePlayback(latest, { pace: settings.botPace, fetchFrame });
+  const behind = pb.behind;
+  useEffect(() => setHoldAuto(behind), [behind]);
+  const raw = pb.shown;
   // Data rendered for another seat than the viewed one is treated as loading (no private leak).
   const game = raw !== null && viewSeat !== null && raw.seat !== viewSeat ? null : raw;
   const mismatch = raw !== null && game === null;
@@ -117,6 +137,7 @@ export default function GameScreen({
   const [tab, setTab] = useState<ScreenTab>("play");
   const [hoverAction, setHoverAction] = useState<number | null>(null);
   const [reporting, setReporting] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [listOpen, setListOpen] = useState(false);
   const [rewindTo, setRewindTo] = useState("0");
   const [exportError, setExportError] = useState<string | null>(null);
@@ -124,7 +145,11 @@ export default function GameScreen({
   const plugin = getPlugin(game?.game ?? "");
   const over = game !== null && isTerminal(game);
   const cp = game ? currentPlayer(game) : null;
-  const humanTurn = game !== null && cp !== null && game.seats[cp] === "human" && !game.bot_thinking;
+  const humanTurn =
+    game !== null && cp !== null && game.seats[cp] === "human" && !game.bot_thinking && !behind;
+  const botThinking = game !== null && !over && (game.bot_thinking || behind);
+  const canSkip =
+    game !== null && !over && (behind || latest?.bot_thinking === true) && game.seats.includes("human");
 
   const phase = game ? plugin.phaseLabel?.(game) : undefined;
   const ui: BoardUi | undefined = game
@@ -136,6 +161,10 @@ export default function GameScreen({
         onBack: () => goBack(),
         canBack: game.history_length > 0 && !over && !busy,
         viewSeat,
+        motion:
+          pb.motion && settings.animation !== "off"
+            ? { ...pb.motion, speed: settings.animation, scale: SPEED_SCALE[settings.animation] }
+            : null,
       }
     : undefined;
 
@@ -204,6 +233,16 @@ export default function GameScreen({
                   </button>
                 </Tip>
                 {onImported && <ImportButton onImported={onImported} compact />}
+                <Tip text="Settings: animation speed, bot pace">
+                  <button
+                    type="button"
+                    className="btn-sm btn-ghost btn-icon"
+                    aria-label="Settings"
+                    onClick={() => setSettingsOpen(true)}
+                  >
+                    <IconSliders />
+                  </button>
+                </Tip>
                 <Tip text="Report a problem with this position">
                   <button
                     type="button"
@@ -261,6 +300,7 @@ export default function GameScreen({
             <p>Loading…</p>
           </div>
         )}
+        {settingsOpen && <SettingsDialog onClose={() => setSettingsOpen(false)} />}
         {raw && covered && viewSeat !== null && (
           <Curtain seat={viewSeat} accent={plugin.seatStyle?.(viewSeat)} disabled={mismatch} onReveal={() => setAckSeat(viewSeat)} />
         )}
@@ -276,10 +316,23 @@ export default function GameScreen({
                 <div className="lg-pane-play">
                   {plugin.renderSide?.(game, ui)}
                   {botThinking && cp !== null && (
-                    <p role="status" className="note lg-thinking">
-                      <span className="spinner" aria-hidden="true" />
-                      {thinkingText(game.seats[cp] ?? "", cp)}
-                    </p>
+                    <div className="lg-thinking-row">
+                      <p role="status" className="note lg-thinking">
+                        <span className="spinner" aria-hidden="true" />
+                        {game.seats[cp] === "human" ? "Showing moves…" : thinkingText(game.seats[cp] ?? "", cp)}
+                      </p>
+                      {canSkip && (
+                        <button
+                          type="button"
+                          className="btn-sm lg-skip"
+                          onClick={pb.skip}
+                          disabled={pb.skipping}
+                        >
+                          <IconSkip />
+                          Skip to my turn
+                        </button>
+                      )}
+                    </div>
                   )}
                   {game.bot_error && !over && (
                     <div role="alert" className="alert">

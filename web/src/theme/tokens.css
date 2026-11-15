@@ -108,6 +108,11 @@
   --t-fast: 0.12s;
   --t: 0.2s;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  /* board motion at "normal" speed (unit 9); the board scales these by --motion-scale */
+  --t-place: 250ms; /* placements ease in */
+  --t-move: 700ms; /* passengers along the street path */
+  --t-float: 950ms; /* "+1" from the delivery to the scorer's panel */
+  --ease-move: cubic-bezier(0.45, 0, 0.25, 1);
 
   /* ---- layout */
   --side-w: 22rem;

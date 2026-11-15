@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { BoardUi } from "../registry";
+import type { BoardMotion, BoardUi } from "../registry";
 import type { GameView } from "../../shell/useGame";
 import BusBoard from "./BusBoard";
 import EndResults from "./EndResults";
@@ -12,10 +12,10 @@ import TurnFrame from "./TurnFrame";
 import "./bus.css";
 
 /** Fetches the geometry once, only for views that carry board data. */
-function LoadedBoard({ data, act }: { data: BusViewData; act: BoardAct | null }) {
+function LoadedBoard({ data, act, motion }: { data: BusViewData; act: BoardAct | null; motion: BoardMotion | null }) {
   const geo = useBusGeometry();
   return geo ? (
-    <BusBoard geo={geo} data={data} act={act} />
+    <BusBoard geo={geo} data={data} act={act} motion={motion} />
   ) : (
     <div className="bus-board-loading">
       <span className="spinner" aria-hidden="true" />
@@ -103,7 +103,7 @@ export default function BusPanel({ game, ui }: { game: GameView; ui?: BoardUi })
         <PlainPrompt prompt={(busInner(game).prompt ?? {}) as RawPrompt} />
       )}
       <TurnFrame game={game} actor={data?.prompt?.actor ?? null}>
-        {data && <LoadedBoard data={data} act={act} />}
+        {data && <LoadedBoard data={data} act={act} motion={ui?.motion ?? null} />}
       </TurnFrame>
       {confirm && pauseId !== null && (
         <LastStoneConfirm

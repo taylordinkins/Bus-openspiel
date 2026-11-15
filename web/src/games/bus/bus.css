@@ -753,3 +753,84 @@
   color: var(--glow);
   margin-bottom: 1px;
 }
+
+/* ================================================================ motion (unit 9; UI_DESIGN 3) */
+/* fresh pieces ease in; durations scale with the speed setting (--motion-scale on .bus-board) */
+.bus-svg [data-anim="in"] {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bus-place calc(var(--t-place) * var(--motion-scale, 1)) var(--ease) both;
+}
+.bus-svg .bus-line[data-anim="in"],
+.bus-svg .clock-hand[data-anim="in"] {
+  animation-name: bus-fade;
+}
+@keyframes bus-place {
+  from {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes bus-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.bus-walker {
+  filter: drop-shadow(0 2px 1px rgba(40, 20, 4, 0.35));
+}
+
+/* "+1" from a delivery to the scorer's panel (fixed layer in a body portal) */
+.bus-float-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  overflow: hidden;
+}
+.bus-float {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: inline-grid;
+  place-items: center;
+  min-width: 34px;
+  height: 26px;
+  padding: 0 7px;
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--seat-ink, var(--paper));
+  background: var(--seat, var(--ink));
+  border: var(--rule) solid var(--ink);
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-2);
+  animation-name: bus-float;
+  animation-timing-function: var(--ease-move);
+  animation-fill-mode: both;
+}
+@keyframes bus-float {
+  0% {
+    opacity: 0;
+    transform: translate(var(--fx), var(--fy)) translate(-50%, -50%) scale(0.6);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(var(--fx), calc(var(--fy) - 22px)) translate(-50%, -50%) scale(1.15);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) translate(-50%, -50%) scale(0.85);
+  }
+}

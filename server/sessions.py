@@ -361,9 +361,24 @@ class Session:
         if seen != n_player_actions:
             raise SessionError(f"only {seen} player actions have been taken")
 
-    def view(self, seat: int) -> JSON:
-        """GameView.view: shell fields plus the adapter payload (nested under `view_key`)."""
-        state = self.state
+    def state_at(self, at: int | None) -> pyspiel.State:
+        """The state after the first `at` history entries (None = the current state).
+
+        Read-only snapshot for client-side playback of bot turns (UI_DESIGN 6.8)."""
+        if at is None or at == len(self.history):
+            return self.state
+        if not 0 <= at <= len(self.history):
+            raise SessionError(f"at={at} out of range 0..{len(self.history)}")
+        state = self._initial()
+        for a in self.history[:at]:
+            state.apply_action(a)
+        return state
+
+    def view(self, seat: int, at: int | None = None) -> JSON:
+        """GameView.view: shell fields plus the adapter payload (nested under `view_key`).
+
+        `at` renders the state after the first `at` history entries instead of the current one."""
+        state = self.state_at(at)
         terminal = state.is_terminal()
         chance = state.is_chance_node()
         current = None if terminal or chance else state.current_player()
@@ -396,12 +411,14 @@ class Session:
             out[key] = payload
         return out
 
-    def history_entries(self, seat: int) -> list[JSON]:
+    def history_entries(self, seat: int, at: int | None = None) -> list[JSON]:
         """Labelled history as seen by `seat`: replay, labelling each action as it was when it
-        was legal. Actions the adapter hides from `seat` (history_mask) get its label, id None."""
+        was legal. Actions the adapter hides from `seat` (history_mask) get its label, id None.
+        `at` keeps only the first `at` entries (playback frames)."""
         state = self._initial()
         out: list[JSON] = []
-        for i, (a, who) in enumerate(zip(self.history, self.actors, strict=True)):
+        n = len(self.history) if at is None else at
+        for i, (a, who) in enumerate(zip(self.history[:n], self.actors[:n], strict=True)):
             shown: int | None = a
             if who == CHANCE:
                 label = self.adapter.chance_label(state, a)

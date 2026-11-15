@@ -745,6 +745,24 @@
               ],
               "title": "Seat"
             }
+          },
+          {
+            "description": "Render the state after the first `at` history entries (a read-only frame for client playback of bot turns); omitted = the current state.",
+            "in": "query",
+            "name": "at",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Render the state after the first `at` history entries (a read-only frame for client playback of bot turns); omitted = the current state.",
+              "title": "At"
+            }
           }
         ],
         "responses": {
@@ -767,6 +785,16 @@
               }
             },
             "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Conflict"
           },
           "422": {
             "content": {

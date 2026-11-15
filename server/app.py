@@ -70,25 +70,36 @@ def create_app(
         except UnknownSession:
             raise HTTPException(404, f"unknown game {game_id!r}") from None
 
-    def render(s: Session, seat: int | None = None) -> GameView:
+    def render(s: Session, seat: int | None = None, at: int | None = None) -> GameView:
         with s.lock:
+            if at is not None and not 0 <= at <= len(s.history):
+                raise HTTPException(409, f"at={at} out of range 0..{len(s.history)}")
+            frame = at is not None and at != len(s.history)
+            state = s.state_at(at)
             if seat is None:
-                seat = 0 if s.state.is_terminal() else max(s.state.current_player(), 0)
+                seat = 0 if state.is_terminal() else max(state.current_player(), 0)
             if not 0 <= seat < len(s.seats):
                 raise HTTPException(422, f"seat {seat} out of range")
             seats: list[str] = list(s.seats)
-            v = s.view(seat)
+            v = s.view(seat, at)
+            if frame:
+                # A past frame: "thinking" = a bot was to move there (playback shows it next).
+                cp = None if state.is_terminal() else state.current_player()
+                thinking = cp is not None and cp >= 0 and not s.is_human(cp)
+                error = None
+            else:
+                thinking, error = s.bot_thinking, s.bot_error
             return GameView.model_validate(
                 {
                     "id": s.id,
                     "game": s.game_name,
                     "seats": seats,
                     "seat_types": seats,
-                    "bot_thinking": s.bot_thinking,
-                    "bot_error": s.bot_error,
+                    "bot_thinking": thinking,
+                    "bot_error": error,
                     "seat": seat,
-                    "history_length": len(s.history),
-                    "history": s.history_entries(seat),
+                    "history_length": len(s.history) if at is None else at,
+                    "history": s.history_entries(seat, at),
                     "dev_mode": dev_mode,
                     "current_player": v["current_player"],
                     "is_terminal": v["is_terminal"],
@@ -150,9 +161,19 @@ def create_app(
             raise HTTPException(404, f"no board geometry for game {game!r}")
         return BoardGeometry(game=game, geometry=geometry)
 
-    @api.get("/games/{game_id}", operation_id="get_game", responses={404: _ERR})
-    def get_game(game_id: str, seat: Annotated[int | None, Query()] = None) -> GameView:
-        return render(lookup(game_id), seat)
+    @api.get("/games/{game_id}", operation_id="get_game", responses={404: _ERR, 409: _ERR})
+    def get_game(
+        game_id: str,
+        seat: Annotated[int | None, Query()] = None,
+        at: Annotated[
+            int | None,
+            Query(
+                description="Render the state after the first `at` history entries (a read-only "
+                "frame for client playback of bot turns); omitted = the current state."
+            ),
+        ] = None,
+    ) -> GameView:
+        return render(lookup(game_id), seat, at)
 
     @api.post(
         "/games/{game_id}/actions",

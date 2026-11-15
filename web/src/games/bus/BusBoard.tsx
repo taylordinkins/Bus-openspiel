@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
 import type { BusGeometry } from "./geometry";
 import {
   BUILDING_ORDER,
@@ -46,6 +46,11 @@ import {
   type Viewport,
 } from "./viewport";
 import { IconFit, IconMinus, IconPlus } from "../../theme/icons";
+import type { BoardMotion } from "../registry";
+import { FloatLayer, WalkLayer } from "./BusMotion";
+import { freshKeys, motionLength, motionPlan, type Float, type Walk } from "./motion";
+
+const NO_KEYS: ReadonlySet<string> = new Set();
 
 const HL = GLOW;
 
@@ -92,10 +97,13 @@ export default function BusBoard({
   geo,
   data,
   act = null,
+  motion = null,
 }: {
   geo: BusGeometry;
   data: BusViewData;
   act?: BoardAct | null;
+  /** The latest shown change to animate (unit 9); null = render immediately. */
+  motion?: BoardMotion | null;
 }) {
   const size = geo.map.width;
   const [vp, setVp] = useState<Viewport>(() => fitViewport(size));
@@ -156,6 +164,64 @@ export default function BusBoard({
   const endDrag = () => {
     drag.current = null;
   };
+
+  // ---------------------------------------------------------------- motion (UI_DESIGN 3, unit 9)
+  // New pieces ease in; computed once per motion seq against the view rendered before it.
+  const prevData = useRef<BusViewData | null>(null);
+  const animRef = useRef<{ seq: number | null; fresh: ReadonlySet<string> }>({ seq: null, fresh: NO_KEYS });
+  const mseq = motion?.seq ?? null;
+  let anim = animRef.current;
+  if (mseq !== anim.seq) anim = { seq: mseq, fresh: motion ? freshKeys(prevData.current, data) : NO_KEYS };
+  useEffect(() => {
+    animRef.current = anim;
+    prevData.current = data;
+  });
+  const plan = useMemo(
+    () => (motion ? motionPlan(geo, data, motion.events, motion.scale, motion.seq) : null),
+    // the plan belongs to the change (seq), not to later polls of the same position
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mseq, geo],
+  );
+  /** Pieces that appear where a walker arrives wait for it (ms). */
+  const arrive = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const w of plan?.walks ?? []) {
+      const end = w.delay + w.duration;
+      if (w.kind === "exit") {
+        const n = geo.sites[w.site]?.node;
+        if (n !== undefined) m.set(`w${n}`, Math.max(m.get(`w${n}`) ?? 0, end));
+      } else m.set(`o${w.site}`, end);
+    }
+    return m;
+  }, [plan, geo]);
+  const [walks, setWalks] = useState<Walk[]>([]);
+  const [floats, setFloats] = useState<Float[]>([]);
+  const timers = useRef(new Set<ReturnType<typeof setTimeout>>());
+  useEffect(() => {
+    if (!plan || !motion || (plan.walks.length === 0 && plan.floats.length === 0)) return;
+    const wk = new Set(plan.walks.map((w) => w.key));
+    const fk = new Set(plan.floats.map((f) => f.key));
+    // keyed by seq, so a repeated effect run (StrictMode) adds nothing twice
+    setWalks((w) => [...w.filter((x) => !wk.has(x.key)), ...plan.walks]);
+    setFloats((f) => [...f.filter((x) => !fk.has(x.key)), ...plan.floats]);
+    const t = setTimeout(() => {
+      timers.current.delete(t);
+      setWalks((w) => w.filter((x) => !wk.has(x.key)));
+      setFloats((f) => f.filter((x) => !fk.has(x.key)));
+    }, motionLength(plan, motion.scale) + 60);
+    timers.current.add(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plan]);
+  useEffect(() => {
+    const ts = timers.current;
+    return () => {
+      for (const t of ts) clearTimeout(t);
+    };
+  }, []);
+  const fresh = anim.fresh;
+  /** Ease-in attributes for a fresh piece (CSS `[data-anim="in"]`), optionally after a delay. */
+  const animIn = (key: string, delay = 0) =>
+    fresh.has(key) ? { "data-anim": "in", style: delay > 0 ? { animationDelay: `${Math.round(delay)}ms` } : undefined } : {};
 
   const st = data.state;
   const nSeats = st.seats.length;
@@ -433,6 +499,7 @@ export default function BusBoard({
             className={`bus-line seat-${s}`}
             data-seat={s}
             data-street={sid}
+            {...animIn(`l${s}-${sid}`)}
             fill="none"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -485,10 +552,15 @@ export default function BusBoard({
           data-site={b.site}
           data-kind={b.type}
           data-occupied={b.occupied}
+          {...animIn(`b${b.site}:${b.type}`)}
         >
           <circle cx={site.x} cy={site.y} r={25} fill={PAPER} stroke={INK} strokeWidth={3} />
           <Icon kind={b.type} x={site.x} y={site.y} scale={0.8} />
-          {b.occupied && <Passenger x={site.x + 20} y={site.y - 14} scale={0.8} />}
+          {b.occupied && (
+            <g className="occupant" {...animIn(`o${b.site}`, arrive.get(`o${b.site}`))}>
+              <Passenger x={site.x + 20} y={site.y - 14} scale={0.8} />
+            </g>
+          )}
         </g>
       );
     });
@@ -508,7 +580,7 @@ export default function BusBoard({
           ))
         );
       return [
-        <g key={`w${nid}`} className="waiting" data-node={nid} data-count={count}>
+        <g key={`w${nid}`} className="waiting" data-node={nid} data-count={count} {...animIn(`w${nid}:${count}`, arrive.get(`w${nid}`))}>
           {figs}
         </g>,
       ];
@@ -521,7 +593,7 @@ export default function BusBoard({
         const cell = busCell(geo, s, bus);
         if (!cell) continue;
         busEls.push(
-          <g key={`bus${s}-${bus}`} className="bus-piece" data-seat={s} data-bus={bus} {...hov(busInfo(s, seat.buses))}>
+          <g key={`bus${s}-${bus}`} className="bus-piece" data-seat={s} data-bus={bus} {...animIn(`bus${s}-${bus}`)} {...hov(busInfo(s, seat.buses))}>
             <rect x={cell[0] - 27} y={cell[1] - 26} width={54} height={52} rx={6} fill={PAPER} opacity={0.9} />
             <BusGlyph x={cell[0]} y={cell[1]} seat={s} scale={0.8} />
           </g>,
@@ -543,6 +615,7 @@ export default function BusBoard({
             data-seat={seat}
             data-action={action}
             data-letter={LETTERS[k]}
+            {...animIn(`m${action}-${k}:${seat}`)}
             {...hov(markerInfo(action, LETTERS[k] ?? "", seat))}
           >
             <SeatToken x={p[0]} y={p[1]} seat={seat} r={19} />
@@ -561,7 +634,7 @@ export default function BusBoard({
       const k = stack.get(key) ?? 0;
       stack.set(key, k + 1);
       scoreEls.push(
-        <g key={`sc${s}`} className="score-disc" data-seat={s} data-points={seat.points} {...hov(scoreInfo(s, seat.points, seat.stones))}>
+        <g key={`sc${s}`} className="score-disc" data-seat={s} data-points={seat.points} {...animIn(`sc${s}:${seat.points}`, plan?.floats.find((f) => f.seat === s)?.delay)} {...hov(scoreInfo(s, seat.points, seat.stones))}>
           <SeatToken x={cell[0] - 40 - k * 36} y={cell[1]} seat={s} r={17} />
         </g>,
       );
@@ -572,7 +645,7 @@ export default function BusBoard({
     const hx = lay.clock.x + lay.clock.hand * Math.cos(angle);
     const hy = lay.clock.y + lay.clock.hand * Math.sin(angle);
     const clockEl = (
-      <g className="clock-hand" data-clock={st.clock}>
+      <g className="clock-hand" data-clock={st.clock} {...animIn(`clock:${st.clock}`)}>
         <line x1={lay.clock.x} y1={lay.clock.y} x2={hx} y2={hy} stroke={PAPER} strokeWidth={14} strokeLinecap="round" />
         <line x1={lay.clock.x} y1={lay.clock.y} x2={hx} y2={hy} stroke={INK} strokeWidth={8} strokeLinecap="round" />
         <circle cx={lay.clock.x} cy={lay.clock.y} r={11} fill={INK} stroke={PAPER} strokeWidth={3} />
@@ -593,7 +666,7 @@ export default function BusBoard({
 
     return { lineEls, buildingEls, waitingEls, busEls, markerEls, scoreEls, clockEl, stoneEls, flag };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [geo, data]);
+  }, [geo, data, fresh, arrive]);
 
   const zoomButton = (factor: number) => () => {
     setPop(null);
@@ -601,7 +674,12 @@ export default function BusBoard({
   };
 
   return (
-    <div className="bus-board" ref={wrap}>
+    <div
+      className="bus-board"
+      ref={wrap}
+      data-motion={motion ? motion.speed : "off"}
+      style={motion ? ({ "--motion-scale": motion.scale } as CSSProperties) : undefined}
+    >
       <div role="group" aria-label="Board zoom" className="bus-zoom">
         <button type="button" className="btn-icon" aria-label="Zoom in" title="Zoom in" onClick={zoomButton(1.25)} disabled={vp.scale >= 2.5}>
           <IconPlus />
@@ -877,8 +955,10 @@ export default function BusBoard({
             <circle cx={geo.nodes[pickedNode].x} cy={geo.nodes[pickedNode].y} r={30} stroke={HL} strokeWidth={6} strokeDasharray="10 6" />
           </g>
         )}
+        <WalkLayer walks={walks} />
         {ghost}
       </svg>
+      <FloatLayer floats={floats} geo={geo} svgRef={svgRef} />
       </div>
       {pop && (
         <div

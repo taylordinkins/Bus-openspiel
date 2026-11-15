@@ -1,5 +1,14 @@
 import { createElement, type ReactNode } from "react";
 import type { GameView, LegalAction } from "../shell/useGame";
+import type { Motion } from "../shell/playback";
+import type { AnimSpeed } from "../shell/settings";
+
+/** The latest shown change to animate (UI_DESIGN §3 motion); null with animation off. */
+export interface BoardMotion extends Motion {
+  speed: Exclude<AnimSpeed, "off">;
+  /** Duration multiplier for the motion tokens (1 = normal). */
+  scale: number;
+}
 import { busPlugin } from "./bus/plugin";
 
 /** Transient UI state shared between the action list and the board. */
@@ -18,6 +27,8 @@ export interface BoardUi {
   canBack?: boolean;
   /** Seat whose private information may be shown (hotseat view seat). */
   viewSeat?: number | null;
+  /** Automatic steps of the latest shown change, for the board to animate (null = none). */
+  motion?: BoardMotion | null;
 }
 
 export interface GamePlugin {

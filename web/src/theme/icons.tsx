@@ -76,6 +76,21 @@ export const IconList = () => (
     <path d="M7 5h10M7 10h10M7 15h10M3 5h.01M3 10h.01M3 15h.01" />
   </Svg>
 );
+/** Settings: three slider rails with knobs. */
+export const IconSliders = () => (
+  <Svg>
+    <path d="M3 5h7M14 5h3M3 10h2M9 10h8M3 15h9M16 15h1" />
+    <circle cx="12" cy="5" r="2" />
+    <circle cx="7" cy="10" r="2" />
+    <circle cx="14" cy="15" r="2" />
+  </Svg>
+);
+export const IconSkip = () => (
+  <Svg>
+    <path d="M3 5l6 5-6 5zM10 5l6 5-6 5z" />
+    <path d="M18 5v10" />
+  </Svg>
+);
 
 /** The Bus wordmark after the map's logo: B red, U yellow, S blue, each with an ink keyline. */
 export function Wordmark({ height = 40 }: { height?: number }) {
