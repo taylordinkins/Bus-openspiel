@@ -56,7 +56,7 @@ export async function boardReady(page: Page): Promise<void> {
  * street's bounding-box centre can miss it), else the shape's centre. Neighbouring hit shapes may
  * overlap there; the board sends such a click to the nearest centre (UI_DESIGN 6.7).
  */
-async function realClick(target: Locator): Promise<void> {
+export async function realClick(target: Locator): Promise<void> {
   await target.scrollIntoViewIfNeeded({ timeout: 1_500 });
   const pt = await target.evaluate((el) => {
     const g = el as SVGGraphicsElement;

@@ -85,10 +85,6 @@
   border-radius: var(--r);
   box-shadow: var(--shadow-2);
 }
-.bus-turn-frame .bus-zoom {
-  top: -10px;
-  margin-right: 22px;
-}
 /* no margin beside the board (tall or narrow column): the rail sits on the board's corner */
 @container busmain (max-aspect-ratio: 27 / 25) {
   .bus-zoom,
@@ -623,13 +619,26 @@
 }
 
 /* ================================================================ hotseat turn frame and toast */
+/*
+ * The frame is drawn over the board's own ink edge rather than round it, so it costs no layout
+ * space and the board keeps its full size (>= 640 px at 1280 x 720, UI_DESIGN 3a). The element
+ * carries the seat colour as its (zero-width) border colour; the ring inherits it.
+ */
 .bus-turn-frame {
   position: relative;
   box-sizing: border-box;
-  border: 6px solid var(--ink);
-  border-radius: 16px;
-  padding: 4px;
+  border: 0 solid var(--ink);
+}
+.bus-turn-frame::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  border: 6px solid;
+  border-color: inherit;
+  border-radius: 10px;
   box-shadow: 0 0 0 1.5px var(--ink), inset 0 0 0 1.5px var(--ink);
+  pointer-events: none;
 }
 .bus-toast {
   position: absolute;

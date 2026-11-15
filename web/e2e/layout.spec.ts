@@ -51,20 +51,23 @@ for (const [w, h] of SIZES) {
     test("fresh game fits one viewport", async ({ page }) => {
       await newGame(page, 4, ["human", "random", "random", "random"]);
       await boardReady(page);
-      // UI_DESIGN 3a: the board is at least 640 px square at 1280 x 720 (one human seat, no turn frame).
+      // UI_DESIGN 3a: the board is at least 640 px square at 1280 x 720.
       await expectOneViewport(page, w, h, 640);
     });
 
     test("5-player hotseat line expansion fits one viewport", async ({ page }) => {
       await scenarioGame(page, "lines_five_player_shared", ["human", "human", "human", "human", "human"]);
       await boardReady(page);
-      await expectOneViewport(page, w, h);
+      await expect(page.getByTestId("turn-frame")).toBeVisible();
+      // UI_DESIGN 3a: the hotseat turn frame costs the board no size (>= 640 px at 1280 x 720).
+      await expectOneViewport(page, w, h, 640);
     });
 
     test("hotseat resolution phase fits one viewport", async ({ page }) => {
       await scenarioGame(page, "resolve_ln", ["human", "human", "human", "human"]);
       await boardReady(page);
-      await expectOneViewport(page, w, h);
+      await expect(page.getByTestId("turn-frame")).toBeVisible();
+      await expectOneViewport(page, w, h, 640);
     });
 
     test("END results fit one viewport", async ({ page }) => {
