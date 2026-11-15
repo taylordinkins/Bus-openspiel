@@ -184,7 +184,7 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 - [x] 13. Observer, `action_meta`, `forced_action`, `max_game_length` (§5.2; ACTIONS.md §3, §5, §6; plus ACTIONS §3.12 `game_result(state)` and winners in the observer string; canonical `current` at END so `str(load(dump(s))) == str(s)`, per unit 12 audit) — `spec-test-writer` → `implementer` (2026-11-14; tensor 1178/1474/1770 floats, ~100 µs; observed max length 177/197/257 vs 702/936/1170)
 - [x] 14. Conformance and random sims (`random_sim_test` 3/4/5, 10,000 games slow) — `implementer`, `sim-runner` (2026-11-14; 10,000 games, 0 violations, 6m40s; margin utility_sum fix)
 - [x] 15. `tools/play_text.py`, `tools/replay.py` — `implementer` (2026-11-14)
-- [ ] 16. `tools/sim_stats.py`, golden playthroughs for 3 seeds — `implementer`, `sim-runner`
+- [x] 16. `tools/sim_stats.py`, golden playthroughs for 3 seeds — `implementer`, `sim-runner` (2026-11-14)
 - *Exit:* rule tests green; `random_sim_test` passes for 3, 4, 5 players; 10,000 random games with zero invariant violations; `sim_stats` report (end-type mix, rounds, scores, markers used); `rules-auditor` + `code-reviewer` pass.
 
 **Phase 2 — Server + polished board UI ✋ playtest #1**

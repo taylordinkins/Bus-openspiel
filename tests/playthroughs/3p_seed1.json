@@ -1,0 +1,724 @@
+{
+ "format": 1,
+ "parameters": {
+  "players": 3,
+  "returns": "win_loss"
+ },
+ "seed": 1,
+ "moves": [
+  {
+   "action": 156,
+   "player": 0,
+   "label": "P0: build pub at site 2 (A, n13)",
+   "state": "bus n=3 returns=win_loss round=0 phase=SB cur=0 clock=house stones_on_clock=4 supply=11 placed=1 start=0 move=1 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[], [], [], [], [], [], []] sites={2: 'pub'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=20,lm=25,st=0,bld=1,line=[],last=None;P1:pts=0,bus=1,am=20,lm=25,st=0,bld=0,line=[],last=None;P2:pts=0,bus=1,am=20,lm=25,st=0,bld=0,line=[],last=None"
+  },
+  {
+   "action": 152,
+   "player": 0,
+   "label": "P0: build office at site 1 (A, n14)",
+   "state": "bus n=3 returns=win_loss round=0 phase=SB cur=1 clock=house stones_on_clock=4 supply=11 placed=2 start=0 move=2 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[], [], [], [], [], [], []] sites={1: 'office', 2: 'pub'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=20,lm=25,st=0,bld=2,line=[],last=None;P1:pts=0,bus=1,am=20,lm=25,st=0,bld=0,line=[],last=None;P2:pts=0,bus=1,am=20,lm=25,st=0,bld=0,line=[],last=None"
+  },
+  {
+   "action": 162,
+   "player": 1,
+   "label": "P1: build pub at site 4 (A, n17)",
+   "state": "bus n=3 returns=win_loss round=0 phase=SB cur=1 clock=house stones_on_clock=4 supply=11 placed=3 start=0 move=3 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[], [], [], [], [], [], []] sites={1: 'office', 2: 'pub', 4: 'pub'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=20,lm=25,st=0,bld=2,line=[],last=None;P1:pts=0,bus=1,am=20,lm=25,st=0,bld=1,line=[],last=None;P2:pts=0,bus=1,am=20,lm=25,st=0,bld=0,line=[],last=None"
+  },
+  {
+   "action": 157,
+   "player": 1,
+   "label": "P1: build house at site 3 (A, n13)",
+   "state": "bus n=3 returns=win_loss round=0 phase=SB cur=2 clock=house stones_on_clock=4 supply=11 placed=4 start=0 move=4 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[], [], [], [], [], [], []] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=20,lm=25,st=0,bld=2,line=[],last=None;P1:pts=0,bus=1,am=20,lm=25,st=0,bld=2,line=[],last=None;P2:pts=0,bus=1,am=20,lm=25,st=0,bld=0,line=[],last=None"
+  },
+  {
+   "action": 175,
+   "player": 2,
+   "label": "P2: build house at site 9 (A, n21)",
+   "state": "bus n=3 returns=win_loss round=0 phase=SB cur=2 clock=house stones_on_clock=4 supply=11 placed=5 start=0 move=5 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[], [], [], [], [], [], []] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=20,lm=25,st=0,bld=2,line=[],last=None;P1:pts=0,bus=1,am=20,lm=25,st=0,bld=2,line=[],last=None;P2:pts=0,bus=1,am=20,lm=25,st=0,bld=1,line=[],last=None"
+  },
+  {
+   "action": 174,
+   "player": 2,
+   "label": "P2: build pub at site 8 (A, n20)",
+   "state": "bus n=3 returns=win_loss round=0 phase=L1 cur=0 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=6 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[], [], [], [], [], [], []] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=20,lm=25,st=0,bld=2,line=[],last=None;P1:pts=0,bus=1,am=20,lm=25,st=0,bld=2,line=[],last=None;P2:pts=0,bus=1,am=20,lm=25,st=0,bld=2,line=[],last=None"
+  },
+  {
+   "action": 68,
+   "player": 0,
+   "label": "P0: start line on s60 (n26-n34)",
+   "state": "bus n=3 returns=win_loss round=0 phase=L1 cur=1 clock=house stones_on_clock=4 supply=11 placed=1 start=0 move=7 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[], [], [], [], [], [], []] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=20,lm=24,st=0,bld=2,line=[60],last=None;P1:pts=0,bus=1,am=20,lm=25,st=0,bld=2,line=[],last=None;P2:pts=0,bus=1,am=20,lm=25,st=0,bld=2,line=[],last=None"
+  },
+  {
+   "action": 56,
+   "player": 1,
+   "label": "P1: start line on s48 (n21-n27)",
+   "state": "bus n=3 returns=win_loss round=0 phase=L1 cur=2 clock=house stones_on_clock=4 supply=11 placed=2 start=0 move=8 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[], [], [], [], [], [], []] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=20,lm=24,st=0,bld=2,line=[60],last=None;P1:pts=0,bus=1,am=20,lm=24,st=0,bld=2,line=[48],last=None;P2:pts=0,bus=1,am=20,lm=25,st=0,bld=2,line=[],last=None"
+  },
+  {
+   "action": 34,
+   "player": 2,
+   "label": "P2: start line on s26 (n11-n16)",
+   "state": "bus n=3 returns=win_loss round=0 phase=L2 cur=2 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=9 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[], [], [], [], [], [], []] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=20,lm=24,st=0,bld=2,line=[60],last=None;P1:pts=0,bus=1,am=20,lm=24,st=0,bld=2,line=[48],last=None;P2:pts=0,bus=1,am=20,lm=24,st=0,bld=2,line=[26],last=None"
+  },
+  {
+   "action": 25,
+   "player": 2,
+   "label": "P2: extend end 0 via s17 (n6-n11) to n6",
+   "state": "bus n=3 returns=win_loss round=0 phase=L2 cur=1 clock=house stones_on_clock=4 supply=11 placed=1 start=0 move=10 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[], [], [], [], [], [], []] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=20,lm=24,st=0,bld=2,line=[60],last=None;P1:pts=0,bus=1,am=20,lm=24,st=0,bld=2,line=[48],last=None;P2:pts=0,bus=1,am=20,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 55,
+   "player": 1,
+   "label": "P1: extend end 0 via s47 (n21-n26) to n26",
+   "state": "bus n=3 returns=win_loss round=0 phase=L2 cur=0 clock=house stones_on_clock=4 supply=11 placed=2 start=0 move=11 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[], [], [], [], [], [], []] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=20,lm=24,st=0,bld=2,line=[60],last=None;P1:pts=0,bus=1,am=20,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=20,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 53,
+   "player": 0,
+   "label": "P0: extend end 0 via s45 (n20-n26) to n20",
+   "state": "bus n=3 returns=win_loss round=1 phase=SEL cur=0 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=12 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[], [], [], [], [], [], []] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=20,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=20,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=20,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 6,
+   "player": 0,
+   "label": "P0: select Starting Player",
+   "state": "bus n=3 returns=win_loss round=1 phase=SEL cur=1 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=13 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[], [], [], [], [], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=19,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=20,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=20,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 3,
+   "player": 1,
+   "label": "P1: select Buildings",
+   "state": "bus n=3 returns=win_loss round=1 phase=SEL cur=2 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=14 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[], [], [], [1], [], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=19,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=19,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=20,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 3,
+   "player": 2,
+   "label": "P2: select Buildings",
+   "state": "bus n=3 returns=win_loss round=1 phase=SEL cur=0 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=15 pass=1 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[], [], [], [1, 2], [], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=19,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=19,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=19,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 4,
+   "player": 0,
+   "label": "P0: select Clock",
+   "state": "bus n=3 returns=win_loss round=1 phase=SEL cur=1 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=16 pass=1 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[], [], [], [1, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=19,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=19,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 0,
+   "player": 1,
+   "label": "P1: select Lines",
+   "state": "bus n=3 returns=win_loss round=1 phase=SEL cur=2 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=17 pass=1 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[1], [], [], [1, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=19,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 3,
+   "player": 2,
+   "label": "P2: select Buildings",
+   "state": "bus n=3 returns=win_loss round=1 phase=SEL cur=0 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=18 pass=2 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[1], [], [], [1, 2, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 2,
+   "player": 0,
+   "label": "P0: select Passengers",
+   "state": "bus n=3 returns=win_loss round=1 phase=SEL cur=1 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=19 pass=2 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[1], [], [0], [1, 2, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 7,
+   "player": 1,
+   "label": "P1: drop out",
+   "state": "bus n=3 returns=win_loss round=1 phase=SEL cur=2 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=20 pass=2 dropped=[1] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[1], [], [0], [1, 2, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 1,
+   "player": 2,
+   "label": "P2: select Buses",
+   "state": "bus n=3 returns=win_loss round=1 phase=SEL cur=0 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=21 pass=3 dropped=[1] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[1], [2], [0], [1, 2, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 7,
+   "player": 0,
+   "label": "P0: drop out",
+   "state": "bus n=3 returns=win_loss round=1 phase=SEL cur=2 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=22 pass=3 dropped=[0, 1] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[1], [2], [0], [1, 2, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 0,
+   "player": 2,
+   "label": "P2: select Lines",
+   "state": "bus n=3 returns=win_loss round=1 phase=SEL cur=2 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=23 pass=4 dropped=[0, 1] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[1, 2], [2], [0], [1, 2, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=16,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 3,
+   "player": 2,
+   "label": "P2: select Buildings",
+   "state": "bus n=3 returns=win_loss round=1 phase=SEL cur=2 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=24 pass=5 dropped=[0, 1] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[1, 2], [2], [0], [1, 2, 2, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=15,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 0,
+   "player": 2,
+   "label": "P2: select Lines",
+   "state": "bus n=3 returns=win_loss round=1 phase=SEL cur=2 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=25 pass=6 dropped=[0, 1] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[1, 2, 2], [2], [0], [1, 2, 2, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=14,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 0,
+   "player": 2,
+   "label": "P2: select Lines",
+   "state": "bus n=3 returns=win_loss round=1 phase=SEL cur=2 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=26 pass=7 dropped=[0, 1] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[1, 2, 2, 2], [2], [0], [1, 2, 2, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 0,
+   "player": 2,
+   "label": "P2: select Lines",
+   "state": "bus n=3 returns=win_loss round=1 phase=SEL cur=2 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=27 pass=8 dropped=[0, 1] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[1, 2, 2, 2, 2], [2], [0], [1, 2, 2, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=12,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 7,
+   "player": 2,
+   "label": "P2: drop out",
+   "state": "bus n=3 returns=win_loss round=1 phase=LN cur=1 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=28 pass=0 dropped=[] cursor=0 units=1 moves_left=0 picked=-1 occupied=[] board=[[1, 2, 2, 2, 2], [2], [0], [1, 2, 2, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=23,st=0,bld=2,line=[47, 48],last=None;P2:pts=0,bus=1,am=12,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 62,
+   "player": 1,
+   "label": "P1: extend end 0 via s54 (n25-n26) to n25",
+   "state": "bus n=3 returns=win_loss round=1 phase=PX cur=0 clock=house stones_on_clock=4 supply=11 placed=0 start=0 move=29 pass=0 dropped=[] cursor=0 units=2 moves_left=0 picked=-1 occupied=[] board=[[1, 2, 2, 2, 2], [2], [0], [1, 2, 2, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1} | P0:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=12,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 290,
+   "player": 0,
+   "label": "P0: passenger to station n25",
+   "state": "bus n=3 returns=win_loss round=1 phase=PX cur=0 clock=house stones_on_clock=4 supply=10 placed=0 start=0 move=30 pass=0 dropped=[] cursor=0 units=1 moves_left=0 picked=-1 occupied=[] board=[[1, 2, 2, 2, 2], [2], [0], [1, 2, 2, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={13: 1, 17: 1, 18: 1, 21: 1, 25: 1} | P0:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=12,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 289,
+   "player": 0,
+   "label": "P0: passenger to station n5",
+   "state": "bus n=3 returns=win_loss round=1 phase=BD cur=2 clock=house stones_on_clock=4 supply=9 placed=0 start=0 move=31 pass=0 dropped=[] cursor=1 units=1 moves_left=0 picked=-1 occupied=[] board=[[1, 2, 2, 2, 2], [2], [0], [1, 2, 2, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 21: 1, 25: 1} | P0:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=12,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 179,
+   "player": 2,
+   "label": "P2: build office at site 10 (A, n21)",
+   "state": "bus n=3 returns=win_loss round=1 phase=BD cur=1 clock=house stones_on_clock=4 supply=9 placed=0 start=0 move=32 pass=0 dropped=[] cursor=0 units=2 moves_left=0 picked=-1 occupied=[] board=[[1, 2, 2, 2, 2], [2], [0], [1, 2, 2, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 21: 1, 25: 1} | P0:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=12,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 171,
+   "player": 1,
+   "label": "P1: build pub at site 7 (A, n18)",
+   "state": "bus n=3 returns=win_loss round=1 phase=BD cur=1 clock=house stones_on_clock=4 supply=9 placed=0 start=0 move=33 pass=0 dropped=[] cursor=0 units=1 moves_left=0 picked=-1 occupied=[] board=[[1, 2, 2, 2, 2], [2], [0], [1, 2, 2, 2], [0], [], [0]] sites={1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 21: 1, 25: 1} | P0:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=12,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 148,
+   "player": 1,
+   "label": "P1: build house at site 0 (A, n10)",
+   "state": "bus n=3 returns=win_loss round=1 phase=CK cur=0 clock=house stones_on_clock=4 supply=9 placed=0 start=0 move=34 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[] board=[[1, 2, 2, 2, 2], [2], [0], [1, 2, 2, 2], [0], [], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 21: 1, 25: 1} | P0:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=12,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 291,
+   "player": 0,
+   "label": "P0: clock advance",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=0 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=35 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [], [], [], [], []] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=17,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=12,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 6,
+   "player": 0,
+   "label": "P0: select Starting Player",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=1 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=36 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [], [], [], [], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=16,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=18,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=12,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 3,
+   "player": 1,
+   "label": "P1: select Buildings",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=2 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=37 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [], [1], [], [], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=16,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=17,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=12,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 3,
+   "player": 2,
+   "label": "P2: select Buildings",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=0 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=38 pass=1 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [], [1, 2], [], [], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=16,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=17,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=11,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 4,
+   "player": 0,
+   "label": "P0: select Clock",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=1 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=39 pass=1 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [], [1, 2], [0], [], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=15,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=17,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=11,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 1,
+   "player": 1,
+   "label": "P1: select Buses",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=2 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=40 pass=1 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [1], [], [1, 2], [0], [], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=15,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=16,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=11,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 3,
+   "player": 2,
+   "label": "P2: select Buildings",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=0 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=41 pass=2 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [1], [], [1, 2, 2], [0], [], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=15,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=16,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=10,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 2,
+   "player": 0,
+   "label": "P0: select Passengers",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=1 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=42 pass=2 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [1], [0], [1, 2, 2], [0], [], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=14,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=16,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=10,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 2,
+   "player": 1,
+   "label": "P1: select Passengers",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=2 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=43 pass=2 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [1], [0, 1], [1, 2, 2], [0], [], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=14,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=15,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=10,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 5,
+   "player": 2,
+   "label": "P2: select Vrrooomm!",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=0 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=44 pass=3 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [1], [0, 1], [1, 2, 2], [0], [2], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=14,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=15,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=9,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 3,
+   "player": 0,
+   "label": "P0: select Buildings",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=1 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=45 pass=3 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [1], [0, 1], [1, 2, 2, 0], [0], [2], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=15,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=9,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 0,
+   "player": 1,
+   "label": "P1: select Lines",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=2 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=46 pass=3 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[1], [1], [0, 1], [1, 2, 2, 0], [0], [2], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=14,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=9,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 5,
+   "player": 2,
+   "label": "P2: select Vrrooomm!",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=0 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=47 pass=4 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[1], [1], [0, 1], [1, 2, 2, 0], [0], [2, 2], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=14,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=8,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 7,
+   "player": 0,
+   "label": "P0: drop out",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=1 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=48 pass=4 dropped=[0] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[1], [1], [0, 1], [1, 2, 2, 0], [0], [2, 2], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=14,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=8,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 0,
+   "player": 1,
+   "label": "P1: select Lines",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=2 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=49 pass=4 dropped=[0] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[1, 1], [1], [0, 1], [1, 2, 2, 0], [0], [2, 2], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=13,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=8,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 2,
+   "player": 2,
+   "label": "P2: select Passengers",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=1 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=50 pass=5 dropped=[0] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[1, 1], [1], [0, 1, 2], [1, 2, 2, 0], [0], [2, 2], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=13,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=7,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 3,
+   "player": 1,
+   "label": "P1: select Buildings",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=2 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=51 pass=5 dropped=[0] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[1, 1], [1], [0, 1, 2], [1, 2, 2, 0, 1], [0], [2, 2], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=12,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=7,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 0,
+   "player": 2,
+   "label": "P2: select Lines",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=1 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=52 pass=6 dropped=[0] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[1, 1, 2], [1], [0, 1, 2], [1, 2, 2, 0, 1], [0], [2, 2], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=12,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 3,
+   "player": 1,
+   "label": "P1: select Buildings",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=2 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=53 pass=6 dropped=[0] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[1, 1, 2], [1], [0, 1, 2], [1, 2, 2, 0, 1, 1], [0], [2, 2], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=11,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 7,
+   "player": 2,
+   "label": "P2: drop out",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=1 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=54 pass=7 dropped=[0, 2] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[1, 1, 2], [1], [0, 1, 2], [1, 2, 2, 0, 1, 1], [0], [2, 2], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=11,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 2,
+   "player": 1,
+   "label": "P1: select Passengers",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=1 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=55 pass=8 dropped=[0, 2] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[1, 1, 2], [1], [0, 1, 2, 1], [1, 2, 2, 0, 1, 1], [0], [2, 2], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=10,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 5,
+   "player": 1,
+   "label": "P1: select Vrrooomm!",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=1 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=56 pass=9 dropped=[0, 2] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[1, 1, 2], [1], [0, 1, 2, 1], [1, 2, 2, 0, 1, 1], [0], [2, 2, 1], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=9,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 5,
+   "player": 1,
+   "label": "P1: select Vrrooomm!",
+   "state": "bus n=3 returns=win_loss round=2 phase=SEL cur=1 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=57 pass=10 dropped=[0, 2] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[1, 1, 2], [1], [0, 1, 2, 1], [1, 2, 2, 0, 1, 1], [0], [2, 2, 1, 1], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=8,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 7,
+   "player": 1,
+   "label": "P1: drop out",
+   "state": "bus n=3 returns=win_loss round=2 phase=LN cur=1 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=58 pass=0 dropped=[] cursor=1 units=1 moves_left=0 picked=-1 occupied=[10] board=[[1, 1, 2], [1], [0, 1, 2, 1], [1, 2, 2, 0, 1, 1], [0], [2, 2, 1, 1], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=8,lm=22,st=0,bld=2,line=[54, 47, 48],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 136,
+   "player": 1,
+   "label": "P1: extend end 1 via s58 (n26-n27) to n26",
+   "state": "bus n=3 returns=win_loss round=2 phase=LN cur=1 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=59 pass=0 dropped=[] cursor=0 units=2 moves_left=0 picked=-1 occupied=[10] board=[[1, 1, 2], [1], [0, 1, 2, 1], [1, 2, 2, 0, 1, 1], [0], [2, 2, 1, 1], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=8,lm=21,st=0,bld=2,line=[54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 64,
+   "player": 1,
+   "label": "P1: extend end 0 via s56 (n25-n32) to n32",
+   "state": "bus n=3 returns=win_loss round=2 phase=LN cur=1 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=60 pass=0 dropped=[] cursor=0 units=1 moves_left=0 picked=-1 occupied=[10] board=[[1, 1, 2], [1], [0, 1, 2, 1], [1, 2, 2, 0, 1, 1], [0], [2, 2, 1, 1], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=1,am=8,lm=20,st=0,bld=2,line=[56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 75,
+   "player": 1,
+   "label": "P1: extend end 0 via s67 (n31-n32) to n31",
+   "state": "bus n=3 returns=win_loss round=2 phase=PX cur=0 clock=office stones_on_clock=4 supply=9 placed=0 start=0 move=61 pass=0 dropped=[] cursor=0 units=2 moves_left=0 picked=-1 occupied=[10] board=[[1, 1, 2], [1], [0, 1, 2, 1], [1, 2, 2, 0, 1, 1], [0], [2, 2, 1, 1], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 1} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=8,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 290,
+   "player": 0,
+   "label": "P0: passenger to station n25",
+   "state": "bus n=3 returns=win_loss round=2 phase=PX cur=0 clock=office stones_on_clock=4 supply=8 placed=0 start=0 move=62 pass=0 dropped=[] cursor=0 units=1 moves_left=0 picked=-1 occupied=[10] board=[[1, 1, 2], [1], [0, 1, 2, 1], [1, 2, 2, 0, 1, 1], [0], [2, 2, 1, 1], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 1, 13: 1, 17: 1, 18: 1, 25: 2} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=8,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 289,
+   "player": 0,
+   "label": "P0: passenger to station n5",
+   "state": "bus n=3 returns=win_loss round=2 phase=PX cur=1 clock=office stones_on_clock=4 supply=7 placed=0 start=0 move=63 pass=0 dropped=[] cursor=1 units=1 moves_left=0 picked=-1 occupied=[10] board=[[1, 1, 2], [1], [0, 1, 2, 1], [1, 2, 2, 0, 1, 1], [0], [2, 2, 1, 1], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 2} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=8,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 290,
+   "player": 1,
+   "label": "P1: passenger to station n25",
+   "state": "bus n=3 returns=win_loss round=2 phase=BD cur=2 clock=office stones_on_clock=4 supply=6 placed=0 start=0 move=64 pass=0 dropped=[] cursor=1 units=1 moves_left=0 picked=-1 occupied=[10] board=[[1, 1, 2], [1], [0, 1, 2, 1], [1, 2, 2, 0, 1, 1], [0], [2, 2, 1, 1], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=8,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 181,
+   "player": 2,
+   "label": "P2: build house at site 11 (A, n26)",
+   "state": "bus n=3 returns=win_loss round=2 phase=BD cur=1 clock=office stones_on_clock=4 supply=6 placed=0 start=0 move=65 pass=0 dropped=[] cursor=0 units=2 moves_left=0 picked=-1 occupied=[10] board=[[1, 1, 2], [1], [0, 1, 2, 1], [1, 2, 2, 0, 1, 1], [0], [2, 2, 1, 1], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=8,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 168,
+   "player": 1,
+   "label": "P1: build pub at site 6 (A, n18)",
+   "state": "bus n=3 returns=win_loss round=2 phase=BD cur=1 clock=office stones_on_clock=4 supply=6 placed=0 start=0 move=66 pass=0 dropped=[] cursor=0 units=1 moves_left=0 picked=-1 occupied=[10] board=[[1, 1, 2], [1], [0, 1, 2, 1], [1, 2, 2, 0, 1, 1], [0], [2, 2, 1, 1], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=8,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 163,
+   "player": 1,
+   "label": "P1: build house at site 5 (A, n17)",
+   "state": "bus n=3 returns=win_loss round=2 phase=CK cur=0 clock=office stones_on_clock=4 supply=6 placed=0 start=0 move=67 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[1, 1, 2], [1], [0, 1, 2, 1], [1, 2, 2, 0, 1, 1], [0], [2, 2, 1, 1], [0]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=13,lm=23,st=0,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=8,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 292,
+   "player": 0,
+   "label": "P0: clock pause",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=0 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=68 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [], [], [], [], []] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=13,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=8,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 4,
+   "player": 0,
+   "label": "P0: select Clock",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=1 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=69 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [], [], [0], [], []] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=12,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=8,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 6,
+   "player": 1,
+   "label": "P1: select Starting Player",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=2 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=70 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [], [], [0], [], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=12,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=7,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=6,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 2,
+   "player": 2,
+   "label": "P2: select Passengers",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=0 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=71 pass=1 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [2], [], [0], [], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=12,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=7,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=5,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 0,
+   "player": 0,
+   "label": "P0: select Lines",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=1 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=72 pass=1 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[0], [], [2], [], [0], [], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=11,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=7,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=5,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 3,
+   "player": 1,
+   "label": "P1: select Buildings",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=2 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=73 pass=1 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[0], [], [2], [1], [0], [], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=11,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=6,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=5,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 5,
+   "player": 2,
+   "label": "P2: select Vrrooomm!",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=0 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=74 pass=2 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[0], [], [2], [1], [0], [2], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=11,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=6,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 0,
+   "player": 0,
+   "label": "P0: select Lines",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=1 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=75 pass=2 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[0, 0], [], [2], [1], [0], [2], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=10,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=6,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 1,
+   "player": 1,
+   "label": "P1: select Buses",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=2 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=76 pass=2 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[0, 0], [1], [2], [1], [0], [2], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=10,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=5,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 7,
+   "player": 2,
+   "label": "P2: drop out",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=0 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=77 pass=3 dropped=[2] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[0, 0], [1], [2], [1], [0], [2], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=10,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=5,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 5,
+   "player": 0,
+   "label": "P0: select Vrrooomm!",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=1 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=78 pass=3 dropped=[2] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[0, 0], [1], [2], [1], [0], [2, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=9,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=5,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 3,
+   "player": 1,
+   "label": "P1: select Buildings",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=0 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=79 pass=4 dropped=[2] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[0, 0], [1], [2], [1, 1], [0], [2, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=9,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=4,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 5,
+   "player": 0,
+   "label": "P0: select Vrrooomm!",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=1 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=80 pass=4 dropped=[2] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[0, 0], [1], [2], [1, 1], [0], [2, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=8,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=4,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 0,
+   "player": 1,
+   "label": "P1: select Lines",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=0 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=81 pass=5 dropped=[2] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1], [1], [2], [1, 1], [0], [2, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=8,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=3,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 5,
+   "player": 0,
+   "label": "P0: select Vrrooomm!",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=1 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=82 pass=5 dropped=[2] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1], [1], [2], [1, 1], [0], [2, 0, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=7,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=3,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 0,
+   "player": 1,
+   "label": "P1: select Lines",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=0 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=83 pass=6 dropped=[2] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1, 1], [1], [2], [1, 1], [0], [2, 0, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=7,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=2,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 3,
+   "player": 0,
+   "label": "P0: select Buildings",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=1 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=84 pass=6 dropped=[2] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1, 1], [1], [2], [1, 1, 0], [0], [2, 0, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=2,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 7,
+   "player": 1,
+   "label": "P1: drop out",
+   "state": "bus n=3 returns=win_loss round=3 phase=SEL cur=0 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=85 pass=7 dropped=[1, 2] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1, 1], [1], [2], [1, 1, 0], [0], [2, 0, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=2,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 7,
+   "player": 0,
+   "label": "P0: drop out",
+   "state": "bus n=3 returns=win_loss round=3 phase=LN cur=0 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=86 pass=0 dropped=[] cursor=1 units=1 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1, 1], [1], [2], [1, 1, 0], [0], [2, 0, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=23,st=1,bld=2,line=[45, 60],last=None;P1:pts=0,bus=2,am=2,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 141,
+   "player": 0,
+   "label": "P0: extend end 1 via s63 (n28-n34) to n28",
+   "state": "bus n=3 returns=win_loss round=3 phase=LN cur=0 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=87 pass=0 dropped=[] cursor=0 units=2 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1, 1], [1], [2], [1, 1, 0], [0], [2, 0, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=22,st=1,bld=2,line=[45, 60, 63],last=None;P1:pts=0,bus=2,am=2,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 127,
+   "player": 0,
+   "label": "P0: extend end 1 via s49 (n21-n28) to n21",
+   "state": "bus n=3 returns=win_loss round=3 phase=LN cur=0 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=88 pass=0 dropped=[] cursor=0 units=1 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1, 1], [1], [2], [1, 1, 0], [0], [2, 0, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=21,st=1,bld=2,line=[45, 60, 63, 49],last=None;P1:pts=0,bus=2,am=2,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 124,
+   "player": 0,
+   "label": "P0: extend end 1 via s46 (n21-n22) to n22",
+   "state": "bus n=3 returns=win_loss round=3 phase=PX cur=2 clock=office stones_on_clock=3 supply=6 placed=0 start=0 move=89 pass=0 dropped=[] cursor=0 units=3 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1, 1], [1], [2], [1, 1, 0], [0], [2, 0, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 2, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=20,st=1,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=2,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 289,
+   "player": 2,
+   "label": "P2: passenger to station n5",
+   "state": "bus n=3 returns=win_loss round=3 phase=PX cur=2 clock=office stones_on_clock=3 supply=5 placed=0 start=0 move=90 pass=0 dropped=[] cursor=0 units=2 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1, 1], [1], [2], [1, 1, 0], [0], [2, 0, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 3, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=20,st=1,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=2,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 289,
+   "player": 2,
+   "label": "P2: passenger to station n5",
+   "state": "bus n=3 returns=win_loss round=3 phase=PX cur=2 clock=office stones_on_clock=3 supply=4 placed=0 start=0 move=91 pass=0 dropped=[] cursor=0 units=1 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1, 1], [1], [2], [1, 1, 0], [0], [2, 0, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 4, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=20,st=1,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=2,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 289,
+   "player": 2,
+   "label": "P2: passenger to station n5",
+   "state": "bus n=3 returns=win_loss round=3 phase=BD cur=0 clock=office stones_on_clock=3 supply=3 placed=0 start=0 move=92 pass=0 dropped=[] cursor=2 units=1 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1, 1], [1], [2], [1, 1, 0], [0], [2, 0, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=20,st=1,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=2,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 184,
+   "player": 0,
+   "label": "P0: build house at site 12 (B, n0)",
+   "state": "bus n=3 returns=win_loss round=3 phase=BD cur=1 clock=office stones_on_clock=3 supply=3 placed=0 start=0 move=93 pass=0 dropped=[] cursor=1 units=2 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1, 1], [1], [2], [1, 1, 0], [0], [2, 0, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=20,st=1,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=2,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 211,
+   "player": 1,
+   "label": "P1: build house at site 21 (B, n31)",
+   "state": "bus n=3 returns=win_loss round=3 phase=BD cur=1 clock=office stones_on_clock=3 supply=3 placed=0 start=0 move=94 pass=0 dropped=[] cursor=1 units=1 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1, 1], [1], [2], [1, 1, 0], [0], [2, 0, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 21: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=20,st=1,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=2,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 193,
+   "player": 1,
+   "label": "P1: build house at site 15 (B, n8)",
+   "state": "bus n=3 returns=win_loss round=3 phase=BD cur=1 clock=office stones_on_clock=3 supply=3 placed=0 start=0 move=95 pass=0 dropped=[] cursor=0 units=3 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1, 1], [1], [2], [1, 1, 0], [0], [2, 0, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 21: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=20,st=1,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=2,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 207,
+   "player": 1,
+   "label": "P1: build pub at site 19 (B, n27)",
+   "state": "bus n=3 returns=win_loss round=3 phase=BD cur=1 clock=office stones_on_clock=3 supply=3 placed=0 start=0 move=96 pass=0 dropped=[] cursor=0 units=2 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1, 1], [1], [2], [1, 1, 0], [0], [2, 0, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 19: 'pub', 21: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=20,st=1,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=2,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 210,
+   "player": 1,
+   "label": "P1: build pub at site 20 (B, n29)",
+   "state": "bus n=3 returns=win_loss round=3 phase=BD cur=1 clock=office stones_on_clock=3 supply=3 placed=0 start=0 move=97 pass=0 dropped=[] cursor=0 units=1 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1, 1], [1], [2], [1, 1, 0], [0], [2, 0, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=20,st=1,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=2,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 197,
+   "player": 1,
+   "label": "P1: build office at site 16 (B, n12)",
+   "state": "bus n=3 returns=win_loss round=3 phase=CK cur=0 clock=office stones_on_clock=3 supply=3 placed=0 start=0 move=98 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[0, 0, 1, 1], [1], [2], [1, 1, 0], [0], [2, 0, 0, 0], [1]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 16: 'office', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=20,st=1,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=2,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 292,
+   "player": 0,
+   "label": "P0: clock pause",
+   "state": "bus n=3 returns=win_loss round=4 phase=SEL cur=1 clock=office stones_on_clock=2 supply=3 placed=0 start=1 move=99 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [], [], [], [], []] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 16: 'office', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=2,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 4,
+   "player": 1,
+   "label": "P1: select Clock",
+   "state": "bus n=3 returns=win_loss round=4 phase=SEL cur=2 clock=office stones_on_clock=2 supply=3 placed=0 start=1 move=100 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [], [], [1], [], []] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 16: 'office', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=1,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=4,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 2,
+   "player": 2,
+   "label": "P2: select Passengers",
+   "state": "bus n=3 returns=win_loss round=4 phase=SEL cur=0 clock=office stones_on_clock=2 supply=3 placed=0 start=1 move=101 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [2], [], [1], [], []] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 16: 'office', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=6,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=1,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=3,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 5,
+   "player": 0,
+   "label": "P0: select Vrrooomm!",
+   "state": "bus n=3 returns=win_loss round=4 phase=SEL cur=1 clock=office stones_on_clock=2 supply=3 placed=0 start=1 move=102 pass=1 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [2], [], [1], [0], []] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 16: 'office', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=5,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=1,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=3,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 2,
+   "player": 1,
+   "label": "P1: select Passengers",
+   "state": "bus n=3 returns=win_loss round=4 phase=SEL cur=2 clock=office stones_on_clock=2 supply=3 placed=0 start=1 move=103 pass=1 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [2, 1], [], [1], [0], []] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 16: 'office', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=5,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=0,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=3,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 3,
+   "player": 2,
+   "label": "P2: select Buildings",
+   "state": "bus n=3 returns=win_loss round=4 phase=SEL cur=0 clock=office stones_on_clock=2 supply=3 placed=0 start=1 move=104 pass=1 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [2, 1], [2], [1], [0], []] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 16: 'office', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=5,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=0,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=2,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 2,
+   "player": 0,
+   "label": "P0: select Passengers",
+   "state": "bus n=3 returns=win_loss round=4 phase=SEL cur=2 clock=office stones_on_clock=2 supply=3 placed=0 start=1 move=105 pass=2 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [2, 1, 0], [2], [1], [0], []] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 16: 'office', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=4,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=0,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=2,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 6,
+   "player": 2,
+   "label": "P2: select Starting Player",
+   "state": "bus n=3 returns=win_loss round=4 phase=SEL cur=0 clock=office stones_on_clock=2 supply=3 placed=0 start=1 move=106 pass=2 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [2, 1, 0], [2], [1], [0], [2]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 16: 'office', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=4,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=0,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=1,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 5,
+   "player": 0,
+   "label": "P0: select Vrrooomm!",
+   "state": "bus n=3 returns=win_loss round=4 phase=SEL cur=2 clock=office stones_on_clock=2 supply=3 placed=0 start=1 move=107 pass=3 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [2, 1, 0], [2], [1], [0, 0], [2]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 16: 'office', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=3,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=0,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=1,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 5,
+   "player": 2,
+   "label": "P2: select Vrrooomm!",
+   "state": "bus n=3 returns=win_loss round=4 phase=SEL cur=0 clock=office stones_on_clock=2 supply=3 placed=0 start=1 move=108 pass=3 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [2, 1, 0], [2], [1], [0, 0, 2], [2]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 16: 'office', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=3,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=0,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=0,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 7,
+   "player": 0,
+   "label": "P0: drop out",
+   "state": "bus n=3 returns=win_loss round=4 phase=PX cur=2 clock=office stones_on_clock=2 supply=3 placed=0 start=1 move=109 pass=0 dropped=[] cursor=0 units=3 moves_left=0 picked=-1 occupied=[10] board=[[], [], [2, 1, 0], [2], [1], [0, 0, 2], [2]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 16: 'office', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 5, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=3,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=0,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=0,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 289,
+   "player": 2,
+   "label": "P2: passenger to station n5",
+   "state": "bus n=3 returns=win_loss round=4 phase=PX cur=2 clock=office stones_on_clock=2 supply=2 placed=0 start=1 move=110 pass=0 dropped=[] cursor=0 units=2 moves_left=0 picked=-1 occupied=[10] board=[[], [], [2, 1, 0], [2], [1], [0, 0, 2], [2]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 16: 'office', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 6, 13: 1, 17: 1, 18: 1, 25: 3} | P0:pts=0,bus=1,am=3,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=0,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=0,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 290,
+   "player": 2,
+   "label": "P2: passenger to station n25",
+   "state": "bus n=3 returns=win_loss round=4 phase=PX cur=2 clock=office stones_on_clock=2 supply=1 placed=0 start=1 move=111 pass=0 dropped=[] cursor=0 units=1 moves_left=0 picked=-1 occupied=[10] board=[[], [], [2, 1, 0], [2], [1], [0, 0, 2], [2]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 16: 'office', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 6, 13: 1, 17: 1, 18: 1, 25: 4} | P0:pts=0,bus=1,am=3,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=0,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=0,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 289,
+   "player": 2,
+   "label": "P2: passenger to station n5",
+   "state": "bus n=3 returns=win_loss round=4 phase=BD cur=2 clock=office stones_on_clock=2 supply=0 placed=0 start=1 move=112 pass=0 dropped=[] cursor=0 units=3 moves_left=0 picked=-1 occupied=[10] board=[[], [], [2, 1, 0], [2], [1], [0, 0, 2], [2]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 16: 'office', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 7, 13: 1, 17: 1, 18: 1, 25: 4} | P0:pts=0,bus=1,am=3,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=0,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=0,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 201,
+   "player": 2,
+   "label": "P2: build pub at site 17 (B, n16)",
+   "state": "bus n=3 returns=win_loss round=4 phase=BD cur=2 clock=office stones_on_clock=2 supply=0 placed=0 start=1 move=113 pass=0 dropped=[] cursor=0 units=2 moves_left=0 picked=-1 occupied=[10] board=[[], [], [2, 1, 0], [2], [1], [0, 0, 2], [2]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 16: 'office', 17: 'pub', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 7, 13: 1, 17: 1, 18: 1, 25: 4} | P0:pts=0,bus=1,am=3,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=0,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=0,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 204,
+   "player": 2,
+   "label": "P2: build pub at site 18 (B, n22)",
+   "state": "bus n=3 returns=win_loss round=4 phase=BD cur=2 clock=office stones_on_clock=2 supply=0 placed=0 start=1 move=114 pass=0 dropped=[] cursor=0 units=1 moves_left=0 picked=-1 occupied=[10] board=[[], [], [2, 1, 0], [2], [1], [0, 0, 2], [2]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 15: 'house', 16: 'office', 17: 'pub', 18: 'pub', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 7, 13: 1, 17: 1, 18: 1, 25: 4} | P0:pts=0,bus=1,am=3,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=0,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=0,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 190,
+   "player": 2,
+   "label": "P2: build house at site 14 (B, n9)",
+   "state": "bus n=3 returns=win_loss round=4 phase=CK cur=1 clock=office stones_on_clock=2 supply=0 placed=0 start=1 move=115 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [2, 1, 0], [2], [1], [0, 0, 2], [2]] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 14: 'house', 15: 'house', 16: 'office', 17: 'pub', 18: 'pub', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 7, 13: 1, 17: 1, 18: 1, 25: 4} | P0:pts=0,bus=1,am=3,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=0,lm=19,st=0,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=0,lm=23,st=0,bld=2,line=[17, 26],last=None"
+  },
+  {
+   "action": 292,
+   "player": 1,
+   "label": "P1: clock pause",
+   "state": "bus n=3 returns=win_loss round=4 phase=END cur=0 clock=office stones_on_clock=1 supply=0 placed=0 start=2 move=116 pass=0 dropped=[] cursor=0 units=0 moves_left=0 picked=-1 occupied=[10] board=[[], [], [], [], [], [], []] sites={0: 'house', 1: 'office', 2: 'pub', 3: 'house', 4: 'pub', 5: 'house', 6: 'pub', 7: 'pub', 8: 'pub', 9: 'house', 10: 'office', 11: 'house', 12: 'house', 14: 'house', 15: 'house', 16: 'office', 17: 'pub', 18: 'pub', 19: 'pub', 20: 'pub', 21: 'house'} waiting={5: 7, 13: 1, 17: 1, 18: 1, 25: 4} | P0:pts=0,bus=1,am=3,lm=20,st=2,bld=2,line=[45, 60, 63, 49, 46],last=None;P1:pts=0,bus=3,am=0,lm=19,st=1,bld=2,line=[67, 56, 54, 47, 48, 58],last=None;P2:pts=0,bus=2,am=0,lm=23,st=0,bld=2,line=[17, 26],last=None | end: markers winners: P2 scores: [-2, -1, 0]"
+  }
+ ],
+ "result": {
+  "end_types": [
+   "markers"
+  ],
+  "winners": [
+   2
+  ],
+  "final_scores": [
+   -2,
+   -1,
+   0
+  ],
+  "returns": [
+   -0.5,
+   -0.5,
+   1.0
+  ]
+ }
+}
