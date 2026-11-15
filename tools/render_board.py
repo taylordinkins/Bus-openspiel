@@ -17,7 +17,8 @@ from pathlib import Path
 from typing import Any
 from xml.sax.saxutils import escape
 
-from bus.board import Board, Street, load_board
+from bus.board import CLOCK_SEGMENTS, Board, Street, load_board
+from bus.constants import ACTION_MARKERS_PER_PLAYER, LINE_MARKERS_PER_PLAYER
 
 # --- Palette tokens -----------------------------------------------------------------------
 PAPER = "#FFF4D6"  # board background (cream)
@@ -349,7 +350,7 @@ def _piece_layer(board: Board) -> list[str]:
             sx, sy = lay.score_track[min(pts, 20) - 1]
             out.append(marker(sx - 40, sy, seat, 17))
     # clock hand
-    ha = math.radians(lay.clock_angles[("house", "office", "pub")[SAMPLE["clock"]]])
+    ha = math.radians(lay.clock_angles[CLOCK_SEGMENTS[SAMPLE["clock"]]])
     out.append(
         f'<g class="clock-hand"><line x1="{lay.clock_x}" y1="{lay.clock_y}" '
         f'x2="{_f(lay.clock_x + lay.clock_hand * math.cos(ha))}" '
@@ -488,10 +489,21 @@ def _player_strip() -> list[str]:
             )
         r2 = inner_y + 172
         out.append(_head(x + 18, r2, "Bus Line markers left", 22))
-        out.append(_badge(x + w - 44, r2, str(25 - SAMPLE["line_lengths"][seat]), 28, 54, 40))
+        out.append(
+            _badge(
+                x + w - 44,
+                r2,
+                str(LINE_MARKERS_PER_PLAYER - SAMPLE["line_lengths"][seat]),
+                28,
+                54,
+                40,
+            )
+        )
         r3 = inner_y + 216
         out.append(_head(x + 18, r3, "Action markers left", 22))
-        out.append(_badge(x + w - 44, r3, str(20 - placed[seat]), 28, 54, 40))
+        out.append(
+            _badge(x + w - 44, r3, str(ACTION_MARKERS_PER_PLAYER - placed[seat]), 28, 54, 40)
+        )
         held = 1 if seat == SAMPLE["stone_holder"] else 0
         r4 = inner_y + 260
         out.append(_seal(x + 46, r4 - 2, 30))

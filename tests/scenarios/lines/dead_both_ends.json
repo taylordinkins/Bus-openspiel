@@ -1,0 +1,121 @@
+{
+ "format": 1,
+ "description": "Seat 0 has a full loop at a degree-2 node: both ends dead.",
+ "parameters": {
+  "players": 4
+ },
+ "round": 1,
+ "phase": "LN",
+ "buildings": [
+  {
+   "site": 0,
+   "type": "house"
+  },
+  {
+   "site": 1,
+   "type": "office"
+  },
+  {
+   "site": 2,
+   "type": "pub"
+  },
+  {
+   "site": 3,
+   "type": "house"
+  },
+  {
+   "site": 4,
+   "type": "office"
+  },
+  {
+   "site": 5,
+   "type": "pub"
+  },
+  {
+   "site": 6,
+   "type": "house"
+  },
+  {
+   "site": 7,
+   "type": "office"
+  }
+ ],
+ "seats": [
+  {
+   "line": [
+    42,
+    43,
+    53
+   ],
+   "markers_left": 19
+  },
+  {
+   "line": [
+    62,
+    65
+   ]
+  },
+  {
+   "line": [
+    58,
+    59
+   ]
+  },
+  {
+   "line": [
+    46,
+    47
+   ]
+  }
+ ],
+ "waiting": {},
+ "action_board": {
+  "lines": [
+   0,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "buses": [
+   null
+  ],
+  "passengers": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "buildings": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "clock": [
+   null
+  ],
+  "vrrooomm": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "starting_player": [
+   null
+  ]
+ },
+ "pending": {
+  "cursor": {
+   "letter": 0
+  },
+  "units_left": 1
+ }
+}

@@ -1,0 +1,120 @@
+{
+ "format": 1,
+ "description": "Rulebook Red C/D shape: at one end of seat 0's one-street line exactly one candidate is unoccupied, at the other end every candidate is occupied by lines passing through (no ends there).",
+ "parameters": {
+  "players": 4
+ },
+ "round": 1,
+ "phase": "LN",
+ "buildings": [
+  {
+   "site": 0,
+   "type": "house"
+  },
+  {
+   "site": 1,
+   "type": "office"
+  },
+  {
+   "site": 2,
+   "type": "pub"
+  },
+  {
+   "site": 3,
+   "type": "house"
+  },
+  {
+   "site": 4,
+   "type": "office"
+  },
+  {
+   "site": 5,
+   "type": "pub"
+  },
+  {
+   "site": 6,
+   "type": "house"
+  },
+  {
+   "site": 7,
+   "type": "office"
+  }
+ ],
+ "seats": [
+  {
+   "line": [
+    28
+   ],
+   "markers_left": 19
+  },
+  {
+   "line": [
+    21,
+    25
+   ]
+  },
+  {
+   "line": [
+    27,
+    29
+   ]
+  },
+  {
+   "line": [
+    42,
+    37,
+    38
+   ]
+  }
+ ],
+ "waiting": {},
+ "action_board": {
+  "lines": [
+   0,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "buses": [
+   null
+  ],
+  "passengers": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "buildings": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "clock": [
+   null
+  ],
+  "vrrooomm": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "starting_player": [
+   null
+  ]
+ },
+ "pending": {
+  "cursor": {
+   "letter": 0
+  },
+  "units_left": 1
+ }
+}

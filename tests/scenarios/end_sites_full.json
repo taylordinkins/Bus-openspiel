@@ -1,0 +1,96 @@
+{
+  "format": 1,
+  "parameters": {
+    "players": 4
+  },
+  "round": 3,
+  "buildings": [
+    {
+      "site": 0,
+      "type": "house"
+    },
+    {
+      "site": 1,
+      "type": "office"
+    },
+    {
+      "site": 2,
+      "type": "pub"
+    },
+    {
+      "site": 3,
+      "type": "house"
+    },
+    {
+      "site": 4,
+      "type": "office"
+    },
+    {
+      "site": 5,
+      "type": "pub"
+    },
+    {
+      "site": 6,
+      "type": "house"
+    },
+    {
+      "site": 7,
+      "type": "office"
+    }
+  ],
+  "seats": [
+    {
+      "line": [
+        16,
+        18
+      ],
+      "points": 3,
+      "last_score_move": 5
+    },
+    {
+      "line": [
+        37,
+        38
+      ],
+      "points": 2,
+      "last_score_move": 4
+    },
+    {
+      "line": [
+        46,
+        47
+      ]
+    },
+    {
+      "line": [
+        62,
+        65
+      ]
+    }
+  ],
+  "waiting": {
+    "13": 1,
+    "17": 1,
+    "18": 1,
+    "21": 1
+  },
+  "phase": "END",
+  "pending": {},
+  "end": {
+    "types": [
+      "sites_full"
+    ]
+  },
+  "expect": {
+    "terminal": true,
+    "points": [
+      3,
+      2,
+      0,
+      0
+    ],
+    "end_types": [
+      "sites_full"
+    ]
+  }
+}

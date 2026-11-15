@@ -9,7 +9,7 @@
 
 ### Progress
 - [x] Phase 0 — Scaffold, board data, rules spec, board look ✋ *you review spec, §4 defaults and the board preview*
-- [ ] Phase 1 — Engine: the full game, 3–5 players
+- [x] Phase 1 — Engine: the full game, 3–5 players (2026-11-14; report `docs/phase-reports/phase-1.md`)
 - [ ] Phase 2 — Server + polished board UI ✋ *playtest #1*
 - [ ] Phase 3 — Bots (random, heuristic, MCTS) ✋ *playtest #2*
 - [ ] Phase 4 — Trained agents *(starts with a mini-interview)*
@@ -53,6 +53,9 @@ A faithful, well-tested implementation of *Bus* as a **Python OpenSpiel game**, 
 | D13 | Tests ahead of code | `@pytest.mark.pending("R-0xx")` (non-strict xfail); `spec-test-writer` can't read `bus/` source (hook) | As lignum D17 |
 | D14 | Model use | Sonnet workhorses, Haiku search and sims, Opus audits at phase close and spot checks (§8); main session defaults to Sonnet | As lignum D15 |
 | D15 | Board art (2026-11-14) | The UI uses the user's art `assets/map/bus_map_reworked_v2.png` as the background for both the map and the placement section (action board, clock, stones, score track); only pieces are drawn on top, positioned from `data/board.yaml` (topology plus a `layout` block for action spaces, bus grid, clock, stone slots, score cells) | User decision; replaces the redrawn-board reading of §5.5 |
+| D16 | Scenario format (2026-11-14) | SCENARIOS.md §9.1–9.10 settle error codes, `waiting` from round 1, `move_offset`, `units_left` = full power on entry, last-stone END keeps the board, canonical `end.types`, R-064 at round-end END | Phase 1 unit decisions (format only, no rules) |
+| D17 | Spec amendment (2026-11-14) | R-049/R-066 "every site has a building"; R-046 punctuation | User-approved, Phase 1 unit 9 |
+| D18 | Encoding (2026-11-14) | Absolute observation tensor with seat-to-act one-hot, counts scaled to [0, 1], points /10 capped (user); `game_result` None before terminal; current seat 0 at END | ACTIONS.md §7 |
 
 ## 4. Rules clarifications
 
@@ -169,6 +172,22 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 
 **Phase 1 — Engine (the whole game, 3–5 players)**
 - Constants, actions, setup, selection, all seven resolutions, end and scoring, both `returns`; observer with RL-ready tensor; `action_meta`; scenario loader; invariant checker; `tools/play_text.py`, `tools/replay.py`, `tools/sim_stats.py`; golden playthroughs for 3 seeds.
+- [x] 1. Constants, action IDs, board fixes (R-001–R-008; ACTIONS.md §2, §4; backlog: Layout hashable, bounds, negative parser tests, supplies to constants) — `spec-test-writer` → `implementer` (2026-11-14)
+- [x] 2. State model and game registration (R-003, R-009, R-014, R-073; §5.2 params) — `spec-test-writer` → `implementer` (2026-11-14; state-aware EXTEND wording moves to unit 5)
+- [x] 3. Scenario loader and invariant checker (SCENARIOS.md, `S-*` codes, §6.3; backlog: `move_offset`, round-1 `waiting`, `S-STONES`) — `spec-test-writer` → `implementer` (2026-11-14; SCENARIOS.md §9 clarifications)
+- [x] 4. Line geometry ⚑ (R-035–R-039, R-041) — `spec-test-writer` → `implementer` → `rules-auditor` (2026-11-14; audit PASS)
+- [x] 5. Setup phases (R-015–R-019, R-021; plus state-aware EXTEND `action_to_string`) — `spec-test-writer` → `implementer` (2026-11-14)
+- [x] 6. Action selection (R-020, R-022–R-028) — `spec-test-writer` → `implementer` (2026-11-14)
+- [x] 7. Resolution framework and Buses ⚑ (R-029–R-034, R-043, R-044; owns `start_resolution` — replace unit 6's placeholder when only Buses/Starting Player hold markers) — `spec-test-writer` → `implementer` → `rules-auditor` (2026-11-14; audit PASS after R-027 hand-off fix)
+- [x] 8. Lines resolution ⚑ (R-040, R-042; must include a state-level O-2 test: unit k+1's legal set reflects the street placed in unit k, per unit 4 audit) — `spec-test-writer` → `implementer` → `rules-auditor` (2026-11-14; audit PASS)
+- [x] 9. Passengers and Buildings (R-045–R-049; R-049/R-066 wording amendment first, needs user OK) — `spec-test-writer` → `implementer` (2026-11-14; amendment applied)
+- [x] 10. Clock and passenger movement ⚑ (R-050–R-055) — `spec-test-writer` → `implementer` → `rules-auditor` (2026-11-14; audit PASS)
+- [x] 11. Vrrooomm! ⚑ (R-056–R-063; add a reachable Vrrooomm!-first fixture with moves > 0 — `resolve_vp` may be unreachable) — `spec-test-writer` → `implementer` → `rules-auditor` (2026-11-14; audit PASS)
+- [x] 12. Round end, game end, returns ⚑ (R-064–R-072; fill the `end_round` stub: R-065 bookkeeping, R-066 checks incl. no seat with markers) — `spec-test-writer` → `implementer` → `rules-auditor` (2026-11-14; audit PASS)
+- [x] 13. Observer, `action_meta`, `forced_action`, `max_game_length` (§5.2; ACTIONS.md §3, §5, §6; plus ACTIONS §3.12 `game_result(state)` and winners in the observer string; canonical `current` at END so `str(load(dump(s))) == str(s)`, per unit 12 audit) — `spec-test-writer` → `implementer` (2026-11-14; tensor 1178/1474/1770 floats, ~100 µs; observed max length 177/197/257 vs 702/936/1170)
+- [x] 14. Conformance and random sims (`random_sim_test` 3/4/5, 10,000 games slow) — `implementer`, `sim-runner` (2026-11-14; 10,000 games, 0 violations, 6m40s; margin utility_sum fix)
+- [x] 15. `tools/play_text.py`, `tools/replay.py` — `implementer` (2026-11-14)
+- [x] 16. `tools/sim_stats.py`, golden playthroughs for 3 seeds — `implementer`, `sim-runner` (2026-11-14)
 - *Exit:* rule tests green; `random_sim_test` passes for 3, 4, 5 players; 10,000 random games with zero invariant violations; `sim_stats` report (end-type mix, rounds, scores, markers used); `rules-auditor` + `code-reviewer` pass.
 
 **Phase 2 — Server + polished board UI ✋ playtest #1**
@@ -217,10 +236,23 @@ Should-fix and minor findings, tagged with the phase that found them. `/close-ph
 - [Phase 0, code-reviewer, minor] `bus/board.py` bounds check accepts 1991 (`<=` vs `<` FRAME_SIZE); tests repeat the literal 1991. `_parse_layout` accepts unknown action keys, non-positive clock hand/radius, 3-element or float points.
 - [Phase 0, code-reviewer, minor] `tools/render_board.py`: clock order re-listed instead of `CLOCK_SEGMENTS`; supplies 25/20 are literals (move to `bus/constants.py` in Phase 1); scores >20 clamped silently (preview only); `BG_HREF` is docs/-relative, so a non-`--embed` render elsewhere has a broken background.
 - [Phase 0, code-reviewer, minor] `tests/data/test_board.py:62` names node pairs (3,6) and (28,35) — the only ids outside board.yaml; acceptable for a data test.
-- [Phase 0, rules-auditor, should-fix] ACTIONS.md:26 / SCENARIOS.md:53 (R-062, R-070): move numbers are history length, but scenarios can set `last_score_move` before load; define a scenario move-number origin (`move_offset`, or default to the max `last_score_move`) so the tiebreak stays correct for editor games and fixtures.
-- [Phase 0, rules-auditor, should-fix, needs AMENDING] RULES_SPEC.md R-049, R-066: "every site is occupied" means every site has a building, but "occupied" means passenger-inside elsewhere (R-062, SCENARIOS `occupied`); reword to "every site has a building" at the next amendment.
-- [Phase 0, rules-auditor, minor] SCENARIOS.md: `waiting` defaults to `{}` outside setup, so the round-1 shorthand drops the 4 roundabout passengers (R-015) — document or require it; S-STONES should reject `stones_on_clock` 0 unless phase `END`.
-- [Phase 0, rules-auditor, minor, needs AMENDING] RULES_SPEC.md R-046: missing full stop after "(R-058)".
+- [x] *(done Phase 1 unit 3: `move_offset`)* [Phase 0, rules-auditor, should-fix] ACTIONS.md:26 / SCENARIOS.md:53 (R-062, R-070): move numbers are history length, but scenarios can set `last_score_move` before load; define a scenario move-number origin (`move_offset`, or default to the max `last_score_move`) so the tiebreak stays correct for editor games and fixtures.
+- [x] *(done Phase 1 unit 9)* [Phase 0, rules-auditor, should-fix, needs AMENDING] RULES_SPEC.md R-049, R-066: "every site is occupied" means every site has a building, but "occupied" means passenger-inside elsewhere (R-062, SCENARIOS `occupied`); reword to "every site has a building" at the next amendment.
+- [x] *(done Phase 1 unit 3)* [Phase 0, rules-auditor, minor] SCENARIOS.md: `waiting` defaults to `{}` outside setup, so the round-1 shorthand drops the 4 roundabout passengers (R-015) — document or require it; S-STONES should reject `stones_on_clock` 0 unless phase `END`.
+- [x] *(done Phase 1 unit 9)* [Phase 0, rules-auditor, minor, needs AMENDING] RULES_SPEC.md R-046: missing full stop after "(R-058)".
+- [x] *(done Phase 1 unit 14: explicit `EXPECTED_UNREACHABLE = {resolve_vd}`)* [Phase 1 unit 11, rules-auditor, minor] `tests/scenarios/resolve_vp.json` / `resolve_vd.json` are unreachable (forced count 0 for the owner; VD has no legal action). `tests/test_invariants.py:106-111` skips such fixtures as "phase not implemented yet", which now hides them. Replace the generic skip with an explicit expected-unreachable list (or make the fixtures reachable) once all phases play.
+- [Phase 1 unit 12, rules-auditor, minor] END fixtures (`tests/scenarios/end_*.json`, `end/*.json`) claim `end.types` their state doesn't support (e.g. `sites_full` with empty sites; `end_last_stone` with an empty board). Either validate end types against the state in the loader (new code) or list it under SCENARIOS §6 "Not checked" and fix the fixtures.
+- [Phase 1 unit 12, rules-auditor, minor] tests/rules/test_game_end.py: stale module docstring (lines 3, 20-21), wrong docstring on the R-072 clip case (764-771, exact −1.0 boundary untested), dead `apply_action` at 797-805.
+- [Phase 1, code-reviewer, should-fix] `state.clone()` deep-copies the immutable Core (~94 µs, the main MCTS cost); give `Core`/`Seat` `__deepcopy__`/`__copy__` returning self (~33 µs). Before Phase 3.
+- [Phase 1, code-reviewer, should-fix] R-042 lookahead recomputed several times per step (legal_actions, apply validation, next unit, `_enter`); memoise `_ln_legal` on the hashable core and hoist other seats' ends/occupied set out of `_best_continuation`. Before Phase 3.
+- [Phase 1, code-reviewer, minor] `bus/observer.py:65` `_nodes_of` unbounded `@cache` → `lru_cache(maxsize=…)`.
+- [Phase 1, code-reviewer, minor] Loader accepts non-terminal resolution nodes with no legal action (SCENARIOS §6 allows for fixtures); reject in the server/editor path (or under `strict`) before Phase 2 accepts scenarios.
+- [Phase 1, code-reviewer, minor] `tools/play_text.py:149` doesn't catch `ScenarioError` (traceback on `--players 7`); `bus/rules.py:186` apply at END says "not implemented" instead of "game is over"; `tools/sim_stats.py:31-32` docstring return order.
+- [Phase 1, code-reviewer, minor] `tests/test_conformance.py:66-72` aliasing check can't fail (advance only the original); `tests/support/invariants.py:115` scoring must strictly advance `last_score_move` (`<=`).
+- [Phase 1, rules-auditor, minor] Docstrings cite wrong rule IDs (`bus/rules.py:475,486` R-046→R-047/R-048; `:558` R-058→R-059); stale module docstring `rules.py:3-5`, `:17`.
+- [Phase 1, rules-auditor, minor] No test tagged R-003, R-009, R-011, R-013 (all exercised under other IDs); no direct test that `returns` never changes legal actions (R-002).
+- [Phase 1, orchestrator, minor] `tools/replay.py` rejects golden playthrough files (`tests/playthroughs/*.json`, S-SCHEMA); accept them (parameters + history) or document the two formats.
+- [Phase 1, orchestrator, minor] `play_text` prints the state as one ~1,000-character line; a multi-line human view would help terminal play.
 - [Phase 0, both reviewers] `layout.bus_grid` validation requires exactly 20 cells; revisit with the row-per-seat item above (5 seats × 5 buses).
 
 ## 10. Risks

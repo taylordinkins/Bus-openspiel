@@ -1,0 +1,9 @@
+{
+  "format": 1,
+  "description": "Fresh game (SCENARIOS 7).",
+  "expect": {
+    "phase": "SB",
+    "current_player": 0,
+    "terminal": false
+  }
+}

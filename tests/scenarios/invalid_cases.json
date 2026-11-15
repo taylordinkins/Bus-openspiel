@@ -1,0 +1,7937 @@
+{
+ "description": "Generated scenario documents: cases fail with the given S-* code; ambiguous ones accept any listed code; controls must load.",
+ "cases": [
+  {
+   "name": "unknown_top_key",
+   "code": "S-SCHEMA",
+   "doc": {
+    "format": 1,
+    "bogus": 1
+   }
+  },
+  {
+   "name": "format_2",
+   "code": "S-SCHEMA",
+   "doc": {
+    "format": 2
+   }
+  },
+  {
+   "name": "format_missing",
+   "code": "S-SCHEMA",
+   "doc": {}
+  },
+  {
+   "name": "round1_without_waiting",
+   "code": "S-SCHEMA",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "seats_wrong_type",
+   "code": "S-SCHEMA",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": "x",
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "unknown_seat_key",
+   "code": "S-SCHEMA",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "color": "red"
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "unknown_building_key",
+   "code": "S-SCHEMA",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house",
+      "owner": 1
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "history_not_list",
+   "code": "S-SCHEMA",
+   "doc": {
+    "format": 1,
+    "history": 5
+   }
+  },
+  {
+   "name": "round_not_int",
+   "code": "S-SCHEMA",
+   "doc": {
+    "format": 1,
+    "round": "one"
+   }
+  },
+  {
+   "name": "line_street_out_of_range",
+   "code": "S-ID",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       70
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "line_street_negative",
+   "code": "S-ID",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       -1
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "building_site_out_of_range",
+   "code": "S-ID",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 47,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "current_player_out_of_range",
+   "code": "S-ID",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "current_player": 4
+   }
+  },
+  {
+   "name": "start_player_out_of_range",
+   "code": "S-ID",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "start_player": 4
+   }
+  },
+  {
+   "name": "board_seat_out_of_range",
+   "code": "S-ID",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 19
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "SEL",
+    "action_board": {
+     "lines": [
+      9,
+      1,
+      2,
+      3,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "pass": 1,
+     "dropped": []
+    }
+   }
+  },
+  {
+   "name": "dropped_seat_out_of_range",
+   "code": "S-ID",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 19
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "SEL",
+    "action_board": {
+     "lines": [
+      0,
+      1,
+      2,
+      3,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "pass": 1,
+     "dropped": [
+      9
+     ]
+    }
+   }
+  },
+  {
+   "name": "picked_node_out_of_range",
+   "code": "S-ID",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 20
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 20
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1,
+     "16": 1
+    },
+    "phase": "VD",
+    "action_board": {
+     "lines": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "cursor": {
+      "letter": 1
+     },
+     "moves_left": 1,
+     "picked_node": 36
+    }
+   }
+  },
+  {
+   "name": "players_2",
+   "code": "S-PLAYERS",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 2
+    }
+   }
+  },
+  {
+   "name": "players_6",
+   "code": "S-PLAYERS",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 6
+    }
+   }
+  },
+  {
+   "name": "seats_longer_than_players",
+   "code": "S-PLAYERS",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     },
+     {}
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "seats_shorter_than_players",
+   "code": "S-PLAYERS",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "line_not_contiguous",
+   "code": "S-LINE",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       37
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "line_repeated_street",
+   "code": "S-LINE",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18,
+       16
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "loop_with_repeated_street",
+   "code": "S-LINE",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       3,
+       10,
+       4,
+       3
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "line_longer_than_25",
+   "code": "S-LINE",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       0,
+       3,
+       6,
+       7,
+       16,
+       18,
+       8,
+       9,
+       11,
+       10,
+       2,
+       1,
+       5,
+       13,
+       23,
+       22,
+       20,
+       21,
+       25,
+       26,
+       28,
+       27,
+       30,
+       39,
+       38,
+       37
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "buses_0",
+   "code": "S-BUS",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "buses": 0
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "buses_6",
+   "code": "S-BUS",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "buses": 6
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "markers_left_21",
+   "code": "S-MARKERS",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 21
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "markers_left_negative",
+   "code": "S-MARKERS",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": -1
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "markers_plus_board_21",
+   "code": "S-MARKERS",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "SEL",
+    "action_board": {
+     "lines": [
+      0,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "pass": 0,
+     "dropped": []
+    }
+   }
+  },
+  {
+   "name": "stones_on_clock_4_at_4p",
+   "code": "S-STONES",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "stones_on_clock": 4
+   }
+  },
+  {
+   "name": "seat_stone_without_clock_decrement",
+   "code": "S-STONES",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "stones": 1
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "five_stones_at_3p",
+   "code": "S-STONES",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 3
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "stones_on_clock": 5
+   }
+  },
+  {
+   "name": "clock_zero_outside_end",
+   "code": "S-STONES",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "stones": 2
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "stones": 3
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "stones_on_clock": 0
+   }
+  },
+  {
+   "name": "clock_zero_sums_wrong_in_end",
+   "code": "S-STONES",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 3,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "points": 3,
+      "last_score_move": 5
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "points": 2,
+      "last_score_move": 4
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "END",
+    "pending": {},
+    "end": {
+     "types": [
+      "sites_full"
+     ]
+    },
+    "stones_on_clock": 0
+   }
+  },
+  {
+   "name": "duplicate_site",
+   "code": "S-SITES",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     },
+     {
+      "site": 0,
+      "type": "house"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "invalid_type",
+   "code": "S-SITES",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "castle"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "supply_mismatch",
+   "code": "S-PASSENGERS",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "supply": 10
+   }
+  },
+  {
+   "name": "more_than_15_waiting",
+   "code": "S-PASSENGERS",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 16
+    }
+   }
+  },
+  {
+   "name": "occupied_plus_waiting_over_15",
+   "code": "S-PASSENGERS",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house",
+      "occupied": true
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "supply": 11
+   }
+  },
+  {
+   "name": "waiting_key_not_numeric",
+   "code": "S-PASSENGERS",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "abc": 1
+    }
+   }
+  },
+  {
+   "name": "lines_has_5_spaces",
+   "code": "S-BOARD",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 19
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "SEL",
+    "action_board": {
+     "lines": [
+      0,
+      1,
+      2,
+      3,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "pass": 1,
+     "dropped": []
+    }
+   }
+  },
+  {
+   "name": "buses_has_2_spaces",
+   "code": "S-BOARD",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 19
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "SEL",
+    "action_board": {
+     "lines": [
+      0,
+      1,
+      2,
+      3,
+      null,
+      null
+     ],
+     "buses": [
+      null,
+      null
+     ],
+     "passengers": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "pass": 1,
+     "dropped": []
+    }
+   }
+  },
+  {
+   "name": "letters_not_contiguous",
+   "code": "S-BOARD",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 19
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "SEL",
+    "action_board": {
+     "lines": [
+      0,
+      1,
+      2,
+      3,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "pass": 1,
+     "dropped": []
+    }
+   }
+  },
+  {
+   "name": "board_non_empty_in_setup",
+   "code": "S-BOARD",
+   "doc": {
+    "format": 1,
+    "action_board": {
+     "lines": [
+      0,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    }
+   }
+  },
+  {
+   "name": "board_non_empty_in_end",
+   "code": "S-BOARD",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 3,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "points": 3,
+      "last_score_move": 5
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "points": 2,
+      "last_score_move": 4
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "END",
+    "pending": {},
+    "end": {
+     "types": [
+      "sites_full"
+     ]
+    },
+    "action_board": {
+     "lines": [
+      0,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    }
+   }
+  },
+  {
+   "name": "sel_in_round_0",
+   "code": "S-PHASE",
+   "doc": {
+    "format": 1,
+    "phase": "SEL",
+    "pending": {
+     "pass": 0,
+     "dropped": []
+    }
+   }
+  },
+  {
+   "name": "sb_in_round_1",
+   "code": "S-PHASE",
+   "doc": {
+    "format": 1,
+    "round": 1,
+    "phase": "SB",
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "pending": {
+     "done": 0
+    }
+   }
+  },
+  {
+   "name": "current_player_not_derived_sb",
+   "code": "S-PHASE",
+   "doc": {
+    "format": 1,
+    "current_player": 1
+   }
+  },
+  {
+   "name": "current_player_not_marker_owner",
+   "code": "S-PHASE",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 20
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 20
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "LN",
+    "action_board": {
+     "lines": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "cursor": {
+      "letter": 1
+     },
+     "units_left": 2
+    },
+    "current_player": 2
+   }
+  },
+  {
+   "name": "cursor_at_empty_letter",
+   "code": "S-PHASE",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 20
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 20
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "LN",
+    "action_board": {
+     "lines": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "cursor": {
+      "letter": 3
+     },
+     "units_left": 2
+    }
+   }
+  },
+  {
+   "name": "dropped_with_one_marker",
+   "code": "S-SEL",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 19
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "SEL",
+    "action_board": {
+     "lines": [
+      0,
+      1,
+      2,
+      3,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "pass": 1,
+     "dropped": [
+      2
+     ]
+    }
+   }
+  },
+  {
+   "name": "seat_before_cp_behind",
+   "code": "S-SEL",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 19
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "SEL",
+    "action_board": {
+     "lines": [
+      0,
+      1,
+      2,
+      3,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      1,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "pass": 1,
+     "dropped": []
+    }
+   }
+  },
+  {
+   "name": "seat_from_cp_behind_pass",
+   "code": "S-SEL",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 19
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "SEL",
+    "action_board": {
+     "lines": [
+      0,
+      1,
+      2,
+      3,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "pass": 2,
+     "dropped": []
+    },
+    "current_player": 0
+   }
+  },
+  {
+   "name": "points_zero_with_move",
+   "code": "S-POINTS",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "last_score_move": 3
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "points_without_move",
+   "code": "S-POINTS",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "points": 2
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "move_after_offset",
+   "code": "S-POINTS",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "points": 2,
+      "last_score_move": 5
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "move_offset": 3
+   }
+  },
+  {
+   "name": "sb_buildings_more_than_done",
+   "code": "S-SETUP",
+   "doc": {
+    "format": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     }
+    ],
+    "pending": {
+     "done": 2
+    }
+   }
+  },
+  {
+   "name": "sb_buildings_fewer_than_done",
+   "code": "S-SETUP",
+   "doc": {
+    "format": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     }
+    ],
+    "pending": {
+     "done": 5
+    }
+   }
+  },
+  {
+   "name": "line_before_l1",
+   "code": "S-SETUP",
+   "doc": {
+    "format": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     }
+    ],
+    "pending": {
+     "done": 3
+    },
+    "seats": [
+     {
+      "line": [
+       16
+      ]
+     },
+     {},
+     {},
+     {}
+    ]
+   }
+  },
+  {
+   "name": "l1_served_seat_without_line",
+   "code": "S-SETUP",
+   "doc": {
+    "format": 1,
+    "phase": "L1",
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "pending": {
+     "done": 2
+    },
+    "seats": [
+     {
+      "line": []
+     },
+     {
+      "line": [
+       37
+      ]
+     },
+     {},
+     {}
+    ]
+   }
+  },
+  {
+   "name": "l1_unserved_seat_has_line",
+   "code": "S-SETUP",
+   "doc": {
+    "format": 1,
+    "phase": "L1",
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "pending": {
+     "done": 2
+    },
+    "seats": [
+     {
+      "line": [
+       16
+      ]
+     },
+     {
+      "line": [
+       37
+      ]
+     },
+     {},
+     {
+      "line": [
+       62
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "l1_missing_buildings",
+   "code": "S-SETUP",
+   "doc": {
+    "format": 1,
+    "phase": "L1",
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     }
+    ],
+    "pending": {
+     "done": 2
+    },
+    "seats": [
+     {
+      "line": [
+       16
+      ]
+     },
+     {
+      "line": [
+       37
+      ]
+     },
+     {},
+     {}
+    ]
+   }
+  },
+  {
+   "name": "l2_unserved_seat_has_two_streets",
+   "code": "S-SETUP",
+   "doc": {
+    "format": 1,
+    "phase": "L2",
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "pending": {
+     "done": 1
+    },
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37
+      ]
+     },
+     {
+      "line": [
+       46
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "l2_served_seat_has_one_street",
+   "code": "S-SETUP",
+   "doc": {
+    "format": 1,
+    "phase": "L2",
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "pending": {
+     "done": 1
+    },
+    "seats": [
+     {
+      "line": [
+       16
+      ]
+     },
+     {
+      "line": [
+       37
+      ]
+     },
+     {
+      "line": [
+       46
+      ]
+     },
+     {
+      "line": [
+       62
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "end_without_block",
+   "code": "S-END",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 3,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "points": 3,
+      "last_score_move": 5
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "points": 2,
+      "last_score_move": 4
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "END",
+    "pending": {}
+   }
+  },
+  {
+   "name": "end_empty_types",
+   "code": "S-END",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 3,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "points": 3,
+      "last_score_move": 5
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "points": 2,
+      "last_score_move": 4
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "END",
+    "pending": {},
+    "end": {
+     "types": []
+    }
+   }
+  },
+  {
+   "name": "end_unknown_type",
+   "code": "S-END",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 3,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "points": 3,
+      "last_score_move": 5
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "points": 2,
+      "last_score_move": 4
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "END",
+    "pending": {},
+    "end": {
+     "types": [
+      "boredom"
+     ]
+    }
+   }
+  },
+  {
+   "name": "last_stone_not_alone",
+   "code": "S-END",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 3,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "points": 3,
+      "last_score_move": 5
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "points": 2,
+      "last_score_move": 4
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "END",
+    "pending": {},
+    "end": {
+     "types": [
+      "last_stone",
+      "markers"
+     ]
+    }
+   }
+  },
+  {
+   "name": "history_id_out_of_range",
+   "code": "S-HISTORY",
+   "doc": {
+    "format": 1,
+    "history": [
+     100000
+    ]
+   }
+  },
+  {
+   "name": "history_id_negative",
+   "code": "S-HISTORY",
+   "doc": {
+    "format": 1,
+    "history": [
+     -1
+    ]
+   }
+  },
+  {
+   "name": "history_illegal_in_phase",
+   "code": "S-HISTORY",
+   "doc": {
+    "format": 1,
+    "history": [
+     7
+    ]
+   }
+  },
+  {
+   "name": "history_second_id_illegal",
+   "code": "S-HISTORY",
+   "doc": {
+    "format": 1,
+    "history": [
+     148,
+     148
+    ]
+   }
+  },
+  {
+   "name": "history_tier_b_while_a_open",
+   "code": "S-HISTORY",
+   "doc": {
+    "format": 1,
+    "history": [
+     184
+    ]
+   }
+  },
+  {
+   "name": "history_after_end",
+   "code": "S-HISTORY",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 3,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "points": 3,
+      "last_score_move": 5
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "points": 2,
+      "last_score_move": 4
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "END",
+    "pending": {},
+    "end": {
+     "types": [
+      "sites_full"
+     ]
+    },
+    "history": [
+     148
+    ]
+   }
+  }
+ ],
+ "ambiguous": [
+  {
+   "name": "waiting_key_out_of_range",
+   "codes": [
+    "S-ID",
+    "S-PASSENGERS"
+   ],
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "99": 1
+    }
+   },
+   "note": "S-ID says ids out of range; S-PASSENGERS says waiting key not a node"
+  },
+  {
+   "name": "sel_pending_missing_key",
+   "codes": [
+    "S-PHASE",
+    "S-PENDING"
+   ],
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 19
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "SEL",
+    "action_board": {
+     "lines": [
+      0,
+      1,
+      2,
+      3,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "pass": 1
+    }
+   },
+   "note": "section 4 names S-PENDING, section 6 has no such code"
+  },
+  {
+   "name": "sel_pending_extra_key",
+   "codes": [
+    "S-PHASE",
+    "S-PENDING"
+   ],
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 19
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "SEL",
+    "action_board": {
+     "lines": [
+      0,
+      1,
+      2,
+      3,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "pass": 1,
+     "dropped": [],
+     "done": 1
+    }
+   },
+   "note": "same"
+  },
+  {
+   "name": "ln_missing_units_left",
+   "codes": [
+    "S-PHASE",
+    "S-PENDING"
+   ],
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 20
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 20
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "LN",
+    "action_board": {
+     "lines": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "cursor": {
+      "letter": 1
+     }
+    }
+   },
+   "note": "same"
+  },
+  {
+   "name": "ck_pending_has_units_left",
+   "codes": [
+    "S-PHASE",
+    "S-PENDING"
+   ],
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 20
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 20
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 20
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 19
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "CK",
+    "action_board": {
+     "lines": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      3
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "cursor": {
+      "letter": 0
+     },
+     "units_left": 1
+    }
+   },
+   "note": "same"
+  },
+  {
+   "name": "end_with_pending",
+   "codes": [
+    "S-PHASE",
+    "S-PENDING"
+   ],
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 3,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "points": 3,
+      "last_score_move": 5
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "points": 2,
+      "last_score_move": 4
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "END",
+    "pending": {
+     "done": 1
+    },
+    "end": {
+     "types": [
+      "sites_full"
+     ]
+    }
+   },
+   "note": "same"
+  },
+  {
+   "name": "units_left_7",
+   "codes": [
+    "S-PHASE",
+    "S-PENDING",
+    "S-SCHEMA"
+   ],
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 20
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 20
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "LN",
+    "action_board": {
+     "lines": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "cursor": {
+      "letter": 1
+     },
+     "units_left": 7
+    }
+   },
+   "note": "range of units_left has no stated code"
+  },
+  {
+   "name": "units_left_0",
+   "codes": [
+    "S-PHASE",
+    "S-PENDING",
+    "S-SCHEMA"
+   ],
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 20
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 20
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "LN",
+    "action_board": {
+     "lines": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "cursor": {
+      "letter": 1
+     },
+     "units_left": 0
+    }
+   },
+   "note": "same"
+  },
+  {
+   "name": "moves_left_6",
+   "codes": [
+    "S-PHASE",
+    "S-PENDING",
+    "S-SCHEMA"
+   ],
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 19
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 20
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 20
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1,
+     "16": 1
+    },
+    "phase": "VP",
+    "action_board": {
+     "lines": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "cursor": {
+      "letter": 1
+     },
+     "moves_left": 6
+    }
+   },
+   "note": "same"
+  },
+  {
+   "name": "sb_done_out_of_range",
+   "codes": [
+    "S-PHASE",
+    "S-PENDING",
+    "S-SETUP"
+   ],
+   "doc": {
+    "format": 1,
+    "pending": {
+     "done": 8
+    }
+   },
+   "note": "done range 0..2n-1 has no stated code"
+  },
+  {
+   "name": "empty_line_in_sel",
+   "codes": [
+    "S-LINE",
+    "S-SETUP",
+    "S-PHASE"
+   ],
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": []
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   },
+   "note": "section 3.1 says empty line is valid only in SB/L1; no code given for violations"
+  },
+  {
+   "name": "l1_pending_done_over_n",
+   "codes": [
+    "S-PHASE",
+    "S-PENDING",
+    "S-SETUP"
+   ],
+   "doc": {
+    "format": 1,
+    "phase": "L1",
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "pending": {
+     "done": 4
+    },
+    "seats": [
+     {
+      "line": [
+       16
+      ]
+     },
+     {
+      "line": [
+       37
+      ]
+     },
+     {},
+     {}
+    ]
+   },
+   "note": "done range for L1"
+  },
+  {
+   "name": "end_block_outside_end",
+   "codes": [
+    "S-END",
+    "S-SCHEMA",
+    "S-PHASE"
+   ],
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "end": {
+     "types": [
+      "markers"
+     ]
+    }
+   },
+   "note": "end only valid in END; no code given"
+  },
+  {
+   "name": "unknown_phase_code",
+   "codes": [
+    "S-PHASE",
+    "S-SCHEMA"
+   ],
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "XX"
+   },
+   "note": "unknown phase"
+  },
+  {
+   "name": "waiting_count_zero",
+   "codes": [
+    "S-SCHEMA",
+    "S-PASSENGERS"
+   ],
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 0,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   },
+   "note": "count must be >= 1; no code given"
+  },
+  {
+   "name": "unknown_action_name_on_board",
+   "codes": [
+    "S-SCHEMA",
+    "S-BOARD"
+   ],
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "SEL",
+    "action_board": {
+     "foo": [
+      null
+     ]
+    },
+    "pending": {
+     "pass": 0,
+     "dropped": []
+    }
+   },
+   "note": "unknown action name"
+  }
+ ],
+ "controls": [
+  {
+   "name": "round1_waiting_empty_all_in_supply",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {}
+   }
+  },
+  {
+   "name": "full_loop_line",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       3,
+       10,
+       4
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "line_exactly_25",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       0,
+       3,
+       6,
+       7,
+       16,
+       18,
+       8,
+       9,
+       11,
+       10,
+       2,
+       1,
+       5,
+       13,
+       23,
+       22,
+       20,
+       21,
+       25,
+       26,
+       28,
+       27,
+       30,
+       39,
+       38
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "markers_left_0",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 0
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "markers_left_20_with_empty_board",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 20
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "stones_on_clock_0_in_end_sum_5",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 3,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "points": 3,
+      "last_score_move": 5,
+      "stones": 2
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "points": 2,
+      "last_score_move": 4,
+      "stones": 3
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "END",
+    "pending": {},
+    "end": {
+     "types": [
+      "sites_full"
+     ]
+    },
+    "stones_on_clock": 0
+   }
+  },
+  {
+   "name": "stones_split_between_clock_and_seats",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "stones": 1
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "stones": 1
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "stones_on_clock": 3
+   }
+  },
+  {
+   "name": "buses_5",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "buses": 5
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    }
+   }
+  },
+  {
+   "name": "move_offset_override_above",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "points": 2,
+      "last_score_move": 5
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "move_offset": 9
+   }
+  },
+  {
+   "name": "allow_unreachable_points_zero_with_move",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "last_score_move": 3
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "allow_unreachable": true
+   }
+  },
+  {
+   "name": "allow_unreachable_tier_b_first",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 12,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ]
+     },
+     {
+      "line": [
+       37,
+       38
+      ]
+     },
+     {
+      "line": [
+       46,
+       47
+      ]
+     },
+     {
+      "line": [
+       62,
+       65
+      ]
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "allow_unreachable": true
+   }
+  },
+  {
+   "name": "sel_pass2_seats_out_of_markers",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 4
+    },
+    "round": 1,
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house"
+     },
+     {
+      "site": 1,
+      "type": "office"
+     },
+     {
+      "site": 2,
+      "type": "pub"
+     },
+     {
+      "site": 3,
+      "type": "house"
+     },
+     {
+      "site": 4,
+      "type": "office"
+     },
+     {
+      "site": 5,
+      "type": "pub"
+     },
+     {
+      "site": 6,
+      "type": "house"
+     },
+     {
+      "site": 7,
+      "type": "office"
+     }
+    ],
+    "seats": [
+     {
+      "line": [
+       16,
+       18
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       37,
+       38
+      ],
+      "markers_left": 18
+     },
+     {
+      "line": [
+       46,
+       47
+      ],
+      "markers_left": 0
+     },
+     {
+      "line": [
+       62,
+       65
+      ],
+      "markers_left": 0
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "phase": "SEL",
+    "action_board": {
+     "lines": [
+      0,
+      1,
+      2,
+      3,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "pass": 2,
+     "dropped": []
+    },
+    "current_player": 0
+   }
+  },
+  {
+   "name": "seats_empty_dicts_fresh",
+   "doc": {
+    "format": 1,
+    "seats": [
+     {},
+     {},
+     {},
+     {}
+    ]
+   }
+  },
+  {
+   "name": "three_players_defaults",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 3
+    }
+   }
+  },
+  {
+   "name": "five_players_defaults",
+   "doc": {
+    "format": 1,
+    "parameters": {
+     "players": 5
+    }
+   }
+  },
+  {
+   "name": "description_and_margin",
+   "doc": {
+    "format": 1,
+    "description": "x",
+    "parameters": {
+     "players": 4,
+     "returns": "margin"
+    }
+   }
+  }
+ ]
+}

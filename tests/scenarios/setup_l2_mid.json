@@ -1,0 +1,69 @@
+{
+  "format": 1,
+  "description": "L2 (reverse order) with seat 3 served; seat 2 acts.",
+  "phase": "L2",
+  "buildings": [
+    {
+      "site": 0,
+      "type": "house"
+    },
+    {
+      "site": 1,
+      "type": "office"
+    },
+    {
+      "site": 2,
+      "type": "pub"
+    },
+    {
+      "site": 3,
+      "type": "house"
+    },
+    {
+      "site": 4,
+      "type": "office"
+    },
+    {
+      "site": 5,
+      "type": "pub"
+    },
+    {
+      "site": 6,
+      "type": "house"
+    },
+    {
+      "site": 7,
+      "type": "office"
+    }
+  ],
+  "pending": {
+    "done": 1
+  },
+  "seats": [
+    {
+      "line": [
+        16
+      ]
+    },
+    {
+      "line": [
+        37
+      ]
+    },
+    {
+      "line": [
+        46
+      ]
+    },
+    {
+      "line": [
+        62,
+        65
+      ]
+    }
+  ],
+  "expect": {
+    "phase": "L2",
+    "current_player": 2
+  }
+}

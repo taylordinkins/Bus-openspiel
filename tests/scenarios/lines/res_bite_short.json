@@ -1,0 +1,127 @@
+{
+ "format": 1,
+ "description": "R-042: power 3, no choice reaches 3; maximum is 2 and one choice reaches only 1.",
+ "parameters": {
+  "players": 4
+ },
+ "round": 1,
+ "phase": "LN",
+ "buildings": [
+  {
+   "site": 0,
+   "type": "house"
+  },
+  {
+   "site": 1,
+   "type": "office"
+  },
+  {
+   "site": 2,
+   "type": "pub"
+  },
+  {
+   "site": 3,
+   "type": "house"
+  },
+  {
+   "site": 4,
+   "type": "office"
+  },
+  {
+   "site": 5,
+   "type": "pub"
+  },
+  {
+   "site": 6,
+   "type": "house"
+  },
+  {
+   "site": 7,
+   "type": "office"
+  }
+ ],
+ "seats": [
+  {
+   "line": [
+    5,
+    4,
+    3,
+    10,
+    14,
+    32,
+    15,
+    2
+   ],
+   "markers_left": 19,
+   "buses": 3
+  },
+  {
+   "line": [
+    39,
+    38
+   ]
+  },
+  {
+   "line": [
+    58,
+    59
+   ]
+  },
+  {
+   "line": [
+    62,
+    65
+   ]
+  }
+ ],
+ "waiting": {},
+ "action_board": {
+  "lines": [
+   0,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "buses": [
+   null
+  ],
+  "passengers": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "buildings": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "clock": [
+   null
+  ],
+  "vrrooomm": [
+   null,
+   null,
+   null,
+   null,
+   null,
+   null
+  ],
+  "starting_player": [
+   null
+  ]
+ },
+ "pending": {
+  "cursor": {
+   "letter": 0
+  },
+  "units_left": 3
+ }
+}

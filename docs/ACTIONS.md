@@ -193,4 +193,9 @@ Total ≤ `4n + 20n + 10n + 200n = 234n`, so **`max_game_length` = 234·n**, whi
 
 ## 7. Open points for encoding
 
-None blocking. Performance note for Phase 1: the R-042 lookahead is a depth-first search of depth ≤ 6 on every Lines node; memoise per node if profiling shows a cost.
+Resolved in Phase 1 unit 13:
+- **Observation tensor** (PLAN 5.2): absolute (perfect information, identical for every observing player), includes a one-hot of the seat to act. Flat float32 with named views (street x seat occupancy and end markers, node waiting and line membership, site type one-hot and occupied flag, clock one-hot, stones, buses, markers left, line markers left, points, action board action x letter x seat, phase one-hot, round, selection pass, dropped seats, end types, pending units/moves left, cursor letter, picked node). Counts are scaled to [0, 1] by their maximum, documented in the `bus/observer.py` docstring. `last_score_move` and move numbers are not in the tensor (the string shows them).
+- `bus.rules.forced_action(state)` accepts a state or a core; None at END. `action_meta` and `game_result` live in `bus/game.py`. `shared_end` is true whenever the street is already in another seat's line (R-038 all-occupied case and R-039), false for the first setup marker; the first setup marker has `from_node` and `to_node` null, `end` 0, `setup` "first"; `deliver_to.building_type` is the clock's type.
+- `game_result(state)` returns `{"end_types", "winners", "final_scores", "returns"}` at END, None before. The observer string at END appends `end: <types> winners: P.. scores: [...]`. `current` is 0 at END (canonical) so dump/load round-trips.
+
+Performance note for Phase 1: the R-042 lookahead is a depth-first search of depth <= 6 on every Lines node; memoise per node if profiling shows a cost.
