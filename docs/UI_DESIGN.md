@@ -130,6 +130,12 @@ Built only from the legal actions and `action_meta`:
 11. `state.current_player` is absent at END (SCENARIOS §4: no actor), so the END round trip holds; `prompt.actor` is null there.
 12. Labels follow ACTIONS §4 verbatim; "Starting Player" is an action name, so the seat-name check is "no `Player <digit>`", not "no `Player`".
 
+### 6.6 Events, board geometry, scenarios, random seats (unit 3)
+- **Events.** Each `HistoryEntry` has `events: list[Event]` (`type` plus type-specific fields): the automatic steps the engine ran as a result of that action, computed from the states before and after it (so replay, bots and Back give the same events). The latest action's events are `history[-1].events`; after bot turns, take every entry past the last one seen. Types: `scored {seat, points, node, site}` (a delivery); `passengers_moved {exited: [{site, node}], entered: [{site, node}]}` (Clock step: all occupied buildings release, then clock-type buildings take one; not emitted for the last-stone end); `selection_ended {}`; `bus_added {seat, buses}` and `marker_skipped {action, letter, owner}` (markers resolved without a decision, in resolution order; a marker that ends early with units unused is not reported); `round_ended {round, start_player}`; `round_started {round}` (also the first SEL after setup); `game_ended {end_types}`. Applying them to the previous `state` reproduces the next state's seats' buses and points, occupied buildings, waiting passengers (with the action's own effect), round and END.
+- **Geometry.** `GET /api/boards/{game}` returns `{game, geometry}`; for Bus `geometry` holds `map {width, height}`, `nodes`, `streets` (with `via` bends), `sites` (tier, node, x, y) and `layout` (`actions` letter positions, `bus_grid`, `clock`, `stones`, `score_track`), all read from `data/board.yaml`. 404 for a game without geometry.
+- **Scenarios.** The server create/import path loads scenarios with `require_legal`: a non-terminal position with no legal action is rejected (HTTP 422 on create, 4xx on import; `S-PHASE` message). `bus.scenario.load_scenario` keeps accepting such fixtures by default.
+- **Random seats.** `seats` entries are `human` or `random`; bots play inline or on the worker as in the shell; a game of only random seats runs to END at creation.
+
 ## 7. Hotseat, bots, undo
 
 - Hotseat: perfect information, so no curtain; the turn frame and toast make the change of seat obvious.

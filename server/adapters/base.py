@@ -86,3 +86,16 @@ class GameAdapter(ABC):
         if scenario is not None:
             raise ValueError(f"{self.name} does not support scenarios")
         return game.new_initial_state()
+
+    def events(
+        self, state_before: pyspiel.State, action_id: int, state_after: pyspiel.State
+    ) -> list[JSON]:
+        """Automatic (non-choice) steps the engine ran after `action_id`; default none.
+
+        Each event is a dict with a `type` key. Must be a function of the two states only.
+        """
+        return []
+
+    def board_geometry(self) -> JSON | None:
+        """Static board geometry for the client renderer, or None if the game has none."""
+        return None

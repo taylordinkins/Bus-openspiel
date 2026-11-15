@@ -17,6 +17,7 @@ from server.reports import DEFAULT_REPORTS_DIR, write_report
 from server.schemas import (
     ActionRequest,
     BatchActionRequest,
+    BoardGeometry,
     CreateGameRequest,
     ErrorResponse,
     GameExport,
@@ -140,6 +141,14 @@ def create_app(
         return render(
             make(body.game, body.params, list(body.seats), None, body.history, body.scenario)
         )
+
+    @api.get("/boards/{game}", operation_id="get_board", responses={404: _ERR})
+    def get_board(game: str) -> BoardGeometry:
+        adapter = store.adapters.get(game)
+        geometry = None if adapter is None else adapter.board_geometry()
+        if geometry is None:
+            raise HTTPException(404, f"no board geometry for game {game!r}")
+        return BoardGeometry(game=game, geometry=geometry)
 
     @api.get("/games/{game_id}", operation_id="get_game", responses={404: _ERR})
     def get_game(game_id: str, seat: Annotated[int | None, Query()] = None) -> GameView:

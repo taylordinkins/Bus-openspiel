@@ -53,6 +53,14 @@ class LegalAction(BaseModel):
     params: dict[str, Any] | None = None
 
 
+class Event(BaseModel):
+    """One automatic step the engine ran after an action; `type` selects the other fields."""
+
+    model_config = ConfigDict(extra="allow")
+
+    type: str
+
+
 class HistoryEntry(BaseModel):
     """One past action; `actor` is null for chance outcomes. Hidden picks have a null id."""
 
@@ -60,6 +68,17 @@ class HistoryEntry(BaseModel):
     actor: int | None
     id: int | None = Field(description="Action id; null when hidden from the rendered seat.")
     label: str
+    events: list[Event] = Field(
+        default_factory=lambda: [],
+        description="Automatic steps the engine ran as a result of this action (adapter-defined).",
+    )
+
+
+class BoardGeometry(BaseModel):
+    """Static board data for the renderer, served once per game type."""
+
+    game: str
+    geometry: dict[str, Any] = Field(description="Adapter-defined geometry payload.")
 
 
 class GameView(BaseModel):

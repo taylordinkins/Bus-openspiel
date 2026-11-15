@@ -413,8 +413,10 @@ class Session:
                 else:
                     label, shown = masked, None
                 actor = who
-            out.append({"index": i, "actor": actor, "id": shown, "label": label})
+            before = state.clone()
             state.apply_action(a)
+            events = self.adapter.events(before, a, state)
+            out.append({"index": i, "actor": actor, "id": shown, "label": label, "events": events})
         return out
 
 

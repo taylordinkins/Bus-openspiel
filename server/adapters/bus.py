@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import Any
 
 import pyspiel
 
 from bus import constants as C
 from bus import rules
+from bus.actions import decode_action
+from bus.board import FRAME_SIZE
 from bus.game import BusState, action_meta, game_result
 from bus.lines import line_nodes
-from bus.scenario import ACTION_KEYS, dump_scenario
+from bus.scenario import ACTION_KEYS, ScenarioError, dump_scenario, load_scenario
 from server.adapters.base import JSON, GameAdapter
 
 _META_TOP = ("id", "kind", "player", "label")
@@ -42,6 +45,29 @@ class BusAdapter(GameAdapter):
             "kind": m["kind"],
             "params": {k: v for k, v in m.items() if k not in _META_TOP},
         }
+
+    def scenario_players(self, scenario: JSON) -> int:
+        try:
+            return load_scenario(scenario, require_legal=True).core.players
+        except ScenarioError as e:
+            raise ValueError(str(e)) from None
+
+    def initial_state(self, game: pyspiel.Game, scenario: JSON | None) -> pyspiel.State:
+        if scenario is None:
+            return game.new_initial_state()
+        try:
+            return load_scenario(scenario, game, require_legal=True)
+        except ScenarioError as e:
+            raise ValueError(f"invalid scenario: {e}") from None
+
+    def events(
+        self, state_before: pyspiel.State, action_id: int, state_after: pyspiel.State
+    ) -> list[JSON]:
+        assert isinstance(state_before, BusState) and isinstance(state_after, BusState)
+        return _events(state_before.core, action_id, state_after.core)
+
+    def board_geometry(self) -> JSON:
+        return _geometry()
 
     def view(self, state: pyspiel.State, seat: int) -> JSON:
         assert isinstance(state, BusState)
@@ -176,3 +202,120 @@ def _targets(state: BusState) -> JSON:
         else:
             t["buttons"].append({"id": a, "kind": kind})
     return t
+
+
+def _events(before: rules.Core, action: int, after: rules.Core) -> list[JSON]:
+    """Automatic steps between two cores (UI_DESIGN 6.6); a pure function of the cores."""
+    out: list[JSON] = []
+    b = rules.board()
+    if before.phase == rules.PHASE_VD:
+        t = decode_action(action)[1][0]
+        seat = before.current
+        out.append(
+            {
+                "type": "scored",
+                "seat": seat,
+                "points": after.seats[seat].points,
+                "node": before.picked_node,
+                "site": t,
+            }
+        )
+    if before.phase == rules.PHASE_CK and not (
+        after.phase == rules.PHASE_END and after.end_types == ("last_stone",)
+    ):  # R-053: no movement
+        entered = list(after.occupied)
+        exited = list(before.occupied)
+        if entered or exited:
+            out.append(
+                {
+                    "type": "passengers_moved",
+                    "exited": [{"site": t, "node": b.sites[t].node} for t in exited],
+                    "entered": [{"site": t, "node": b.sites[t].node} for t in entered],
+                }
+            )
+    # Selection ending (R-028) and markers passed over without a decision (R-029, R-043).
+    positions = rules.resolution_positions(before)
+    start: int | None = None
+    owners = before.action_board
+    if before.phase == rules.PHASE_SEL:
+        kind, params = decode_action(action)
+        board_ = before.action_board
+        if kind == "select":
+            a = params[0]
+            board_ = board_[:a] + (board_[a] + (before.current,),) + board_[a + 1 :]
+        owners = board_
+        positions = rules.resolution_positions(replace(before, action_board=board_))
+        if after.phase != rules.PHASE_SEL or after.round != before.round:
+            out.append({"type": "selection_ended"})
+            start = -1
+    else:
+        res = rules.resolving_action(before)
+        if res is not None:
+            start = positions.index((res, before.cursor))
+    if start is not None:
+        res_after = rules.resolving_action(after)
+        if res_after is not None and after.round == before.round:
+            end = positions.index((res_after, after.cursor))
+        else:
+            end = len(positions)
+        buses = [s.buses for s in before.seats]
+        for a, k in positions[start + 1 : end]:
+            owner = owners[a][k]
+            if a == rules.ACT_BUSES and buses[owner] < C.BUSES_PER_PLAYER:
+                buses[owner] += 1
+                out.append({"type": "bus_added", "seat": owner, "buses": buses[owner]})
+            else:
+                out.append(
+                    {
+                        "type": "marker_skipped",
+                        "action": ACTION_KEYS[a],
+                        "letter": k,
+                        "owner": owner,
+                    }
+                )
+    if (
+        before.phase not in rules.SETUP_PHASES
+        and before.phase != rules.PHASE_END
+        and before.round >= 1
+        and (after.phase == rules.PHASE_END or after.round > before.round)
+    ):
+        out.append(
+            {"type": "round_ended", "round": before.round, "start_player": after.start_player}
+        )
+    if after.phase == rules.PHASE_SEL and after.round > before.round:
+        out.append({"type": "round_started", "round": after.round})
+    if after.phase == rules.PHASE_END and before.phase != rules.PHASE_END:
+        out.append({"type": "game_ended", "end_types": list(after.end_types)})
+    return out
+
+
+def _geometry() -> JSON:
+    b = rules.board()
+    lay = b.layout
+    return {
+        "map": {"width": FRAME_SIZE, "height": FRAME_SIZE},
+        "nodes": [
+            {"id": n.id, "x": n.x, "y": n.y, "station": n.station, "roundabout": n.roundabout}
+            for n in b.nodes
+        ],
+        "streets": [
+            {"id": st.id, "a": st.a, "b": st.b, "via": [list(p) for p in st.via]}
+            for st in b.streets
+        ],
+        "sites": [
+            {"id": t.id, "tier": t.tier, "node": t.node, "x": t.x, "y": t.y} for t in b.sites
+        ],
+        "layout": {
+            "actions": {k: {ltr: list(p) for ltr, p in v.items()} for k, v in lay.actions.items()},
+            "bus_grid": [list(p) for p in lay.bus_grid],
+            "clock": {
+                "x": lay.clock_x,
+                "y": lay.clock_y,
+                "hand": lay.clock_hand,
+                "radius": lay.clock_radius,
+                "angles": dict(lay.clock_angles),
+            },
+            "stones": [list(p) for p in lay.stones],
+            "score_track": [list(p) for p in lay.score_track],
+        },
+    }

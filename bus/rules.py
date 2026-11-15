@@ -371,6 +371,11 @@ def _positions(core: Core) -> list[tuple[int, int]]:
     return out
 
 
+def resolution_positions(core: Core) -> list[tuple[int, int]]:
+    """Public view of the resolution order of the markers on the board. Implements R-029, R-030."""
+    return _positions(core)
+
+
 def _line_nodes(core: Core, seat: int) -> set[int]:
     from bus.lines import line_nodes
 

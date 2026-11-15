@@ -608,8 +608,14 @@ def _check_expect_schema(d: dict[str, Any]) -> None:
         _only_keys(e, EXPECT_KEYS, "expect")
 
 
-def load_scenario(doc: dict[str, Any] | str | Path, game: Any = None) -> BusState:
-    """Load, validate and play out a scenario document. Implements SCENARIOS 2-6 and 9."""
+def load_scenario(
+    doc: dict[str, Any] | str | Path, game: Any = None, *, require_legal: bool = False
+) -> BusState:
+    """Load, validate and play out a scenario document. Implements SCENARIOS 2-6 and 9.
+
+    ``require_legal`` (server import path) also rejects a non-terminal final position with no
+    legal action, which fixtures may rest at (SCENARIOS 6) but a played game never reaches.
+    """
     d = _read(doc)
     core, mode = _build(d, game)
     _check_expect_schema(d)
@@ -624,6 +630,8 @@ def load_scenario(doc: dict[str, Any] | str | Path, game: Any = None) -> BusStat
         if a not in rules.legal_actions(state.core):
             raise _err("S-HISTORY", f"action {a} is illegal in phase {state.core.phase}")
         state.apply_action(a)
+    if require_legal and not state.is_terminal() and not rules.legal_actions(state.core):
+        raise _err("S-PHASE", f"{state.core.phase} is not terminal but has no legal action")
     return state
 
 

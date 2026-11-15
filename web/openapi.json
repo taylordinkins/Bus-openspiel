@@ -33,6 +33,27 @@
         "title": "BatchActionRequest",
         "type": "object"
       },
+      "BoardGeometry": {
+        "description": "Static board data for the renderer, served once per game type.",
+        "properties": {
+          "game": {
+            "title": "Game",
+            "type": "string"
+          },
+          "geometry": {
+            "additionalProperties": true,
+            "description": "Adapter-defined geometry payload.",
+            "title": "Geometry",
+            "type": "object"
+          }
+        },
+        "required": [
+          "game",
+          "geometry"
+        ],
+        "title": "BoardGeometry",
+        "type": "object"
+      },
       "CreateGameRequest": {
         "properties": {
           "game": {
@@ -94,6 +115,21 @@
           "detail"
         ],
         "title": "ErrorResponse",
+        "type": "object"
+      },
+      "Event": {
+        "additionalProperties": true,
+        "description": "One automatic step the engine ran after an action; `type` selects the other fields.",
+        "properties": {
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "Event",
         "type": "object"
       },
       "GameExport": {
@@ -350,6 +386,14 @@
             ],
             "title": "Actor"
           },
+          "events": {
+            "description": "Automatic steps the engine ran as a result of this action (adapter-defined).",
+            "items": {
+              "$ref": "#/components/schemas/Event"
+            },
+            "title": "Events",
+            "type": "array"
+          },
           "id": {
             "anyOf": [
               {
@@ -528,6 +572,55 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/boards/{game}": {
+      "get": {
+        "operationId": "get_board",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "game",
+            "required": true,
+            "schema": {
+              "title": "Game",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BoardGeometry"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Board"
+      }
+    },
     "/api/games": {
       "post": {
         "operationId": "create_game",
