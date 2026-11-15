@@ -28,8 +28,10 @@ RED_DARK = "#7E0606"
 SLOT_TEXT = "#FFF4D6"
 PASSENGER = "#3A3A3A"
 STONE = "#8C1D1D"
-# Seat colours: colour-blind-friendly (Okabe-Ito based), P0..P4.
-SEAT_COLORS = ("#0072B2", "#E69F00", "#009E73", "#D55E00", "#7B3FA0")
+# Seat colours: the Lines stripes of the art (D21), P0..P4 = red, green, orange, blue, white.
+# Sampled from assets/map/bus_map_reworked_v2.png at x=180, the centre row of each stripe.
+SEAT_COLORS = ("#FE0000", "#007F00", "#FE6500", "#0065FE", "#FEFEFE")
+SEAT_TEXT = ("#FFFFFF", "#FFFFFF", INK, "#FFFFFF", INK)  # label colour on each seat colour
 FONT = "Helvetica, Arial, sans-serif"
 
 WIDTH = 1991
@@ -203,9 +205,10 @@ def icon(kind: str, cx: float, cy: float, s: float = 1.0) -> str:
 
 def bus_glyph(cx: float, cy: float, s: float = 1.0, fill: str = INK) -> str:
     return (
-        f'<g class="bus-glyph" transform="translate({_f(cx)} {_f(cy)}) scale({s})" fill="{fill}">'
+        f'<g class="bus-glyph" transform="translate({_f(cx)} {_f(cy)}) scale({s})" fill="{fill}" '
+        f'stroke="{INK}" stroke-width="2">'
         f'<rect x="-20" y="-14" width="40" height="26" rx="6"/>'
-        f'<rect x="-15" y="-9" width="30" height="10" rx="2" fill="{PAPER}"/>'
+        f'<rect x="-15" y="-9" width="30" height="10" rx="2" fill="{PAPER}" stroke="none"/>'
         f'<circle cx="-11" cy="14" r="4"/><circle cx="11" cy="14" r="4"/></g>'
     )
 
@@ -236,7 +239,7 @@ def marker(cx: float, cy: float, seat: int, r: float = 17) -> str:
     return (
         f'<circle class="marker seat-{seat}" cx="{_f(cx)}" cy="{_f(cy)}" r="{_f(r)}" '
         f'fill="{SEAT_COLORS[seat]}" stroke="{INK}" stroke-width="2.5"/>'
-        f"{_text(cx, cy + 1, f'P{seat}', 14, '#FFFFFF')}"
+        f"{_text(cx, cy + 1, f'P{seat}', 14, SEAT_TEXT[seat])}"
     )
 
 
@@ -334,11 +337,11 @@ def _piece_layer(board: Board) -> list[str]:
         for k, seat in placed:
             x, y = spaces["abcdef"[k]]
             out.append(marker(x, y, seat, 19))
-    # buses in the Buses grid: owned buses, seat by seat
-    cells = iter(lay.bus_grid)
+    # buses in the Buses grid: one column per seat, buses 2..5 top to bottom (D19); the starting
+    # bus is not drawn
     for seat, count in enumerate(SAMPLE["buses"][: SAMPLE["seats"]]):
-        for _ in range(count):
-            x, y = next(cells)
+        for bus in range(2, count + 1):
+            x, y = lay.bus_cell(seat, bus)
             out.append(
                 f'<rect x="{x - 27}" y="{y - 26}" width="54" height="52" rx="6" '
                 f'fill="{PAPER}" opacity="0.9"/>{bus_glyph(x, y, 0.8, SEAT_COLORS[seat])}'

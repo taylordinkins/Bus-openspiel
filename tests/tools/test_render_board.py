@@ -39,3 +39,16 @@ def test_render_uses_background_image_and_embed(tmp_path: Path) -> None:
     )
     img = next(e for e in ET.parse(emb).getroot().iter() if e.tag.endswith("image"))
     assert (img.get("href") or "").startswith("data:image/png;base64,")
+
+
+def test_seat_palette_matches_lines_stripes() -> None:
+    from tools.render_board import SEAT_COLORS
+
+    assert len(SEAT_COLORS) == 5 and len(set(SEAT_COLORS)) == 5
+    # red, green, orange, blue, white (D21)
+    r, g, o, b, w = (tuple(int(c[i : i + 2], 16) for i in (1, 3, 5)) for c in SEAT_COLORS)
+    assert r[0] > 200 and r[1] < 60 and r[2] < 60
+    assert g[1] > 100 and g[0] < 60 and g[2] < 60
+    assert o[0] > 200 and 70 < o[1] < 140 and o[2] < 60
+    assert b[2] > 200 and b[0] < 60 and 60 < b[1] < 140
+    assert min(w) > 240

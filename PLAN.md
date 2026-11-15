@@ -198,7 +198,7 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 - [x] 1. Port the server shell (lignum `server/`: app, sessions, random bots, reports, schemas, `adapters/base.py`; toy adapter and game-agnostic server tests; fastapi/uvicorn/httpx deps) — `implementer` (2026-11-14; 90 server tests)
 - [x] 2. Bus adapter: `view`, labels, `prompt`, `targets` (UI_DESIGN §6; ACTIONS §5) — done: every legal action in random 3/4/5-player games has a label and a target; view matches fixtures — `spec-test-writer` → `implementer` (2026-11-14; contract UI_DESIGN §6.5)
 - [x] 3. Bus adapter: per-action automatic-step `events`, board-geometry endpoint, strict scenario load (backlog: reject non-terminal no-legal-action states), random seats — done: all-random game to END via the API; events match state diffs — `implementer` (2026-11-14; 1560 tests; contract UI_DESIGN §6.6)
-- [ ] 4. Bus grid by seat column (D19) and seat palette from the art's Lines stripes (D21) in `board-palette.md` and `tools/render_board.py` — done: data tests green, preview regenerated and reviewed — `implementer`
+- [x] 4. Bus grid by seat column (D19) and seat palette from the art's Lines stripes (D21) in `board-palette.md` and `tools/render_board.py` — done: data tests green, preview regenerated and reviewed — `implementer` (2026-11-14; 1562 tests; `Layout.bus_cell`)
 - [ ] 5. Port the web shell (`web/`, `src/shell/`, OpenAPI export, generated types; Bus on the action-list fallback) — done: typecheck, test, build, check:api green — `implementer`
 - [ ] 6. Board renderer: art, pieces (UI_DESIGN §3), zoom/pan, hover info — done: render tests + screenshot review — `implementer`
 - [ ] 7. Panels: prompt bar, seat panels, hotseat turn frame, log with hover highlight, END results — done: render tests for SB, SEL, each resolution phase, END — `implementer`
@@ -245,7 +245,7 @@ Opus spot audits only for units touching line-expansion validity, resolution ord
 ### Backlog
 Should-fix and minor findings, tagged with the phase that found them. `/close-phase` appends here.
 
-- [Phase 2, from Phase 0 preview review] Buses cell of the action board: the printed 4×5 grid is **one column per seat** (5 columns × 4 cells), not one row per seat — see D19. The preview currently fills it in reading order across seats; fix in Phase 2 unit 4. No 5th row is needed and the art is not changed.
+- [x] (done Phase 2 unit 4) [Phase 2, from Phase 0 preview review] Buses cell of the action board: the printed 4×5 grid is **one column per seat** (5 columns × 4 cells), not one row per seat — see D19. The preview currently fills it in reading order across seats; fix in Phase 2 unit 4. No 5th row is needed and the art is not changed.
 - [Phase 0, code-reviewer, should-fix] `bus/board.py` `Layout` holds plain dicts, so the frozen cached `Board` is unhashable and mutable (`hash(load_board())` raises). Store tuples/`MappingProxyType` or exclude `layout` from hash/compare before Phase 1 caches on the board.
 - [Phase 0, code-reviewer, should-fix] `tests/data/test_board.py`: frame/letter/count tests only re-check data `load_board()` already validates; add negative tests feeding bad raw dicts to the parser (out-of-frame point, letters a–e, 19 bus cells, missing clock segment) expecting `ValueError`.
 - [Phase 0, code-reviewer, minor] `bus/board.py` bounds check accepts 1991 (`<=` vs `<` FRAME_SIZE); tests repeat the literal 1991. `_parse_layout` accepts unknown action keys, non-positive clock hand/radius, 3-element or float points.
