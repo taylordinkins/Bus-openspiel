@@ -10,7 +10,7 @@
 ### Progress
 - [x] Phase 0 — Scaffold, board data, rules spec, board look ✋ *you review spec, §4 defaults and the board preview*
 - [x] Phase 1 — Engine: the full game, 3–5 players (2026-11-14; report `docs/phase-reports/phase-1.md`)
-- [ ] Phase 2 — Server + polished board UI ✋ *playtest #1*
+- [x] Phase 2 — Server + polished board UI ✋ *playtest #1*
 - [ ] Phase 3 — Bots (random, heuristic, MCTS) ✋ *playtest #2*
 - [ ] Phase 4 — Trained agents *(starts with a mini-interview)*
 
@@ -60,6 +60,7 @@ A faithful, well-tested implementation of *Bus* as a **Python OpenSpiel game**, 
 | D20 | Setup editor (2026-11-14) | Dropped from Phase 2. Phase 2 keeps scenario JSON load (paste, upload, named) and export in the lobby; the on-board editor is deferred, to be revisited after playtest #1 | User decision during `/start-phase 2` |
 | D21 | UI/UX (2026-11-14) | `docs/UI_DESIGN.md` is the UI contract: BGA-style prompt bar, only legal targets lit, click the board itself, previews on hover, automatic steps animated and logged. Seat colours match the art's Lines stripes (P0 red, P1 green, P2 orange, P3 blue, P4 white); human seats always click, even with one legal action (bots auto-play); Lines shows legal streets only; desktop/laptop only | User choices during `/start-phase 2`; amends §5.3 (UI no longer auto-advances single choices) |
 | D22 | Clock step every round (2026-11-15) | From playtest reports 2b0b32 and a22926. Every round, including round 1 and the round that ends on "every site has a building", the Clock step runs before any Vrrooomm! marker: the clock advances one space clockwise, passengers step out, then step into empty buildings of the clock's type, one per building. A Clock marker is the only way to pause (the owner takes a stone); the owner may instead advance without taking a stone, and the automatic advance still happens. Taking the last stone ends the game at once (no movement). Vrrooomm! carries only a passenger not in a building of the clock's type, to an empty building of that type elsewhere on the owner's line; R-061 is retired. Overrides the ⚑ defaults in R-015/R-029/R-061; the rulebook is silent on the no-marker case | User decision, triage of playtest reports; spec AMENDING |
+| D23 | Phase 2 close (2026-11-15) | Last-stone end emits only `game_ended` (no later marker events, no `round_ended`); `round_ended` omits `start_player` when the round end also ends the game. UI contract change only (UI_DESIGN §6.6); rules unchanged | rules-auditor must-fix at phase close |
 
 ## 4. Rules clarifications
 
@@ -277,6 +278,11 @@ Should-fix and minor findings, tagged with the phase that found them. `/close-ph
 - [Phase 2 unit 9, implementer, minor] vitest prints React `act()` warnings (`shell.test.tsx` 12, `pacing.test.tsx` 2, `useGame.test.tsx` auto-advance tests, ~170 in total); source of most not traced and not checked against pre-unit-9. Tests pass; wrap the state updates in `act`/`waitFor` or silence deliberately.
 - [Phase 2 unit 11 / D22, rules-auditor, minor] `web/src/games/bus/fixtures/interaction/VP.lone.json` is hand-made and shows a VP state S-CLOCKSTEP would reject (waiting passengers at n13/n18 beside empty houses); rebuild it as a valid post-Clock-step state.
 - [D22, implementer, minor] Only the automatic Clock step sweeps the clock hand; a Clock marker's own advance still fades. Consider sweeping both.
+- [Phase 2 close, code-reviewer, should-fix] Toolbar Back works at END and reopens a finished game (`web/src/shell/GameScreen.tsx:230`; UI_DESIGN §6.7 says disabled); add `|| isTerminal(game)` and make `Session.back()` raise `CannotGoBack` when terminal (`server/sessions.py:330`).
+- [Phase 2 close, code-reviewer, should-fix] `server/app.py:205-261`: `seat` is validated after the mutation (bad seat gives 422 but the history changed); `post_action` does not check that `seat` is the mover (`apply_batch` does). Validate before mutating.
+- [Phase 2 close, code-reviewer, minor] Playback can stall after Back during an in-flight frame fetch (`web/src/shell/playback.ts:140-205`); polling can stop after a failed mutation (`useGame.ts:72`); the debug action list bypasses the last-stone confirm (`GameScreen.tsx:200`); `BUS_DEV=0` enables dev mode (`server/app.py:329`); malformed `#/game/%E0` hash crashes the app (`App.tsx:9`); `ImportButton` does not reset its input; out-of-order named-scenario picks (`Lobby.tsx:95`); sessions never evicted (`sessions.py:440`).
+- [Phase 2 close, rules-auditor, minor] Prompt chip shows nominal `units_left` even when fewer can be placed (`promptText.ts:69`); scores above 20 are pinned to cell 20 on the board (`model.ts:156`, R-008 has no cap); action-box hover lists markers in letter order without power (`BusBoard.tsx:940`, UI_DESIGN §5 wants resolution order with M−k); `VP.lone.json` rejected by S-CLOCKSTEP (rebuild it); `panels.test.tsx:315,322` use winner lists the engine never produces and 322 accepts three tiebreak texts; `UI_DESIGN.md:193` repeats the §6.8 settings sentence in §6.9.
+- [Phase 2 close, orchestrator, minor] Vitest still prints 262 React `act()` warnings, all from `GameScreen.tsx:108`; D22 follow-up: a Clock marker's own advance fades instead of sweeping the hand (the automatic step sweeps).
 
 ## 10. Risks
 

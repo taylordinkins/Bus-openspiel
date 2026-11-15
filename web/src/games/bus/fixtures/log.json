@@ -1,5 +1,5 @@
 {
- "id": "ab2a0806007442179bd546e0d0f9316f",
+ "id": "02e4da5dc52445b9a0427e67b2ee466e",
  "game": "bus",
  "seats": [
   "random",
@@ -1505,8 +1505,7 @@
     },
     {
      "type": "round_ended",
-     "round": 4,
-     "start_player": 3
+     "round": 4
     },
     {
      "type": "game_ended",

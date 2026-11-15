@@ -60,6 +60,7 @@ export function describeEvent(e: Event): { text: string; hl: Partial<BusHighligh
       };
     }
     case "round_ended": {
+      // start_player is absent when the round end also ends the game (no next round)
       const sp = n(e.start_player);
       return {
         text: `Round ${n(e.round)} ends${sp === null ? "" : `; P${sp} starts next`}`,

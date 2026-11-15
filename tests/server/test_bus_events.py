@@ -269,3 +269,46 @@ def test_automatic_clock_step_emits_clock_advanced_before_vrrooomm() -> None:
     ]
     assert not any(e["type"] == "passengers_moved" for e in per_action[-1])
     assert isinstance(state, BusState) and state.phase == "VP" and state.clock == "office"
+
+
+@pytest.mark.parametrize("fixture", ["clock/ck_last_stone_4p", "clock/ck_last_stone_3p"])
+def test_last_stone_end_emits_only_game_ended(fixture: str) -> None:
+    """R-053, R-067 (UI_DESIGN 6.6): a CK pause that takes the last stone ends the game at once.
+    The Vrrooomm! and Starting Player markers still on the board never resolve, so the action's
+    events are only ``game_ended``: no marker_skipped, bus_added, clock_advanced,
+    passengers_moved or round_ended."""
+    from bus.actions import CLOCK_PAUSE
+    from tests import harness as H
+
+    state = H.load_fixture(fixture)
+    assert state.phase == "CK" and state.stones_on_clock == 1
+    assert state.core.action_board[rules.ACT_VRROOOMM]  # markers still waiting to resolve
+    before = state.clone()
+    state.apply_action(CLOCK_PAUSE)
+    assert state.is_terminal() and state.core.end_types == ("last_stone",)
+    assert BusAdapter().events(before, CLOCK_PAUSE, state) == [
+        {"type": "game_ended", "end_types": ["last_stone"]}
+    ]
+
+
+def test_round_end_that_ends_game_has_no_next_start_player() -> None:
+    """R-064, R-066 (UI_DESIGN 6.6): ``round_ended`` names the next round's start player only when
+    a next round follows; when the round end also ends the game it carries no ``start_player``."""
+    ad = BusAdapter()
+    checked = 0
+    for seed in range(4):
+        state = ad.load({"num_players": 4}).new_initial_state()
+        rng = random.Random(seed)
+        while not state.is_terminal():
+            a = rng.choice(state.legal_actions())
+            before = state.clone()
+            state.apply_action(a)
+            for e in ad.events(before, a, state):
+                if e["type"] != "round_ended":
+                    continue
+                if state.is_terminal():
+                    assert "start_player" not in e
+                    checked += 1
+                else:
+                    assert e["start_player"] == state.core.start_player
+    assert checked > 0

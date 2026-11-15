@@ -301,9 +301,9 @@ def _events(before: rules.Core, action: int, after: rules.Core) -> list[JSON]:
         )
         moved()
 
-    if before.phase == rules.PHASE_CK and not (
-        after.phase == rules.PHASE_END and after.end_types == ("last_stone",)
-    ):  # R-053: no movement
+    # R-053, R-067: taking the last stone ends the game at once; nothing after it resolves.
+    last_stone = after.phase == rules.PHASE_END and after.end_types == ("last_stone",)
+    if before.phase == rules.PHASE_CK and not last_stone:  # R-053: no movement
         moved()
     # Selection ending (R-028) and markers passed over without a decision (R-029, R-043).
     positions = rules.resolution_positions(before)
@@ -324,7 +324,7 @@ def _events(before: rules.Core, action: int, after: rules.Core) -> list[JSON]:
         res = rules.resolving_action(before)
         if res is not None:
             start = positions.index((res, before.cursor))
-    if start is not None:
+    if start is not None and not last_stone:
         res_after = rules.resolving_action(after)
         if res_after is not None and after.round == before.round:
             end = positions.index((res_after, after.cursor))
@@ -359,11 +359,13 @@ def _events(before: rules.Core, action: int, after: rules.Core) -> list[JSON]:
         before.phase not in rules.SETUP_PHASES
         and before.phase != rules.PHASE_END
         and before.round >= 1
+        and not last_stone  # the round never ends: Starting Player does not resolve (R-067)
         and (after.phase == rules.PHASE_END or after.round > before.round)
     ):
-        out.append(
-            {"type": "round_ended", "round": before.round, "start_player": after.start_player}
-        )
+        ev: JSON = {"type": "round_ended", "round": before.round}
+        if after.phase != rules.PHASE_END:  # nobody starts a next round after the game ends
+            ev["start_player"] = after.start_player
+        out.append(ev)
     if after.phase == rules.PHASE_SEL and after.round > before.round:
         out.append({"type": "round_started", "round": after.round})
     if after.phase == rules.PHASE_END and before.phase != rules.PHASE_END:

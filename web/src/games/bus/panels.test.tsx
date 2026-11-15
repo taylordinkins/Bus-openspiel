@@ -230,6 +230,8 @@ describe("log", () => {
     expect(log).toHaveTextContent(/P\d adds a bus \(now \d\)/);
     expect(log).toHaveTextContent(/P\d's (Lines|Buses|Passengers|Buildings|Clock|Vrrooomm!|Starting Player) marker [A-F] resolves with nothing to do/);
     expect(log).toHaveTextContent(/Round \d ends; P\d starts next/);
+    // the round end that ends the game names no next start player (UI_DESIGN 6.6)
+    expect(log.textContent).toMatch(/Round 4 ends(?!;)/);
     expect(log).toHaveTextContent(/Game ends: at most one player has Action markers left/);
     expect(log).toHaveTextContent(/P2 delivers a passenger: 1 pts/);
     expect(log).toHaveTextContent(/Passengers move: \d+ leave buildings, \d+ enter/);
