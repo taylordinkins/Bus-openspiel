@@ -56,6 +56,9 @@ A faithful, well-tested implementation of *Bus* as a **Python OpenSpiel game**, 
 | D16 | Scenario format (2026-11-14) | SCENARIOS.md §9.1–9.10 settle error codes, `waiting` from round 1, `move_offset`, `units_left` = full power on entry, last-stone END keeps the board, canonical `end.types`, R-064 at round-end END | Phase 1 unit decisions (format only, no rules) |
 | D17 | Spec amendment (2026-11-14) | R-049/R-066 "every site has a building"; R-046 punctuation | User-approved, Phase 1 unit 9 |
 | D18 | Encoding (2026-11-14) | Absolute observation tensor with seat-to-act one-hot, counts scaled to [0, 1], points /10 capped (user); `game_result` None before terminal; current seat 0 at END | ACTIONS.md §7 |
+| D19 | Bus grid (2026-11-14) | The printed 4×5 grid in the map's **Buses** box (`layout.bus_grid`) is read by **columns**: 5 columns = one per seat (P0…P4, left to right), 4 cells per column = the buses a seat can add (buses 2–5, R-043). The art and board.yaml coordinates stay unchanged. The side panel separately shows each seat's total (1–5) | User clarification during `/start-phase 2`; replaces the earlier "row per seat" reading. Columns fill top to bottom (bus 2 in the top cell); the starting bus (R-014) is not drawn on the map (user, same day) |
+| D20 | Setup editor (2026-11-14) | Dropped from Phase 2. Phase 2 keeps scenario JSON load (paste, upload, named) and export in the lobby; the on-board editor is deferred, to be revisited after playtest #1 | User decision during `/start-phase 2` |
+| D21 | UI/UX (2026-11-14) | `docs/UI_DESIGN.md` is the UI contract: BGA-style prompt bar, only legal targets lit, click the board itself, previews on hover, automatic steps animated and logged. Seat colours match the art's Lines stripes (P0 red, P1 green, P2 orange, P3 blue, P4 white); human seats always click, even with one legal action (bots auto-play); Lines shows legal streets only; desktop/laptop only | User choices during `/start-phase 2`; amends §5.3 (UI no longer auto-advances single choices) |
 
 ## 4. Rules clarifications
 
@@ -121,7 +124,7 @@ ROUND: SELECT (mandatory ×2, then place-or-drop until all dropped)
        ─► end checks ─► next ROUND or TERMINAL
 ```
 
-Resolution sub-decisions are made by the marker's owner as they come up; steps with exactly one legal choice auto-advance in the UI and for bots.
+Resolution sub-decisions are made by the marker's owner as they come up; steps with exactly one legal choice auto-advance for bots, while human seats still click them (D21).
 
 ### 5.4 Actions (sketch; fixed in `docs/ACTIONS.md` during Phase 0, frozen when Phase 1 closes)
 
@@ -191,7 +194,19 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 - *Exit:* rule tests green; `random_sim_test` passes for 3, 4, 5 players; 10,000 random games with zero invariant violations; `sim_stats` report (end-type mix, rounds, scores, markers used); `rules-auditor` + `code-reviewer` pass.
 
 **Phase 2 — Server + polished board UI ✋ playtest #1**
-- Port server and shell (D3); Bus adapter (views, labels, `action_meta`); SVG board plugin per §5.5 and the agreed preview; setup editor; random seats; Playwright test that finishes a game; CI web + e2e jobs.
+- Port server and shell (D3); Bus adapter (views, labels, `action_meta`); SVG board plugin per §5.5 and the agreed preview; scenario JSON load/export (editor deferred, D20); random seats; Playwright test that finishes a game; CI web + e2e jobs.
+- [ ] 1. Port the server shell (lignum `server/`: app, sessions, random bots, reports, schemas, `adapters/base.py`; toy adapter and game-agnostic server tests; fastapi/uvicorn/httpx deps) — `implementer`
+- [ ] 2. Bus adapter: `view`, labels, `prompt`, `targets` (UI_DESIGN §6; ACTIONS §5) — done: every legal action in random 3/4/5-player games has a label and a target; view matches fixtures — `spec-test-writer` → `implementer`
+- [ ] 3. Bus adapter: per-action automatic-step `events`, board-geometry endpoint, strict scenario load (backlog: reject non-terminal no-legal-action states), random seats — done: all-random game to END via the API; events match state diffs — `implementer`
+- [ ] 4. Bus grid by seat column (D19) and seat palette from the art's Lines stripes (D21) in `board-palette.md` and `tools/render_board.py` — done: data tests green, preview regenerated and reviewed — `implementer`
+- [ ] 5. Port the web shell (`web/`, `src/shell/`, OpenAPI export, generated types; Bus on the action-list fallback) — done: typecheck, test, build, check:api green — `implementer`
+- [ ] 6. Board renderer: art, pieces (UI_DESIGN §3), zoom/pan, hover info — done: render tests + screenshot review — `implementer`
+- [ ] 7. Panels: prompt bar, seat panels, hotseat turn frame, log with hover highlight, END results — done: render tests for SB, SEL, each resolution phase, END — `implementer`
+- [ ] 8. Interaction layer (UI_DESIGN §4): glow, hover ghosts, type popover, VP→VD, bar buttons, last-stone confirm, Back — done: every legal action at every phase code reachable by clicking — `spec-test-writer` → `implementer`
+- [ ] 9. Animation and pacing: automatic steps from `events`, +1 float, speed and bot-pace settings — done: vitest + screenshot review — `implementer`
+- [ ] 10. Scenarios in the lobby: paste, upload, named; export (editor deferred, D20) — done: API tests + vitest — `implementer`
+- [ ] 11. Playwright (smoke, layout, a game finished by clicking, screenshot baselines) and CI web + e2e jobs — done: `npm run e2e` green — `implementer`, `sim-runner`
+- [ ] 12. ✋ Playtest #1: one hotseat game and one against random bots, with reports
 - *Exit:* you play one hotseat game and one against random bots, and file reports.
 
 **Phase 3 — Bots ✋ playtest #2**
@@ -230,7 +245,7 @@ Opus spot audits only for units touching line-expansion validity, resolution ord
 ### Backlog
 Should-fix and minor findings, tagged with the phase that found them. `/close-phase` appends here.
 
-- [Phase 2, from Phase 0 preview review] Buses cell of the action board: each seat owns one row of the bus grid, and a seat's buses fill along its row as they are added (user, 2026-11-14). `layout.bus_grid` in `data/board.yaml` should be addressed as row-per-seat (5 cells per row = 5 buses max, R-043). The preview currently fills the grid in reading order across seats. The printed grid as digitized has 4 rows; check how a 5th seat's row is shown in 5-player games.
+- [Phase 2, from Phase 0 preview review] Buses cell of the action board: the printed 4×5 grid is **one column per seat** (5 columns × 4 cells), not one row per seat — see D19. The preview currently fills it in reading order across seats; fix in Phase 2 unit 4. No 5th row is needed and the art is not changed.
 - [Phase 0, code-reviewer, should-fix] `bus/board.py` `Layout` holds plain dicts, so the frozen cached `Board` is unhashable and mutable (`hash(load_board())` raises). Store tuples/`MappingProxyType` or exclude `layout` from hash/compare before Phase 1 caches on the board.
 - [Phase 0, code-reviewer, should-fix] `tests/data/test_board.py`: frame/letter/count tests only re-check data `load_board()` already validates; add negative tests feeding bad raw dicts to the parser (out-of-frame point, letters a–e, 19 bus cells, missing clock segment) expecting `ValueError`.
 - [Phase 0, code-reviewer, minor] `bus/board.py` bounds check accepts 1991 (`<=` vs `<` FRAME_SIZE); tests repeat the literal 1991. `_parse_layout` accepts unknown action keys, non-positive clock hand/radius, 3-element or float points.
@@ -253,7 +268,7 @@ Should-fix and minor findings, tagged with the phase that found them. `/close-ph
 - [Phase 1, rules-auditor, minor] No test tagged R-003, R-009, R-011, R-013 (all exercised under other IDs); no direct test that `returns` never changes legal actions (R-002).
 - [Phase 1, orchestrator, minor] `tools/replay.py` rejects golden playthrough files (`tests/playthroughs/*.json`, S-SCHEMA); accept them (parameters + history) or document the two formats.
 - [Phase 1, orchestrator, minor] `play_text` prints the state as one ~1,000-character line; a multi-line human view would help terminal play.
-- [Phase 0, both reviewers] `layout.bus_grid` validation requires exactly 20 cells; revisit with the row-per-seat item above (5 seats × 5 buses).
+- [Phase 0, both reviewers] `layout.bus_grid` validation requires exactly 20 cells; that is correct (5 seat columns × 4 added buses, D19) — keep it, and add the column-per-seat accessor in Phase 2 unit 4.
 
 ## 10. Risks
 
