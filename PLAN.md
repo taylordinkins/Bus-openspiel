@@ -209,7 +209,7 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 - [x] 9. Animation and pacing: automatic steps from `events`, +1 float, speed and bot-pace settings — done: vitest + screenshot review — `implementer` (2026-11-15; Opus 5.5 medium; 430 vitest, 1574 pytest; server `GET /api/games/{id}?at=N` frames for bot pacing; UI_DESIGN §6.8)
 - [x] 10. Scenarios in the lobby: paste, upload, named; export (editor deferred, D20) — done: API tests + vitest — `implementer` (2026-11-15; Opus 5.5 medium; 441 vitest, 1607 pytest; `GET /api/scenarios`, `data/scenarios.yaml`; UI_DESIGN §6.9)
 - [x] 11. Playwright (smoke, layout, a game finished by clicking, screenshot baselines) and CI web + e2e jobs — done: `npm run e2e` green — `implementer`, `sim-runner` (2026-11-15; Opus 5.5 medium; 14 e2e + 6 opt-in screenshot tests, 445 vitest, 1627 pytest; screenshots run via `npm run e2e:shots`, advisory in CI)
-- [ ] 12. ✋ Playtest #1: one hotseat game and one against random bots, with reports
+- [x] 12. ✋ Playtest #1: one hotseat game and one against random bots, with reports (2026-11-15; two reports triaged → D22, user happy with the result)
 - *Exit:* you play one hotseat game and one against random bots, and file reports.
 
 **Phase 3 — Bots ✋ playtest #2**
