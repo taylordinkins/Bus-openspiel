@@ -79,8 +79,8 @@
           },
           "seats": {
             "items": {
-              "description": "human or a bot seat type (random).",
-              "pattern": "^(human|random)$",
+              "description": "human, or a bot seat type: kind or kind:param (random).",
+              "pattern": "^(human|[a-z_]+(:[A-Za-z0-9_.-]+)?)$",
               "type": "string"
             },
             "title": "Seats",
@@ -164,8 +164,8 @@
           },
           "seats": {
             "items": {
-              "description": "human or a bot seat type (random).",
-              "pattern": "^(human|random)$",
+              "description": "human, or a bot seat type: kind or kind:param (random).",
+              "pattern": "^(human|[a-z_]+(:[A-Za-z0-9_.-]+)?)$",
               "type": "string"
             },
             "title": "Seats",
@@ -303,8 +303,8 @@
           },
           "seat_types": {
             "items": {
-              "description": "human or a bot seat type (random).",
-              "pattern": "^(human|random)$",
+              "description": "human, or a bot seat type: kind or kind:param (random).",
+              "pattern": "^(human|[a-z_]+(:[A-Za-z0-9_.-]+)?)$",
               "type": "string"
             },
             "title": "Seat Types",
@@ -312,8 +312,8 @@
           },
           "seats": {
             "items": {
-              "description": "human or a bot seat type (random).",
-              "pattern": "^(human|random)$",
+              "description": "human, or a bot seat type: kind or kind:param (random).",
+              "pattern": "^(human|[a-z_]+(:[A-Za-z0-9_.-]+)?)$",
               "type": "string"
             },
             "title": "Seats",
