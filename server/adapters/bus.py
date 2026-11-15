@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+import copy
+import json
 from dataclasses import replace
+from functools import cache
+from pathlib import Path
 from typing import Any
 
 import pyspiel
+import yaml
 
 from bus import actions, rules
 from bus import constants as C
@@ -47,10 +52,17 @@ class BusAdapter(GameAdapter):
         }
 
     def scenario_players(self, scenario: JSON) -> int:
+        return self.scenario_params(scenario)["num_players"]
+
+    def scenario_params(self, scenario: JSON) -> JSON:
         try:
-            return load_scenario(scenario, require_legal=True).core.players
+            state = load_scenario(scenario, require_legal=True)
         except ScenarioError as e:
             raise ValueError(str(e)) from None
+        return {"num_players": state.core.players, "returns": state.returns_mode}
+
+    def named_scenarios(self) -> list[JSON]:
+        return copy.deepcopy(_named_scenarios())
 
     def initial_state(self, game: pyspiel.Game, scenario: JSON | None) -> pyspiel.State:
         if scenario is None:
@@ -78,6 +90,38 @@ class BusAdapter(GameAdapter):
             "prompt": _prompt(state, derived),
             "targets": _targets(state),
         }
+
+
+SCENARIOS_MANIFEST = Path(__file__).resolve().parents[2] / "data" / "scenarios.yaml"
+
+
+@cache
+def _named_scenarios(manifest: Path = SCENARIOS_MANIFEST) -> list[JSON]:
+    """Lobby scenarios from `data/scenarios.yaml`, each loaded strictly (UI_DESIGN 6.9)."""
+    raw: JSON = yaml.safe_load(manifest.read_text())
+    base = manifest.parent.parent / raw["dir"]
+    out: list[JSON] = []
+    for entry in raw["scenarios"]:
+        doc: JSON = json.loads((base / entry["file"]).read_text())
+        doc.pop("expect", None)  # test assertions, not part of the position
+        try:
+            state = load_scenario(doc, require_legal=True)
+        except ScenarioError as e:
+            raise ValueError(f"named scenario {entry['id']!r}: {e}") from None
+        pos = dump_scenario(state)
+        out.append(
+            {
+                "id": entry["id"],
+                "title": entry["title"],
+                "description": doc.get("description", ""),
+                "players": state.core.players,
+                "returns": state.returns_mode,
+                "round": pos["round"],
+                "phase": pos["phase"],
+                "scenario": doc,
+            }
+        )
+    return out
 
 
 def _open_tier(core: rules.Core) -> str | None:

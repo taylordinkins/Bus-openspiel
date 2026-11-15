@@ -132,6 +132,25 @@ class GameExport(BaseModel):
     )
 
 
+class ScenarioSummary(BaseModel):
+    """A named built-in scenario offered in the lobby (UI_DESIGN 6.9)."""
+
+    id: str
+    game: str
+    title: str
+    description: str = ""
+    players: int
+    returns: Literal["win_loss", "margin"]
+    round: int
+    phase: str = Field(description="Phase code the position rests at (ACTIONS 3).")
+
+
+class NamedScenario(ScenarioSummary):
+    scenario: dict[str, Any] = Field(
+        description="Scenario JSON (docs/SCENARIOS.md) to post as CreateGameRequest.scenario."
+    )
+
+
 class ReportRequest(BaseModel):
     note: str = Field(min_length=1, description="What went wrong (required).")
     category: str | None = Field(default=None, description='e.g. "engine", "ui", "other".')

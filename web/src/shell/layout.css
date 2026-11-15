@@ -136,6 +136,49 @@
   color: var(--ink-muted);
   font-size: var(--fs-sm);
 }
+/* start from: fresh setup or a scenario / replay document (unit 10) */
+.lobby-mode {
+  margin-top: calc(-1 * var(--sp-1));
+}
+.lobby-scenario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.lobby-scenario-pick {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--sp-3);
+}
+.lobby-scenario-pick select {
+  width: 100%;
+}
+.lobby-upload {
+  min-height: 34px;
+}
+.lobby-json {
+  width: 100%;
+  min-height: 6em;
+  max-height: 40vh;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+}
+.lobby-json[aria-invalid="true"] {
+  border-color: var(--red);
+}
+.lobby-doc-summary {
+  min-height: 1.4em;
+  overflow-wrap: anywhere;
+}
+.lobby-doc-summary[data-kind="error"] {
+  color: var(--red-dark);
+  font-weight: 600;
+}
+.lobby-doc-summary[data-kind="scenario"],
+.lobby-doc-summary[data-kind="replay"] {
+  color: var(--ink-soft);
+}
 .lobby-seed input {
   max-width: 12rem;
 }
@@ -714,6 +757,12 @@
   .lobby-form {
     gap: var(--sp-3);
     padding: var(--sp-4) var(--sp-5) var(--sp-5);
+  }
+  .lobby-json {
+    min-height: 5em;
+  }
+  .lobby-scenario {
+    gap: 6px;
   }
   .lobby-map {
     aspect-ratio: 5 / 2;

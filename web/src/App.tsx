@@ -65,7 +65,7 @@ export default function App() {
             <h2 className="section-title">
               <span className="num-tile">2</span> Continue a game
             </h2>
-            <p className="lobby-hint">Load a replay exported from an earlier game; play resumes where it stopped.</p>
+            <p className="lobby-hint">Load a replay exported from an earlier game; play resumes where it stopped. To change its seats, use New game → Scenario.</p>
             <ImportButton onImported={goTo} />
           </section>
           <section className="card lobby-card lobby-tips" aria-label="How to play here">

@@ -23,9 +23,11 @@ from server.schemas import (
     GameExport,
     GameParams,
     GameView,
+    NamedScenario,
     ReportRequest,
     ReportResponse,
     RewindRequest,
+    ScenarioSummary,
 )
 from server.sessions import (
     CannotGoBack,
@@ -128,14 +130,17 @@ def create_app(
             if game not in store.adapters:
                 raise HTTPException(400, f"unknown game {game!r}")
             try:
-                n = store.adapters[game].scenario_players(scenario)
+                fixed = store.adapters[game].scenario_params(scenario)
             except (ValueError, TypeError, AttributeError, KeyError) as e:
                 raise HTTPException(422, f"invalid scenario: {e}") from None
-            if params.num_players is not None and params.num_players != n:
-                raise HTTPException(
-                    422, f"num_players {params.num_players} does not match scenario ({n})"
-                )
-            adapter_params["num_players"] = n
+            # The scenario fixes these; a field the client set explicitly must agree with it.
+            given = {k for k in params.model_fields_set if getattr(params, k, None) is not None}
+            for k, v in fixed.items():
+                if k in given and adapter_params.get(k) != v:
+                    raise HTTPException(
+                        422, f"{k} {adapter_params.get(k)} does not match scenario ({v})"
+                    )
+                adapter_params[k] = v
         try:
             return store.create(game, adapter_params, seats, seed, history, scenario, salt)
         except IllegalAction as e:
@@ -152,6 +157,23 @@ def create_app(
         return render(
             make(body.game, body.params, list(body.seats), None, body.history, body.scenario)
         )
+
+    def scenarios_of(game: str) -> list[dict[str, Any]]:
+        adapter = store.adapters.get(game)
+        if adapter is None:
+            raise HTTPException(404, f"unknown game {game!r}")
+        return [{**sc, "game": game} for sc in adapter.named_scenarios()]
+
+    @api.get("/scenarios", operation_id="list_scenarios", responses={404: _ERR})
+    def list_scenarios(game: Annotated[str, Query()] = "bus") -> list[ScenarioSummary]:
+        return [ScenarioSummary.model_validate(sc) for sc in scenarios_of(game)]
+
+    @api.get("/scenarios/{scenario_id}", operation_id="get_scenario", responses={404: _ERR})
+    def get_scenario(scenario_id: str, game: Annotated[str, Query()] = "bus") -> NamedScenario:
+        for sc in scenarios_of(game):
+            if sc["id"] == scenario_id:
+                return NamedScenario.model_validate(sc)
+        raise HTTPException(404, f"unknown scenario {scenario_id!r}")
 
     @api.get("/boards/{game}", operation_id="get_board", responses={404: _ERR})
     def get_board(game: str) -> BoardGeometry:

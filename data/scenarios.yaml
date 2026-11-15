@@ -1,0 +1,63 @@
+# Named scenarios offered in the lobby (GET /api/scenarios; docs/UI_DESIGN.md section 6.9).
+# A curated subset of the rule-test fixtures: `file` is relative to `dir` (repo root based) and
+# the scenario's own `description` is shown under `title`. Every entry must load with the
+# server's strict loader (require_legal); tests/server/test_scenarios_api.py checks this.
+dir: tests/scenarios
+scenarios:
+  - id: fresh_4p
+    file: fresh_4p.json
+    title: Fresh game (4 players)
+  - id: setup_sb_midway
+    file: setup_sb_midway.json
+    title: Setup, starting buildings half placed
+  - id: setup_l1_mid
+    file: setup_l1_mid.json
+    title: Setup, first line markers
+  - id: setup_l2_mid
+    file: setup_l2_mid.json
+    title: Setup, second line markers
+  - id: sel_round1
+    file: sel_round1.json
+    title: Round 1, action selection
+  - id: sel_pass1_mid
+    file: sel_pass1_mid.json
+    title: Action selection, second pass
+  - id: sel_pass2_dropped
+    file: sel_pass2_dropped.json
+    title: Action selection, a seat dropped out
+  - id: resolve_ln
+    file: resolve_ln.json
+    title: Resolving Line Expansion
+  - id: resolve_px
+    file: resolve_px.json
+    title: Resolving Passengers
+  - id: resolve_bd
+    file: resolve_bd.json
+    title: Resolving Buildings
+  - id: resolve_ck
+    file: resolve_ck.json
+    title: Resolving the Clock
+  - id: resolve_vp
+    file: resolve_vp.json
+    title: Resolving Vrrooomm!
+  - id: ck_movement
+    file: clock/ck_movement.json
+    title: Clock advance with waiting passengers
+  - id: ck_last_stone_4p
+    file: clock/ck_last_stone_4p.json
+    title: Clock with one stone left
+  - id: lines_full_loop
+    file: lines/full_loop.json
+    title: Line Expansion, a full-loop line
+  - id: lines_red_cd
+    file: lines/red_cd.json
+    title: Line Expansion, rulebook Red example
+  - id: lines_five_player_shared
+    file: lines/five_player_shared.json
+    title: Line Expansion, 5 players with shared ends
+  - id: vrrooomm_base
+    file: vrrooomm/base.json
+    title: Round 1 with lines across the city
+  - id: end_returns_margin_3p
+    file: end/returns_margin_3p.json
+    title: Finished game, margin returns (3 players)

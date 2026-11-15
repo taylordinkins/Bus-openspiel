@@ -466,6 +466,66 @@
         "title": "LegalAction",
         "type": "object"
       },
+      "NamedScenario": {
+        "properties": {
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "game": {
+            "title": "Game",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "phase": {
+            "description": "Phase code the position rests at (ACTIONS 3).",
+            "title": "Phase",
+            "type": "string"
+          },
+          "players": {
+            "title": "Players",
+            "type": "integer"
+          },
+          "returns": {
+            "enum": [
+              "win_loss",
+              "margin"
+            ],
+            "title": "Returns",
+            "type": "string"
+          },
+          "round": {
+            "title": "Round",
+            "type": "integer"
+          },
+          "scenario": {
+            "additionalProperties": true,
+            "description": "Scenario JSON (docs/SCENARIOS.md) to post as CreateGameRequest.scenario.",
+            "title": "Scenario",
+            "type": "object"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "game",
+          "title",
+          "players",
+          "returns",
+          "round",
+          "phase",
+          "scenario"
+        ],
+        "title": "NamedScenario",
+        "type": "object"
+      },
       "ReportRequest": {
         "properties": {
           "category": {
@@ -522,6 +582,60 @@
           "player_actions"
         ],
         "title": "RewindRequest",
+        "type": "object"
+      },
+      "ScenarioSummary": {
+        "description": "A named built-in scenario offered in the lobby (UI_DESIGN 6.9).",
+        "properties": {
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "game": {
+            "title": "Game",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "phase": {
+            "description": "Phase code the position rests at (ACTIONS 3).",
+            "title": "Phase",
+            "type": "string"
+          },
+          "players": {
+            "title": "Players",
+            "type": "integer"
+          },
+          "returns": {
+            "enum": [
+              "win_loss",
+              "margin"
+            ],
+            "title": "Returns",
+            "type": "string"
+          },
+          "round": {
+            "title": "Round",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "game",
+          "title",
+          "players",
+          "returns",
+          "round",
+          "phase"
+        ],
+        "title": "ScenarioSummary",
         "type": "object"
       },
       "ValidationError": {
@@ -1341,6 +1455,119 @@
           }
         },
         "summary": "Rewind Game"
+      }
+    },
+    "/api/scenarios": {
+      "get": {
+        "operationId": "list_scenarios",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "game",
+            "required": false,
+            "schema": {
+              "default": "bus",
+              "title": "Game",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ScenarioSummary"
+                  },
+                  "title": "Response List Scenarios",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Scenarios"
+      }
+    },
+    "/api/scenarios/{scenario_id}": {
+      "get": {
+        "operationId": "get_scenario",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scenario_id",
+            "required": true,
+            "schema": {
+              "title": "Scenario Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "game",
+            "required": false,
+            "schema": {
+              "default": "bus",
+              "title": "Game",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NamedScenario"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Scenario"
       }
     }
   }

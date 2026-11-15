@@ -191,6 +191,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/scenarios": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Scenarios */
+        get: operations["list_scenarios"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/scenarios/{scenario_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Scenario */
+        get: operations["get_scenario"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -408,6 +442,41 @@ export interface components {
                 [key: string]: unknown;
             } | null;
         };
+        /** NamedScenario */
+        NamedScenario: {
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /** Game */
+            game: string;
+            /** Id */
+            id: string;
+            /**
+             * Phase
+             * @description Phase code the position rests at (ACTIONS 3).
+             */
+            phase: string;
+            /** Players */
+            players: number;
+            /**
+             * Returns
+             * @enum {string}
+             */
+            returns: "win_loss" | "margin";
+            /** Round */
+            round: number;
+            /**
+             * Scenario
+             * @description Scenario JSON (docs/SCENARIOS.md) to post as CreateGameRequest.scenario.
+             */
+            scenario: {
+                [key: string]: unknown;
+            };
+            /** Title */
+            title: string;
+        };
         /** ReportRequest */
         ReportRequest: {
             /**
@@ -432,6 +501,37 @@ export interface components {
         RewindRequest: {
             /** Player Actions */
             player_actions: number;
+        };
+        /**
+         * ScenarioSummary
+         * @description A named built-in scenario offered in the lobby (UI_DESIGN 6.9).
+         */
+        ScenarioSummary: {
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /** Game */
+            game: string;
+            /** Id */
+            id: string;
+            /**
+             * Phase
+             * @description Phase code the position rests at (ACTIONS 3).
+             */
+            phase: string;
+            /** Players */
+            players: number;
+            /**
+             * Returns
+             * @enum {string}
+             */
+            returns: "win_loss" | "margin";
+            /** Round */
+            round: number;
+            /** Title */
+            title: string;
         };
         /** ValidationError */
         ValidationError: {
@@ -979,6 +1079,88 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_scenarios: {
+        parameters: {
+            query?: {
+                game?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScenarioSummary"][];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_scenario: {
+        parameters: {
+            query?: {
+                game?: string;
+            };
+            header?: never;
+            path: {
+                scenario_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NamedScenario"];
                 };
             };
             /** @description Not Found */

@@ -81,6 +81,19 @@ class GameAdapter(ABC):
         """Player count of a scenario JSON; raise ValueError if invalid or unsupported."""
         raise ValueError(f"{self.name} does not support scenarios")
 
+    def scenario_params(self, scenario: JSON) -> JSON:
+        """API params a scenario fixes (`num_players`, maybe `returns`); ValueError if invalid.
+
+        The server takes these when the client leaves them unset and rejects a mismatch."""
+        return {"num_players": self.scenario_players(scenario)}
+
+    def named_scenarios(self) -> list[JSON]:
+        """Built-in scenarios offered in the lobby (default none).
+
+        Each dict has `id`, `title`, `description`, `players`, `returns`, `round`, `phase` and
+        `scenario` (the JSON document a client posts back as `CreateGameRequest.scenario`)."""
+        return []
+
     def initial_state(self, game: pyspiel.Game, scenario: JSON | None) -> pyspiel.State:
         """Start state: the game's own, or the one a scenario JSON describes (D18)."""
         if scenario is not None:
