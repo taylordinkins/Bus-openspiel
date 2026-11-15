@@ -25,7 +25,7 @@ def test_valid(s: str) -> None:
     assert is_valid_seat_type(s)
 
 
-@pytest.mark.parametrize("s", ["alien", "mcts:50", "random:3", "random:", "Human", ""])
+@pytest.mark.parametrize("s", ["alien", "mcts:0", "random:3", "random:", "Human", ""])
 def test_invalid(s: str) -> None:
     assert not is_valid_seat_type(s)
 

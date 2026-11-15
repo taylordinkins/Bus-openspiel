@@ -13,6 +13,7 @@ from dataclasses import dataclass
 
 from bots.base import Bot
 from bots.heuristic import HeuristicBot
+from bots.mcts import parse_mcts_param
 from bots.random_bot import RandomBot
 
 HUMAN = "human"
@@ -53,6 +54,13 @@ def _heuristic_factory(param: str | None) -> Bot:
 
 
 register("heuristic", _heuristic_factory)
+
+
+def _mcts_factory(param: str | None) -> Bot:
+    return parse_mcts_param(param)
+
+
+register("mcts", _mcts_factory)
 
 
 def parse_seat_type(s: str) -> tuple[str, str | None]:

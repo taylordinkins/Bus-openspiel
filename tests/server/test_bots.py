@@ -170,7 +170,7 @@ def test_valid_seat_types(t: str) -> None:
     assert is_valid_seat_type(t)
 
 
-@pytest.mark.parametrize("t", ["alien", "", "Human", "random ", "random\n", "mcts:50"])
+@pytest.mark.parametrize("t", ["alien", "", "Human", "random ", "random\n", "mcts:0"])
 def test_invalid_seat_types(t: str) -> None:
     from server.bots import is_valid_seat_type
 
