@@ -124,10 +124,10 @@ export default function GameScreen({
     pb.motion && settings.animation !== "off"
       ? { ...pb.motion, speed: settings.animation, scale: SPEED_SCALE[settings.animation] }
       : null;
-  // The latest change's animation is still running (none with animation off or pace 0).
+  // The latest change's animation is still running (none with animation off).
   const [doneSeq, setDoneSeq] = useState<number | null>(null);
   const motionMs =
-    boardMotion && settings.botPace > 0 ? (getPlugin(gameName).motionMs?.(boardMotion) ?? 0) : 0;
+    boardMotion ? (getPlugin(gameName).motionMs?.(boardMotion) ?? 0) : 0;
   const motionSeq = boardMotion?.seq ?? null;
   const animating = motionSeq !== null && motionMs > 0 && motionSeq !== doneSeq;
   useEffect(() => {

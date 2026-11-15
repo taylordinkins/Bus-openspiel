@@ -68,8 +68,8 @@ beforeEach(() => {
 });
 
 describe("hotseat hand-off waits for the mover's animation (UI_DESIGN 7, 6.8)", () => {
-  it("the board stays up while the move animates, then the curtain covers it", async () => {
-    updateSettings({ animation: "normal", botPace: 0.8 });
+  it.each([0.8, 0])("bot pace %s: the board stays up while the move animates, then the curtain covers it", async (botPace) => {
+    updateSettings({ animation: "normal", botPace });
     serve();
     render(<GameScreen gameId="g1" pollMs={POLL} />);
     await waitFor(() => expect(stateText()).toContain('"n":0'));
@@ -96,7 +96,6 @@ describe("hotseat hand-off waits for the mover's animation (UI_DESIGN 7, 6.8)", 
 
   it.each([
     ["animation off", { animation: "off" as const, botPace: 0.8 }],
-    ["pace 0", { animation: "normal" as const, botPace: 0 }],
   ])("%s: the curtain comes at once", async (_name, s) => {
     updateSettings(s);
     serve();

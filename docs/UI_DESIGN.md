@@ -194,7 +194,7 @@ The UI posts only ids that are in `legal_actions`, one id per click path, throug
 
 ## 7. Hotseat, bots, undo
 
-- Hotseat (more than one human seat): when the human seat to move changes, a hand-off curtain (§3a Curtain, `shell/Curtain.tsx`) covers the board, actions and log with "Pass to Pn" until that seat clicks "Click when ready" (user decision 2026-11-15, although Bus has no hidden information). The curtain waits for the change that hands over to finish animating (§6.8 motion; length from the plugin's `motionMs`), so the mover sees their move play out; meanwhile the viewed seat stays the mover's and no input or auto-advance is accepted. With animation off or bot pace 0 it shows at once. No curtain with one human seat or at END; the turn frame and toast still mark the change of seat.
+- Hotseat (more than one human seat): when the human seat to move changes, a hand-off curtain (§3a Curtain, `shell/Curtain.tsx`) covers the board, actions and log with "Pass to Pn" until that seat clicks "Click when ready" (user decision 2026-11-15, although Bus has no hidden information). The curtain waits for the change that hands over to finish animating (§6.8 motion; length from the plugin's `motionMs`), so the mover sees their move play out; meanwhile the viewed seat stays the mover's and no input or auto-advance is accepted. With animation off it shows at once. No curtain with one human seat or at END; the turn frame and toast still mark the change of seat.
 - Bots: moves play at a readable pace (default 0.8 s, setting 0–2 s), each with its animation; a "skip to my turn" button fast-forwards (contract §6.8).
 - Back: undoes to the previous human decision; disabled at the start and at END.
 
