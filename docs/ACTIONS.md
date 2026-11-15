@@ -126,6 +126,7 @@ The owner gets +1 bus if they have fewer than 5; otherwise nothing. No decision,
 - `CLOCK_PAUSE` that takes the last stone ends the game immediately (R-053): terminal, nothing else resolves, the marker already spent.
 - After the choice (if the game continues) passenger movement runs **automatically** with no further decision: step-out (R-054), then step-in at each node by ascending site id (R-055).
 - **Pending state:** none beyond the marker owner.
+- **No Clock marker (D22):** the Clock step still runs every round at the Clock slot (after Buildings, before Vrrooomm!, R-029, R-050), as an **automatic** step: the clock advances one space, no stone is taken, then step-out and step-in run as above. It adds no action id and no decision node. The `CK` node exists only when a Clock marker resolves; its owner's `CLOCK_ADVANCE` replaces the automatic advance (the clock moves once, not twice).
 
 ### 3.10 `VP` / `VD` — Vrrooomm! (R-056..R-063)
 - **Who:** the marker owner; letter a first. Not dwindling (R-056).
@@ -142,7 +143,7 @@ The Starting Player marker (if any) sets the next start player; otherwise the st
 No legal actions. `returns()` per R-071 / R-072. The recorded end-type list (R-066) and winners (R-069) are exposed through the observer string and `game_result(state)`.
 
 ### Automatic steps (no node, no id)
-Skipped seats in `SEL`; power ≤ 0 markers; Lines with no legal extension; the Buses action; Passengers with empty supply; Buildings with no empty site; Vrrooomm! with `moves = 0`; passenger step-out and step-in after the Clock choice; Starting Player and round-end bookkeeping. They are applied by the transition that produced them, so the next state is always a decision node or terminal.
+Skipped seats in `SEL`; power ≤ 0 markers; Lines with no legal extension; the Buses action; Passengers with empty supply; Buildings with no empty site; Vrrooomm! with `moves = 0`; passenger step-out and step-in after the Clock choice; the Clock step (advance, step-out, step-in) in a round with no Clock marker (D22); Starting Player and round-end bookkeeping. They are applied by the transition that produced them, so the next state is always a decision node or terminal.
 
 ## 4. `action_to_string` format
 
