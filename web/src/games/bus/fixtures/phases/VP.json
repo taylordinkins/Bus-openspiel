@@ -1,5 +1,5 @@
 {
- "id": "4762bbedd937482a83ff4019eb26632f",
+ "id": "9a944348c8cc43c9a0108e479ca92115",
  "game": "bus",
  "seats": [
   "human",
@@ -30,6 +30,24 @@
     "node": 16,
     "waiting": 1
    }
+  },
+  {
+   "id": 312,
+   "label": "P1: pick passenger at n19",
+   "kind": "pick_passenger",
+   "params": {
+    "node": 19,
+    "waiting": 1
+   }
+  },
+  {
+   "id": 313,
+   "label": "P1: pick passenger at n20",
+   "kind": "pick_passenger",
+   "params": {
+    "node": 20,
+    "waiting": 1
+   }
   }
  ],
  "returns": null,
@@ -45,6 +63,24 @@
     "kind": "pick_passenger",
     "params": {
      "node": 16,
+     "waiting": 1
+    }
+   },
+   {
+    "id": 312,
+    "label": "P1: pick passenger at n19",
+    "kind": "pick_passenger",
+    "params": {
+     "node": 19,
+     "waiting": 1
+    }
+   },
+   {
+    "id": 313,
+    "label": "P1: pick passenger at n20",
+    "kind": "pick_passenger",
+    "params": {
+     "node": 20,
      "waiting": 1
     }
    }
@@ -157,9 +193,11 @@
      "16": 1,
      "17": 1,
      "18": 1,
+     "19": 1,
+     "20": 1,
      "21": 1
     },
-    "supply": 10,
+    "supply": 8,
     "action_board": {
      "lines": [
       null,
@@ -314,10 +352,13 @@
    },
    "targets": {
     "streets": {},
+    "street_ends": {},
     "sites": {},
     "stations": {},
     "nodes": {
-     "16": 309
+     "16": 309,
+     "19": 312,
+     "20": 313
     },
     "actions": {},
     "clock": {

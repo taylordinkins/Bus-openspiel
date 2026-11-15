@@ -128,6 +128,8 @@ export default function GameScreen({
         canAct: !over && humanTurn && !busy && showBoard,
         onAct: (id) => act(id),
         onActBatch: (ids) => actBatch(ids),
+        onBack: () => goBack(),
+        canBack: game.history_length > 0 && !over && !busy,
         viewSeat,
       }
     : undefined;

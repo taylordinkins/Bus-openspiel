@@ -578,6 +578,7 @@ def test_prompt_context_ck(adapter: BusAdapter) -> None:
         "clock": d["clock"],
         "next_clock": NEXT_CLOCK[d["clock"]],
         "stones_on_clock": d["stones_on_clock"],
+        "last_stone": d["stones_on_clock"] == 1,
     }
 
 
@@ -611,7 +612,7 @@ def test_prompt_context_keys_over_playouts(adapter: BusAdapter, playout_states: 
         "SB": {"done"}, "L1": {"done"}, "L2": {"done"},
         "SEL": {"pass", "mandatory", "markers_left"},
         "PX": {"supply"}, "BD": {"open_tier"},
-        "CK": {"clock", "next_clock", "stones_on_clock"},
+        "CK": {"clock", "next_clock", "stones_on_clock", "last_stone"},
         "VP": {"clock", "moves_left", "picked_node"},
         "VD": {"clock", "moves_left", "picked_node"},
         "END": set(),
@@ -636,7 +637,7 @@ def test_prompt_context_keys_over_playouts(adapter: BusAdapter, playout_states: 
 
 # ---------------------------------------------------------------- 5. targets (6.4)
 
-GROUPS = {"streets", "sites", "stations", "nodes", "actions", "clock", "buttons"}
+GROUPS = {"streets", "street_ends", "sites", "stations", "nodes", "actions", "clock", "buttons"}
 
 
 def ids_of(v: Any) -> list[int]:

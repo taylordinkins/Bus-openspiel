@@ -71,7 +71,15 @@ export interface BusPrompt {
   context?: Record<string, unknown>;
 }
 
+/** UI_DESIGN 6.4 and 6.7a; every group optional so partial hand-made fixtures still parse. */
 export interface BusTargets {
+  streets?: Record<string, number[]>;
+  /** Per street, one entry per `extend` id with the line end it extends (same order as `streets`). */
+  street_ends?: Record<string, { id: number; end: number; node: number | null }[]>;
+  sites?: Record<string, number[]>;
+  stations?: Record<string, number>;
+  nodes?: Record<string, number>;
+  actions?: Record<string, number>;
   clock?: { advance: number | null; pause: number | null };
   buttons?: { id: number; kind: string }[];
 }

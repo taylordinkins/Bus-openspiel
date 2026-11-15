@@ -1,5 +1,5 @@
 {
- "id": "93fb17d6c42948faa918ae495deb7c37",
+ "id": "76c133674a9b4936b87f6953609ef58a",
  "game": "bus",
  "seats": [
   "human",
@@ -325,11 +325,13 @@
     "context": {
      "clock": "house",
      "next_clock": "office",
-     "stones_on_clock": 5
+     "stones_on_clock": 5,
+     "last_stone": false
     }
    },
    "targets": {
     "streets": {},
+    "street_ends": {},
     "sites": {},
     "stations": {},
     "nodes": {},

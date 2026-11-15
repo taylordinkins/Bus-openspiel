@@ -1,5 +1,5 @@
 {
- "id": "deeb35971ddf41bfbaed1cc1c9740d55",
+ "id": "ad06617b4d2c492487049f3f7bb31de9",
  "game": "bus",
  "seats": [
   "human",
@@ -442,6 +442,7 @@
    },
    "targets": {
     "streets": {},
+    "street_ends": {},
     "sites": {},
     "stations": {},
     "nodes": {},

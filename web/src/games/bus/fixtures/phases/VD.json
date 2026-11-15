@@ -1,5 +1,5 @@
 {
- "id": "a27494a006e443dfa075a548ca04afe1",
+ "id": "3fffc6e7bba84c00bdd13374790a2598",
  "game": "bus",
  "seats": [
   "human",
@@ -29,14 +29,94 @@
  "dev_mode": false,
  "current_player": 1,
  "is_terminal": false,
- "legal_actions": [],
+ "legal_actions": [
+  {
+   "id": 337,
+   "label": "P1: deliver to site 8 (A, n20)",
+   "kind": "deliver_to",
+   "params": {
+    "site": 8,
+    "node": 20,
+    "tier": "A",
+    "building_type": "house",
+    "picked_node": 16,
+    "same_node": false
+   }
+  },
+  {
+   "id": 346,
+   "label": "P1: deliver to site 17 (B, n16)",
+   "kind": "deliver_to",
+   "params": {
+    "site": 17,
+    "node": 16,
+    "tier": "B",
+    "building_type": "house",
+    "picked_node": 16,
+    "same_node": true
+   }
+  },
+  {
+   "id": 368,
+   "label": "P1: deliver to site 39 (D, n19)",
+   "kind": "deliver_to",
+   "params": {
+    "site": 39,
+    "node": 19,
+    "tier": "D",
+    "building_type": "house",
+    "picked_node": 16,
+    "same_node": false
+   }
+  }
+ ],
  "returns": null,
  "winners": null,
  "view": {
   "seat": 1,
   "current_player": 1,
   "is_terminal": false,
-  "legal_actions": [],
+  "legal_actions": [
+   {
+    "id": 337,
+    "label": "P1: deliver to site 8 (A, n20)",
+    "kind": "deliver_to",
+    "params": {
+     "site": 8,
+     "node": 20,
+     "tier": "A",
+     "building_type": "house",
+     "picked_node": 16,
+     "same_node": false
+    }
+   },
+   {
+    "id": 346,
+    "label": "P1: deliver to site 17 (B, n16)",
+    "kind": "deliver_to",
+    "params": {
+     "site": 17,
+     "node": 16,
+     "tier": "B",
+     "building_type": "house",
+     "picked_node": 16,
+     "same_node": true
+    }
+   },
+   {
+    "id": 368,
+    "label": "P1: deliver to site 39 (D, n19)",
+    "kind": "deliver_to",
+    "params": {
+     "site": 39,
+     "node": 19,
+     "tier": "D",
+     "building_type": "house",
+     "picked_node": 16,
+     "same_node": false
+    }
+   }
+  ],
   "returns": null,
   "winners": null,
   "view": {
@@ -138,6 +218,21 @@
       "site": 7,
       "type": "office",
       "occupied": false
+     },
+     {
+      "site": 8,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 17,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 39,
+      "type": "house",
+      "occupied": false
      }
     ],
     "waiting": {
@@ -145,9 +240,11 @@
      "16": 1,
      "17": 1,
      "18": 1,
+     "19": 1,
+     "20": 1,
      "21": 1
     },
-    "supply": 10,
+    "supply": 8,
     "action_board": {
      "lines": [
       null,
@@ -303,7 +400,18 @@
    },
    "targets": {
     "streets": {},
-    "sites": {},
+    "street_ends": {},
+    "sites": {
+     "8": [
+      337
+     ],
+     "17": [
+      346
+     ],
+     "39": [
+      368
+     ]
+    },
     "stations": {},
     "nodes": {},
     "actions": {},

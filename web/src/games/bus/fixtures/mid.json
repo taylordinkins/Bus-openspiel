@@ -366,6 +366,7 @@
   },
   "targets": {
    "streets": {},
+   "street_ends": {},
    "sites": {},
    "stations": {},
    "nodes": {},

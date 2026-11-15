@@ -43,3 +43,20 @@
 .bus-end-table th, .bus-end-table td { padding: 2px 4px; text-align: left; border-bottom: 1px solid #1a1a1a44; }
 .bus-end-table tr[data-winner="true"] { background: #ffd24a; font-weight: 700; }
 .bus-end-table tr:hover { outline: 2px solid #ffd24a; }
+
+/* Interaction layer (UI_DESIGN 4, 6.7) */
+@keyframes bus-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+.glow-fx { animation: bus-pulse 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .glow-fx { animation: none; } }
+.hit.glow { cursor: pointer; }
+.handle.hit[data-pending="true"], .handle.hit[data-armed="true"] { stroke: #1a1a1a; stroke-width: 10; }
+.bus-type-popover { position: absolute; z-index: 10; display: flex; gap: 4px; padding: 4px; transform: translate(-50%, calc(-100% - 22px)); background: #fff4d6; border: 3px solid #1a1a1a; border-radius: 8px; box-shadow: 0 3px 10px #0007; }
+.bus-type-popover button { display: flex; flex-direction: column; align-items: center; gap: 0; min-width: 64px; min-height: 48px; padding: 2px 8px; font-size: 0.8rem; font-weight: 700; color: #1a1a1a; background: #fff; border: 2px solid #1a1a1a; border-radius: 6px; cursor: pointer; }
+.bus-type-popover button:hover, .bus-type-popover button:focus-visible { background: #ffd24a; outline: 2px solid #1a1a1a; }
+.bus-prompt-actions { display: inline-flex; flex-wrap: wrap; gap: 6px; margin-left: auto; }
+.bus-prompt-actions button { min-height: 32px; padding: 2px 12px; font-weight: 700; color: #1a1a1a; background: #ffd24a; border: 2px solid #1a1a1a; border-radius: 6px; cursor: pointer; }
+.bus-prompt-actions button:disabled { opacity: 0.45; cursor: default; }
+.bus-confirm { position: fixed; z-index: 50; left: 50%; top: 30%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; padding: 14px 18px; background: #fff4d6; color: #1a1a1a; border: 4px solid #1a1a1a; border-radius: 10px; box-shadow: 0 6px 24px #0009; font-size: 1.05rem; }
+.bus-confirm-buttons { display: flex; gap: 10px; justify-content: flex-end; }
+.bus-confirm button { min-height: 36px; padding: 2px 16px; font-weight: 700; color: #1a1a1a; background: #fff; border: 2px solid #1a1a1a; border-radius: 6px; cursor: pointer; }
+.bus-confirm button.primary { background: #ffd24a; }

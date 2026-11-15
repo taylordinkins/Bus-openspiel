@@ -1,6 +1,18 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import type { BusGeometry } from "./geometry";
+import {
+  BUILDING_ORDER,
+  NOT_ARMED,
+  hasAmbiguousStreet,
+  handleIds,
+  hitMin,
+  idForEnd,
+  streetIds,
+  type Armed,
+  type BoardAct,
+} from "./interaction";
 import { useHighlight, type BusHighlight } from "./hoverStore";
+import { ACTION_TITLE, BUILDING_NAME } from "./promptText";
 import { busInfo, markerInfo, nodeInfo, scoreInfo, siteInfo, streetInfo } from "./hoverInfo";
 import {
   INK,
@@ -53,10 +65,39 @@ interface Hover {
 /** Group action_board entries per action in letter order. */
 const LETTERS = "abcdef";
 
-export default function BusBoard({ geo, data }: { geo: BusGeometry; data: BusViewData }) {
+/** Hover state of a legal target (drives the ghost). */
+type Hv =
+  | { t: "street" | "site" | "node" | "handle"; id: number }
+  | { t: "action"; name: string }
+  | { t: "advance" };
+
+/** A legal point-like target; overlapping hit shapes resolve to the nearest centre. */
+interface Centre {
+  key: string;
+  t: "site" | "node" | "handle";
+  id: number;
+  x: number;
+  y: number;
+  half: number;
+}
+
+const LN_HANDLE_PHASES = ["LN", "L2"];
+
+export default function BusBoard({
+  geo,
+  data,
+  act = null,
+}: {
+  geo: BusGeometry;
+  data: BusViewData;
+  act?: BoardAct | null;
+}) {
   const size = geo.map.width;
   const [vp, setVp] = useState<Viewport>(() => fitViewport(size));
   const [hover, setHover] = useState<Hover | null>(null);
+  const [hv, setHv] = useState<Hv | null>(null);
+  const [pop, setPop] = useState<{ site: number; x: number; y: number } | null>(null);
+  const [armed, setArmed] = useState<Armed>(NOT_ARMED);
   const hl = useHighlight();
   const wrap = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -73,6 +114,7 @@ export default function BusBoard({ geo, data }: { geo: BusGeometry; data: BusVie
       const r = el.getBoundingClientRect();
       const fx = r.width ? (e.clientX - r.left) / r.width : 0.5;
       const fy = r.height ? (e.clientY - r.top) / r.height : 0.5;
+      setPop(null);
       setVp((v) => zoomAt(v, size, e.deltaY < 0 ? 1.2 : 1 / 1.2, fx, fy));
     };
     el.addEventListener("wheel", onWheel, { passive: false });
@@ -100,6 +142,7 @@ export default function BusBoard({ geo, data }: { geo: BusGeometry; data: BusVie
     drag.current = { x: e.clientX, y: e.clientY };
     if (dx || dy) {
       setHover(null);
+      setPop(null);
       setVp((v) => panBy(v, size, dx, dy));
     }
   };
@@ -110,6 +153,263 @@ export default function BusBoard({ geo, data }: { geo: BusGeometry; data: BusVie
   const st = data.state;
   const nSeats = st.seats.length;
   const lay = geo.layout;
+
+  // ---------------------------------------------------------------- interaction (UI_DESIGN 4, 6.7)
+  const tg = data.targets ?? {};
+  const phase = data.prompt?.phase ?? "";
+  const actor = typeof data.prompt?.actor === "number" ? data.prompt.actor : null;
+  const live = act !== null;
+  const hm = hitMin(size) / 2; // half of the smallest legal hit shape
+  const sig = JSON.stringify([phase, actor, tg]);
+  // Reset transient UI when the prompt/targets change. Not on mount: the mount effect would run after
+  // an early click and wipe the popover/armed state that click just set.
+  const lastSig = useRef(sig);
+  useEffect(() => {
+    if (lastSig.current === sig) return;
+    lastSig.current = sig;
+    setPop(null);
+    setArmed(NOT_ARMED);
+    setHv(null);
+  }, [sig]);
+  useEffect(() => {
+    if (!pop) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPop(null);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [pop]);
+
+  const sIds = (id: number): number[] => (live ? streetIds(tg, String(id), armed.end) : []);
+  const siteIdsOf = (id: number): number[] => (live ? (tg.sites?.[String(id)] ?? []) : []);
+  const nodeIdsOf = (id: number): number[] => {
+    if (!live) return [];
+    const a = tg.stations?.[String(id)];
+    const b = tg.nodes?.[String(id)];
+    return [a, b].filter((x): x is number => x !== undefined);
+  };
+  const actionIdOf = (name: string): number | undefined => (live ? tg.actions?.[name] : undefined);
+  const advanceId = live ? (tg.clock?.advance ?? null) : null;
+  const pauseId = live ? (tg.clock?.pause ?? null) : null;
+  const lineEnds =
+    actor !== null && LN_HANDLE_PHASES.includes(phase) ? (data.derived.seats[actor]?.ends ?? null) : null;
+  const handlesOn = live && lineEnds !== null && hasAmbiguousStreet(tg);
+  const handlePos = (end: number): { x: number; y: number } => {
+    const ends = lineEnds ?? [0, 0];
+    const n = at(geo.nodes, ends[end] ?? 0);
+    const same = ends[0] === ends[1];
+    return { x: n.x + (same ? (end === 0 ? -1 : 1) * hm * 1.1 : 0), y: n.y };
+  };
+
+  const centres: Centre[] = [];
+  if (live) {
+    for (const s of geo.sites)
+      if (siteIdsOf(s.id).length) centres.push({ key: `site:${s.id}`, t: "site", id: s.id, x: s.x, y: s.y, half: hm });
+    for (const n of geo.nodes)
+      if (nodeIdsOf(n.id).length)
+        centres.push({ key: `node:${n.id}`, t: "node", id: n.id, x: n.x, y: n.y, half: Math.max(hm, n.station ? 34 : 18) });
+    if (handlesOn)
+      for (const end of [0, 1])
+        if (handleIds(tg, end).length) {
+          const p = handlePos(end);
+          centres.push({ key: `handle:${end}`, t: "handle", id: end, x: p.x, y: p.y, half: hm });
+        }
+  }
+  const centreOf = (t: Centre["t"], id: number): Centre | undefined => centres.find((c) => c.t === t && c.id === id);
+
+  /** Screen frame of the svg for the current viewport (null without layout, e.g. in jsdom). */
+  const frame = () => {
+    const el = svgRef.current;
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    if (!r.width || !r.height) return null;
+    const v = clampViewport(vp, size);
+    const side = size / v.scale;
+    const k = Math.min(r.width, r.height) / side;
+    return { r, x0: v.cx - side / 2, y0: v.cy - side / 2, k, ox: (r.width - side * k) / 2, oy: (r.height - side * k) / 2 };
+  };
+  const toMap = (cx: number, cy: number) => {
+    const f = frame();
+    return f ? { x: f.x0 + (cx - f.r.left - f.ox) / f.k, y: f.y0 + (cy - f.r.top - f.oy) / f.k } : null;
+  };
+  const toWrap = (x: number, y: number) => {
+    const f = frame();
+    const w = wrap.current?.getBoundingClientRect();
+    if (!f || !w) return { x: 0, y: 0 };
+    return { x: f.r.left + f.ox + (x - f.x0) * f.k - w.left, y: f.r.top + f.oy + (y - f.y0) * f.k - w.top };
+  };
+  /** Overlapping legal hit shapes: the nearest centre under the pointer wins; else the element's own. */
+  const pick = (e: { clientX: number; clientY: number }, own: Centre | undefined): Centre | undefined => {
+    if (e.clientX || e.clientY) {
+      const p = toMap(e.clientX, e.clientY);
+      if (p) {
+        let best: Centre | undefined;
+        let bd = Infinity;
+        for (const c of centres) {
+          const dx = Math.abs(p.x - c.x);
+          const dy = Math.abs(p.y - c.y);
+          if (dx <= c.half && dy <= c.half && Math.hypot(dx, dy) < bd) {
+            bd = Math.hypot(dx, dy);
+            best = c;
+          }
+        }
+        if (best) return best;
+      }
+    }
+    return own;
+  };
+
+  const clickCentre = (c: Centre) => {
+    if (!act) return;
+    if (c.t === "site") {
+      const ids = siteIdsOf(c.id);
+      if (ids.length > 1) {
+        setPop({ site: c.id, ...toWrap(c.x, c.y) });
+        return;
+      }
+      setPop(null);
+      if (ids[0] !== undefined) act.post(ids[0]);
+    } else if (c.t === "node") {
+      setPop(null);
+      const id = nodeIdsOf(c.id)[0];
+      if (id !== undefined) act.post(id);
+    } else {
+      setPop(null);
+      if (armed.street !== null) {
+        const id = idForEnd(tg, armed.street, c.id);
+        if (id !== undefined) {
+          setArmed(NOT_ARMED);
+          act.post(id);
+        }
+        return;
+      }
+      setArmed(armed.end === c.id ? NOT_ARMED : { street: null, end: c.id });
+    }
+  };
+  const onPoint = (e: MouseEvent, t: Centre["t"], id: number) => {
+    const c = pick(e, centreOf(t, id));
+    if (c) clickCentre(c);
+    else setPop(null);
+  };
+  const clickStreet = (id: number) => {
+    setPop(null);
+    if (!act) return;
+    const ids = sIds(id);
+    if (ids.length === 0) return;
+    if (ids.length === 1) {
+      setArmed(NOT_ARMED);
+      act.post(ids[0] as number);
+      return;
+    }
+    setArmed({ street: String(id), end: armed.end }); // R-041: pick the end with a handle next
+  };
+  const clickAction = (name: string) => {
+    setPop(null);
+    const id = actionIdOf(name);
+    if (act && id !== undefined) act.post(id);
+  };
+  const hoverPoint = (e: MouseEvent, t: Centre["t"], id: number) => {
+    const c = pick(e, centreOf(t, id));
+    setHv(c ? { t: c.t, id: c.id } : null);
+  };
+  const leave = () => {
+    hide();
+    setHv(null);
+  };
+
+  const pickedNode = typeof data.prompt?.context?.picked_node === "number" ? data.prompt.context.picked_node : null;
+  const nextClock = typeof data.prompt?.context?.next_clock === "string" ? data.prompt.context.next_clock : null;
+
+  const actionBox = (name: string) => {
+    const pts = Object.values(lay.actions[name] ?? {});
+    if (pts.length === 0) return null;
+    const xs = pts.map((p) => p[0]);
+    const ys = pts.map((p) => p[1]);
+    const x = Math.min(...xs) - hm;
+    const y = Math.min(...ys) - hm;
+    return { x, y, width: Math.max(...xs) + hm - x, height: Math.max(...ys) + hm - y };
+  };
+  const stonesBox = (() => {
+    if (lay.stones.length === 0) return null;
+    const xs = lay.stones.map((p) => p[0]);
+    const ys = lay.stones.map((p) => p[1]);
+    const x = Math.min(...xs) - hm;
+    const y = Math.min(...ys) - hm;
+    return { x, y, width: Math.max(...xs) + hm - x, height: Math.max(...ys) + hm - y };
+  })();
+  const clockR = Math.max(lay.clock.radius, hm);
+
+  /** Hover ghost for the legal target under the pointer (UI_DESIGN 6.7e); at most one. */
+  const ghost = ((): ReactNode => {
+    if (!live || !hv || actor === null) return null;
+    const colour = seatFill(actor);
+    const common = { "data-testid": "ghost", "data-seat": actor, pointerEvents: "none" as const };
+    if (hv.t === "street") {
+      if (sIds(hv.id).length === 0) return null;
+      return (
+        <path {...common} data-kind="street" data-street={hv.id} d={pathD(streetPoints(geo, hv.id))}
+          fill="none" stroke={colour} strokeWidth={12} strokeOpacity={0.7} strokeLinecap="round" strokeLinejoin="round" />
+      );
+    }
+    if (hv.t === "site") {
+      if (siteIdsOf(hv.id).length === 0) return null;
+      const site = at(geo.sites, hv.id);
+      if (phase === "VD" && pickedNode !== null) {
+        const from = at(geo.nodes, pickedNode);
+        return (
+          <path {...common} data-kind="path" data-from={pickedNode} data-to={hv.id}
+            d={pathD([[from.x, from.y], [site.x, site.y]])} fill="none" stroke={colour}
+            strokeWidth={9} strokeDasharray="16 12" strokeLinecap="round" />
+        );
+      }
+      return (
+        <g {...common} data-kind="building" data-site={hv.id} opacity={0.75}>
+          <circle cx={site.x} cy={site.y} r={26} fill={PAPER} fillOpacity={0.6} stroke={colour} strokeWidth={6} strokeDasharray="8 5" />
+        </g>
+      );
+    }
+    if (hv.t === "node") {
+      const n = geo.nodes[hv.id];
+      if (!n || nodeIdsOf(hv.id).length === 0 || phase === "VP") return null;
+      return (
+        <g {...common} data-kind="passenger" data-node={hv.id} opacity={0.6}>
+          <circle cx={n.x} cy={n.y - 62 - 10} r={22} fill="none" stroke={colour} strokeWidth={4} strokeDasharray="6 4" />
+          <Passenger x={n.x} y={n.y - 62} scale={1.2} />
+        </g>
+      );
+    }
+    if (hv.t === "action") {
+      const id = actionIdOf(hv.name);
+      const space = id !== undefined ? act?.legal.get(id)?.params?.space : undefined;
+      const letter = typeof space === "number" ? LETTERS[space] : undefined;
+      const p = letter ? lay.actions[hv.name]?.[letter] : undefined;
+      if (!p || !letter) return null;
+      return (
+        <g {...common} data-kind="marker" data-action={hv.name} data-letter={letter} opacity={0.6}>
+          <SeatToken x={p[0]} y={p[1]} seat={actor} r={19} />
+        </g>
+      );
+    }
+    if (hv.t === "advance") {
+      if (advanceId === null || !nextClock) return null;
+      const a = ((lay.clock.angles[nextClock] ?? 0) * Math.PI) / 180;
+      return (
+        <line {...common} data-kind="clock-hand" data-clock={nextClock} x1={lay.clock.x} y1={lay.clock.y}
+          x2={lay.clock.x + lay.clock.hand * Math.cos(a)} y2={lay.clock.y + lay.clock.hand * Math.sin(a)}
+          stroke={colour} strokeWidth={9} strokeOpacity={0.75} strokeLinecap="round" strokeDasharray="12 8" />
+      );
+    }
+    return null;
+  })();
+
+  const legalProps = (ids: number[]) =>
+    ids.length ? { "data-legal": "true", "data-action-ids": ids.join(",") } : {};
+  const popTypes = pop
+    ? siteIdsOf(pop.site).map((id, i) => {
+        const bt = act?.legal.get(id)?.params?.building_type;
+        return { id, type: typeof bt === "string" ? bt : (BUILDING_ORDER[i] ?? "house") };
+      })
+    : [];
 
   const layers = useMemo(() => {
     // ---- lines: offset per seat on shared streets
@@ -288,7 +588,10 @@ export default function BusBoard({ geo, data }: { geo: BusGeometry; data: BusVie
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [geo, data]);
 
-  const zoomButton = (factor: number) => () => setVp((v) => zoomAt(v, size, factor));
+  const zoomButton = (factor: number) => () => {
+    setPop(null);
+    setVp((v) => zoomAt(v, size, factor));
+  };
 
   return (
     <div className="bus-board" ref={wrap}>
@@ -313,6 +616,9 @@ export default function BusBoard({ geo, data }: { geo: BusGeometry; data: BusVie
         style={{ touchAction: "none", cursor: "grab", background: "#2B2B2B" }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
+        onClick={(e) => {
+          if (e.target === e.currentTarget || (e.target as Element).tagName === "image") setPop(null);
+        }}
         onPointerUp={endDrag}
         onPointerLeave={endDrag}
       >
@@ -344,51 +650,168 @@ export default function BusBoard({ geo, data }: { geo: BusGeometry; data: BusVie
               : [];
           })}
         </g>
+        <g className="glow-layer" pointerEvents="none" fill="none" data-testid="glow-layer">
+          {geo.streets.map((st2) =>
+            sIds(st2.id).length ? (
+              <path key={`gs${st2.id}`} className="glow-fx" d={pathD(streetPoints(geo, st2.id))} stroke={HL}
+                strokeWidth={30} strokeOpacity={0.6} strokeLinecap="round" strokeLinejoin="round" />
+            ) : null,
+          )}
+          {centres.map((c) => (
+            <circle key={`g${c.key}`} className="glow-fx" cx={c.x} cy={c.y}
+              r={c.t === "site" ? 36 : c.t === "handle" ? hm : geo.nodes[c.id]?.station ? 44 : 26}
+              fill={HL} fillOpacity={0.3} stroke={HL} strokeWidth={8} />
+          ))}
+          {Object.keys(lay.actions).map((name) => {
+            const bx = actionBox(name);
+            return bx && actionIdOf(name) !== undefined ? (
+              <rect key={`ga${name}`} className="glow-fx" {...bx} rx={14} fill={HL} fillOpacity={0.2} stroke={HL} strokeWidth={8} />
+            ) : null;
+          })}
+          {advanceId !== null && (
+            <circle className="glow-fx" cx={lay.clock.x} cy={lay.clock.y} r={clockR} fill={HL} fillOpacity={0.2} stroke={HL} strokeWidth={8} />
+          )}
+          {pauseId !== null && stonesBox && (
+            <rect className="glow-fx" {...stonesBox} rx={14} fill={HL} fillOpacity={0.2} stroke={HL} strokeWidth={8} />
+          )}
+        </g>
         <g className="hit-layer" fill="none">
-          {geo.streets.map((s) => (
-            <path
-              key={`s${s.id}`}
-              id={`street-${s.id}`}
-              className="street hit"
-              data-street={s.id}
-              d={pathD(streetPoints(geo, s.id))}
-              stroke="#000"
-              strokeOpacity={0}
-              strokeWidth={26}
-              strokeLinejoin="round"
-              {...hov(streetInfo(data, s.id))}
-            />
-          ))}
-          {geo.sites.map((s) => (
+          {geo.streets.map((s) => {
+            const ids = sIds(s.id);
+            return (
+              <path
+                key={`s${s.id}`}
+                id={`street-${s.id}`}
+                className={`street hit${ids.length ? " glow" : ""}`}
+                data-street={s.id}
+                {...legalProps(ids)}
+                d={pathD(streetPoints(geo, s.id))}
+                stroke="#000"
+                strokeOpacity={0}
+                strokeWidth={ids.length ? hm * 2 : 26}
+                strokeLinejoin="round"
+                onClick={() => clickStreet(s.id)}
+                onMouseEnter={(e) => {
+                  show(streetInfo(data, s.id))(e);
+                  setHv({ t: "street", id: s.id });
+                }}
+                onMouseMove={show(streetInfo(data, s.id))}
+                onMouseLeave={leave}
+              />
+            );
+          })}
+          {geo.sites.map((s) => {
+            const ids = siteIdsOf(s.id);
+            const half = ids.length ? hm : 24;
+            return (
+              <rect
+                key={`site${s.id}`}
+                id={`site-${s.id}`}
+                className={`site hit${ids.length ? " glow" : ""}`}
+                data-site={s.id}
+                {...legalProps(ids)}
+                x={s.x - half}
+                y={s.y - half}
+                width={half * 2}
+                height={half * 2}
+                rx={7}
+                fill="#000"
+                fillOpacity={0}
+                onClick={(e) => onPoint(e, "site", s.id)}
+                onMouseEnter={(e) => {
+                  show(siteInfo(geo, data, s.id))(e);
+                  hoverPoint(e, "site", s.id);
+                }}
+                onMouseMove={(e) => {
+                  show(siteInfo(geo, data, s.id))(e);
+                  hoverPoint(e, "site", s.id);
+                }}
+                onMouseLeave={leave}
+              />
+            );
+          })}
+          {geo.nodes.map((n) => {
+            const ids = nodeIdsOf(n.id);
+            const base = n.station ? 34 : 18;
+            return (
+              <circle
+                key={`n${n.id}`}
+                id={`node-${n.id}`}
+                className={`node hit${ids.length ? " glow" : ""}`}
+                data-node={n.id}
+                {...legalProps(ids)}
+                cx={n.x}
+                cy={n.y}
+                r={ids.length ? Math.max(base, hm) : base}
+                fill="#000"
+                fillOpacity={0}
+                onClick={(e) => onPoint(e, "node", n.id)}
+                onMouseEnter={(e) => {
+                  show(nodeInfo(geo, data, n.id))(e);
+                  hoverPoint(e, "node", n.id);
+                }}
+                onMouseMove={(e) => {
+                  show(nodeInfo(geo, data, n.id))(e);
+                  hoverPoint(e, "node", n.id);
+                }}
+                onMouseLeave={leave}
+              />
+            );
+          })}
+          {handlesOn &&
+            lineEnds &&
+            [0, 1].map((end) => {
+              const p = handlePos(end);
+              const ids = handleIds(tg, end);
+              const pending = armed.street !== null && idForEnd(tg, armed.street, end) !== undefined;
+              return (
+                <circle
+                  key={`h${end}`}
+                  data-testid={`handle-${end}`}
+                  className={`handle hit${ids.length ? " glow" : ""}`}
+                  data-end={end}
+                  data-node={lineEnds[end]}
+                  data-pending={pending ? "true" : undefined}
+                  data-armed={armed.end === end ? "true" : undefined}
+                  {...legalProps(ids)}
+                  cx={p.x}
+                  cy={p.y}
+                  r={hm}
+                  fill="#000"
+                  fillOpacity={0}
+                  onClick={(e) => onPoint(e, "handle", end)}
+                  onMouseEnter={() => setHv(null)}
+                />
+              );
+            })}
+          <circle
+            data-testid="target-clock-advance"
+            className={`clock-target hit${advanceId !== null ? " glow" : ""}`}
+            {...legalProps(advanceId !== null ? [advanceId] : [])}
+            cx={lay.clock.x}
+            cy={lay.clock.y}
+            r={clockR}
+            fill="#000"
+            fillOpacity={0}
+            pointerEvents={advanceId !== null ? undefined : "none"}
+            onClick={() => advanceId !== null && act?.post(advanceId)}
+            onMouseEnter={() => setHv({ t: "advance" })}
+            onMouseLeave={leave}
+          />
+          {stonesBox && (
             <rect
-              key={`site${s.id}`}
-              id={`site-${s.id}`}
-              className="site hit"
-              data-site={s.id}
-              x={s.x - 24}
-              y={s.y - 24}
-              width={48}
-              height={48}
-              rx={7}
+              data-testid="target-clock-pause"
+              className={`stones-target hit${pauseId !== null ? " glow" : ""}`}
+              {...legalProps(pauseId !== null ? [pauseId] : [])}
+              {...stonesBox}
+              rx={14}
               fill="#000"
               fillOpacity={0}
-              {...hov(siteInfo(geo, data, s.id))}
+              pointerEvents={pauseId !== null ? undefined : "none"}
+              onClick={() => pauseId !== null && act?.pause()}
+              onMouseEnter={() => setHv(null)}
             />
-          ))}
-          {geo.nodes.map((n) => (
-            <circle
-              key={`n${n.id}`}
-              id={`node-${n.id}`}
-              className="node hit"
-              data-node={n.id}
-              cx={n.x}
-              cy={n.y}
-              r={n.station ? 34 : 18}
-              fill="#000"
-              fillOpacity={0}
-              {...hov(nodeInfo(geo, data, n.id))}
-            />
-          ))}
+          )}
         </g>
         <g pointerEvents="none">
           {layers.lineEls}
@@ -401,8 +824,77 @@ export default function BusBoard({ geo, data }: { geo: BusGeometry; data: BusVie
         {layers.busEls}
         {layers.markerEls}
         {layers.scoreEls}
+        <g className="action-hit-layer" fill="none">
+          {Object.keys(lay.actions).map((name) => {
+            const bx = actionBox(name);
+            if (!bx) return null;
+            const id = actionIdOf(name);
+            const legal = id !== undefined;
+            const placed = (st.action_board[name] ?? []).flatMap((seat, k) =>
+              seat === null || seat === undefined ? [] : markerInfo(name, LETTERS[k] ?? "", seat),
+            );
+            const lines = [ACTION_TITLE[name] ?? name, ...placed];
+            return (
+              <rect
+                key={`act${name}`}
+                data-testid={`target-action-${name}`}
+                className={`action-target hit${legal ? " glow" : ""}`}
+                data-action={name}
+                {...legalProps(legal ? [id] : [])}
+                {...bx}
+                rx={14}
+                fill="#000"
+                fillOpacity={0}
+                pointerEvents={legal ? undefined : "none"}
+                onClick={() => clickAction(name)}
+                onMouseEnter={(e) => {
+                  show(lines)(e);
+                  setHv({ t: "action", name });
+                }}
+                onMouseMove={show(lines)}
+                onMouseLeave={leave}
+              />
+            );
+          })}
+        </g>
+        {pickedNode !== null && phase === "VD" && geo.nodes[pickedNode] && (
+          <g data-testid="picked-node" data-node={pickedNode} pointerEvents="none" fill="none">
+            <circle cx={geo.nodes[pickedNode].x} cy={geo.nodes[pickedNode].y} r={30} stroke={INK} strokeWidth={10} />
+            <circle cx={geo.nodes[pickedNode].x} cy={geo.nodes[pickedNode].y} r={30} stroke={HL} strokeWidth={6} strokeDasharray="10 6" />
+          </g>
+        )}
+        {ghost}
       </svg>
       </div>
+      {pop && (
+        <div
+          role="menu"
+          aria-label="Choose building type"
+          data-testid="type-popover"
+          data-site={pop.site}
+          className="bus-type-popover"
+          style={{ left: pop.x, top: pop.y }}
+        >
+          {popTypes.map((o, i) => (
+            <button
+              key={o.id}
+              type="button"
+              role="menuitem"
+              data-action-id={o.id}
+              autoFocus={i === 0}
+              onClick={() => {
+                setPop(null);
+                act?.post(o.id);
+              }}
+            >
+              <svg width={28} height={28} viewBox="-32 -32 64 64" aria-hidden="true">
+                <Icon kind={o.type} x={0} y={0} scale={1.2} />
+              </svg>
+              <span>{BUILDING_NAME[o.type] ?? o.type}</span>
+            </button>
+          ))}
+        </div>
+      )}
       {hover && (
         <div
           role="tooltip"

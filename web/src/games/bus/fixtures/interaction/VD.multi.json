@@ -1,0 +1,426 @@
+{
+ "id": "96afb42aa5054450bdbb3d2c17670787",
+ "game": "bus",
+ "seats": [
+  "human",
+  "human",
+  "human",
+  "human"
+ ],
+ "seat_types": [
+  "human",
+  "human",
+  "human",
+  "human"
+ ],
+ "bot_thinking": false,
+ "bot_error": null,
+ "seat": 1,
+ "history_length": 1,
+ "history": [
+  {
+   "index": 0,
+   "actor": 1,
+   "id": 309,
+   "label": "P1: pick passenger at n16",
+   "events": []
+  }
+ ],
+ "dev_mode": false,
+ "current_player": 1,
+ "is_terminal": false,
+ "legal_actions": [
+  {
+   "id": 337,
+   "label": "P1: deliver to site 8 (A, n20)",
+   "kind": "deliver_to",
+   "params": {
+    "site": 8,
+    "node": 20,
+    "tier": "A",
+    "building_type": "house",
+    "picked_node": 16,
+    "same_node": false
+   }
+  },
+  {
+   "id": 346,
+   "label": "P1: deliver to site 17 (B, n16)",
+   "kind": "deliver_to",
+   "params": {
+    "site": 17,
+    "node": 16,
+    "tier": "B",
+    "building_type": "house",
+    "picked_node": 16,
+    "same_node": true
+   }
+  },
+  {
+   "id": 368,
+   "label": "P1: deliver to site 39 (D, n19)",
+   "kind": "deliver_to",
+   "params": {
+    "site": 39,
+    "node": 19,
+    "tier": "D",
+    "building_type": "house",
+    "picked_node": 16,
+    "same_node": false
+   }
+  }
+ ],
+ "returns": null,
+ "winners": null,
+ "view": {
+  "seat": 1,
+  "current_player": 1,
+  "is_terminal": false,
+  "legal_actions": [
+   {
+    "id": 337,
+    "label": "P1: deliver to site 8 (A, n20)",
+    "kind": "deliver_to",
+    "params": {
+     "site": 8,
+     "node": 20,
+     "tier": "A",
+     "building_type": "house",
+     "picked_node": 16,
+     "same_node": false
+    }
+   },
+   {
+    "id": 346,
+    "label": "P1: deliver to site 17 (B, n16)",
+    "kind": "deliver_to",
+    "params": {
+     "site": 17,
+     "node": 16,
+     "tier": "B",
+     "building_type": "house",
+     "picked_node": 16,
+     "same_node": true
+    }
+   },
+   {
+    "id": 368,
+    "label": "P1: deliver to site 39 (D, n19)",
+    "kind": "deliver_to",
+    "params": {
+     "site": 39,
+     "node": 19,
+     "tier": "D",
+     "building_type": "house",
+     "picked_node": 16,
+     "same_node": false
+    }
+   }
+  ],
+  "returns": null,
+  "winners": null,
+  "view": {
+   "state": {
+    "format": 1,
+    "parameters": {
+     "players": 4,
+     "returns": "win_loss"
+    },
+    "round": 1,
+    "phase": "VD",
+    "current_player": 1,
+    "start_player": 0,
+    "clock": "house",
+    "stones_on_clock": 5,
+    "seats": [
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 19,
+      "line": [
+       16,
+       18
+      ],
+      "last_score_move": null
+     },
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 19,
+      "line": [
+       37,
+       38
+      ],
+      "last_score_move": null
+     },
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 20,
+      "line": [
+       46,
+       47
+      ],
+      "last_score_move": null
+     },
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 20,
+      "line": [
+       62,
+       65
+      ],
+      "last_score_move": null
+     }
+    ],
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 1,
+      "type": "office",
+      "occupied": false
+     },
+     {
+      "site": 2,
+      "type": "pub",
+      "occupied": false
+     },
+     {
+      "site": 3,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 4,
+      "type": "office",
+      "occupied": false
+     },
+     {
+      "site": 5,
+      "type": "pub",
+      "occupied": false
+     },
+     {
+      "site": 6,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 7,
+      "type": "office",
+      "occupied": false
+     },
+     {
+      "site": 8,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 17,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 39,
+      "type": "house",
+      "occupied": false
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "16": 1,
+     "17": 1,
+     "18": 1,
+     "19": 1,
+     "20": 1,
+     "21": 1
+    },
+    "supply": 8,
+    "action_board": {
+     "lines": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "cursor": {
+      "letter": 1
+     },
+     "moves_left": 1,
+     "picked_node": 16
+    },
+    "move_offset": 1
+   },
+   "derived": {
+    "seats": [
+     {
+      "line_markers_left": 23,
+      "line_nodes": [
+       6,
+       7,
+       8
+      ],
+      "ends": [
+       6,
+       8
+      ],
+      "dropped": false
+     },
+     {
+      "line_markers_left": 23,
+      "line_nodes": [
+       19,
+       16,
+       20
+      ],
+      "ends": [
+       19,
+       20
+      ],
+      "dropped": false
+     },
+     {
+      "line_markers_left": 23,
+      "line_nodes": [
+       22,
+       21,
+       26
+      ],
+      "ends": [
+       22,
+       26
+      ],
+      "dropped": false
+     },
+     {
+      "line_markers_left": 23,
+      "line_nodes": [
+       28,
+       29,
+       30
+      ],
+      "ends": [
+       28,
+       30
+      ],
+      "dropped": false
+     }
+    ],
+    "street_lines": {
+     "16": [
+      0
+     ],
+     "18": [
+      0
+     ],
+     "37": [
+      1
+     ],
+     "38": [
+      1
+     ],
+     "46": [
+      2
+     ],
+     "47": [
+      2
+     ],
+     "62": [
+      3
+     ],
+     "65": [
+      3
+     ]
+    },
+    "open_tier": "A",
+    "resolving": {
+     "action": "vrrooomm",
+     "letter": 1,
+     "owner": 1,
+     "power": null
+    },
+    "result": null
+   },
+   "prompt": {
+    "phase": "VD",
+    "actor": 1,
+    "units_left": 1,
+    "power": null,
+    "context": {
+     "clock": "house",
+     "moves_left": 1,
+     "picked_node": 16
+    }
+   },
+   "targets": {
+    "streets": {},
+    "street_ends": {},
+    "sites": {
+     "8": [
+      337
+     ],
+     "17": [
+      346
+     ],
+     "39": [
+      368
+     ]
+    },
+    "stations": {},
+    "nodes": {},
+    "actions": {},
+    "clock": {
+     "advance": null,
+     "pause": null
+    },
+    "buttons": []
+   }
+  }
+ }
+}

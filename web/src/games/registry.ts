@@ -12,6 +12,10 @@ export interface BoardUi {
   onAct?: (actionId: number) => void | Promise<unknown>;
   /** Submit several legal actions in order as one all-or-nothing request. */
   onActBatch?: (actionIds: number[]) => void | Promise<unknown>;
+  /** Undo to the previous human decision (same path as the toolbar Back). */
+  onBack?: () => void | Promise<unknown>;
+  /** Whether Back is available (not at the start, not at END, no request in flight). */
+  canBack?: boolean;
   /** Seat whose private information may be shown (hotseat view seat). */
   viewSeat?: number | null;
 }

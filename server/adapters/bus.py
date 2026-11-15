@@ -7,8 +7,8 @@ from typing import Any
 
 import pyspiel
 
+from bus import actions, rules
 from bus import constants as C
-from bus import rules
 from bus.actions import decode_action
 from bus.board import FRAME_SIZE
 from bus.game import BusState, action_meta, game_result
@@ -133,7 +133,8 @@ def _context(core: rules.Core, derived: JSON) -> JSON:
     if ph == rules.PHASE_SEL:
         return {
             "pass": core.sel_pass,
-            "mandatory": core.sel_pass < C.MANDATORY_PASSES,
+            # R-023: Drop out is forbidden exactly while it is not legal (UI_DESIGN 6.7c)
+            "mandatory": actions.DROP_OUT not in rules.legal_actions(core),
             "markers_left": core.seats[core.current].action_markers,
         }
     if ph == rules.PHASE_PX:
@@ -143,7 +144,13 @@ def _context(core: rules.Core, derived: JSON) -> JSON:
     clock = C.BUILDING_TYPES[core.clock]
     if ph == rules.PHASE_CK:
         nxt = C.BUILDING_TYPES[(core.clock + 1) % len(C.BUILDING_TYPES)]
-        return {"clock": clock, "next_clock": nxt, "stones_on_clock": core.stones_on_clock}
+        # R-053: the pause action is the one that takes the last stone (UI_DESIGN 6.7b)
+        return {
+            "clock": clock,
+            "next_clock": nxt,
+            "stones_on_clock": core.stones_on_clock,
+            "last_stone": core.stones_on_clock - 1 <= 0,
+        }
     if ph in (rules.PHASE_VP, rules.PHASE_VD):
         picked = core.picked_node if ph == rules.PHASE_VD else None
         return {"clock": clock, "moves_left": core.moves_left, "picked_node": picked}
@@ -171,6 +178,7 @@ def _prompt(state: BusState, derived: JSON) -> JSON:
 def _targets(state: BusState) -> JSON:
     t: JSON = {
         "streets": {},
+        "street_ends": {},
         "sites": {},
         "stations": {},
         "nodes": {},
@@ -185,6 +193,9 @@ def _targets(state: BusState) -> JSON:
         kind = m["kind"]
         if kind == "extend":
             t["streets"].setdefault(str(m["street"]), []).append(a)
+            t["street_ends"].setdefault(str(m["street"]), []).append(
+                {"id": a, "end": m["end"], "node": m["from_node"]}
+            )
         elif kind == "build":
             t["sites"].setdefault(str(m["site"]), []).append(a)
         elif kind == "deliver_to":
