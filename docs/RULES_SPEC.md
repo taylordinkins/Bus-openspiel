@@ -8,7 +8,7 @@ Contract between the rulebook and the engine. Every rule behaviour in `bus/` mus
 
 1. The *Bus* Complete Edition rulebook (`third_party/rules/bus_rulebook.pdf`), Capstone Games / Splotter 2024. The PDF is two large sheets, cited here as "RB p.1" (cover sheet: contents, Assembly, Setting Up, First Buildings, First Bus Lines, Play, Phase 1: Select Actions, Phase 2 intro, Line Expansion power text) and "RB p.2" (second sheet: Line Expansion rules and examples, Buses, Passengers, Buildings, Clock, Vrrooomm!, Starting Player, cleanup, End of the Game). The section name is given where it helps.
 2. PLAN.md §3 decisions (D-numbers) and §4 clarifications (C-numbers). A ⚑ clarification is a default where no source settles it.
-3. Where the rulebook and PLAN §4 differ, the rulebook wins unless a D-number or a user answer in PLAN §9 overrides it. None of the differences found are of that kind; the open ones are in "Open questions" at the end.
+3. Where the rulebook and PLAN §4 differ, the rulebook wins unless a D-number or a user answer in PLAN §9 overrides it. None of the differences found are of that kind; the open ones are in "Open questions" at the end. D22 (2026-11-15) replaces the ⚑ defaults of C3 (starting passengers), C10 (the Clock step only on a marker) and C11 (same-node Vrrooomm!) where the rulebook is silent; it overrides no rulebook text.
 
 The rulebook is paraphrased here, never pasted.
 
@@ -95,10 +95,10 @@ Source: RB p.2 (Line Expansion rule 1b, rule 3); C1.
 At the start of setup: the clock points at house; every seat's points are 0; every seat has exactly 1 bus; all time stones are on the clock (R-006); no sites are filled; no lines exist; every seat has all 20 Action markers and 25 Bus Line markers; the action board is empty.
 Source: RB p.1 (Assembly, Setting Up); C2, C3.
 
-### R-015 — Starting passengers ⚑
-Place one passenger on each of the 4 roundabout nodes (the rest, 11, stay in the supply). These passengers stand at the intersection; they do not enter buildings until a Clock action resolves ⚑. They are waiting passengers and can be moved by Vrrooomm! before then (R-058).
-Example: if a roundabout node has a house site that gets built in setup, the passenger there does not step in at setup; it can only get in through a Clock action (R-055) or by being carried by a Vrrooomm! (R-061).
-Source: RB p.1 (Setting Up: one passenger on each roundabout); C3 (⚑ the no-entry-before-Clock part: the rulebook is silent).
+### R-015 — Starting passengers
+Place one passenger on each of the 4 roundabout nodes (the rest, 11, stay in the supply). These passengers stand at the intersection and do not enter buildings during setup. They can first step in at the Clock step of round 1 (R-050, R-055), which runs whether or not anyone selected Clock. Until then they are waiting passengers.
+Example: a roundabout node gets a house and an office during first buildings. Nobody selects Clock in round 1, so at the round-1 Clock step the clock advances house → office and the passenger there steps into the office (R-055); it is then not eligible for Vrrooomm! that round (R-058). If instead the owner of a Clock marker pauses in round 1, the clock stays at house and the passenger steps into the house.
+Source: RB p.1 (Setting Up: one passenger on each roundabout); D22 (the rulebook is silent on entering buildings at setup; replaces C3's ⚑ default).
 
 ### R-016 — First buildings
 After setup of the board, in turn order from the start player, each player in turn places 2 buildings: each on any empty site of the lowest open tier (R-010), of any type of that player's choice. Both buildings are placed by one player before the next player begins. Because the lowest open tier is re-evaluated for each building, the first building may fill the last empty tier-A site, so the second must then go on tier B.
@@ -170,8 +170,9 @@ Source: RB p.1 (Phase 1: "once everyone has dropped out"); C4.
 ## 7. Resolution order and action power (Phase 2)
 
 ### R-029 — Resolution order between actions
-Actions resolve top to bottom: Lines, Buses, Passengers, Buildings, Clock, Vrrooomm!, Starting Player. Every marker on an action resolves before the next action starts. An action with no markers is skipped.
-Source: RB p.1 (Phase 2: "from top to bottom ... starting with Line Expansion and ending with Starting Player"); C6.
+Actions resolve top to bottom: Lines, Buses, Passengers, Buildings, Clock, Vrrooomm!, Starting Player. Every marker on an action resolves before the next action starts. An action with no markers is skipped, with one exception: the Clock step (R-050) runs every round at the Clock action's place in this order (after Buildings, before Vrrooomm!), with or without a Clock marker.
+Example: round 1 has markers only on Lines, Passengers and Vrrooomm!. Order: Lines, Passengers, the Clock step (automatic advance, house → office), Vrrooomm!; then, with no Starting Player marker, the start passes on (R-064).
+Source: RB p.1 (Phase 2: "from top to bottom ... starting with Line Expansion and ending with Starting Player"); C6; D22 (the Clock step every round, at the Clock slot: user confirmed 2026-11-15).
 
 ### R-030 — Order within a multi-use action
 Markers on one action resolve left to right as the spaces are printed. For Lines and Buildings the highest letter resolves first (f, e, … a), so the player who selected last goes first. For Passengers and Vrrooomm! letter a resolves first (a, b, … f), so the first to select goes first. Each marker resolves completely, owned by the player who placed it, before the next.
@@ -287,71 +288,77 @@ Source: RB p.2 (Buildings: "once the 1s are full, you must build on 2"); C9.
 
 ### R-049 — Sites full
 Builds with no empty site left are lost. A state where every site has a building marks the game to end at the end of the current round (R-066). The remainder of the round still resolves.
-Example: Buildings fills the last site during Phase 2. Clock, Vrrooomm! and Starting Player still resolve, then the game ends (R-066).
-Source: RB p.2 (Buildings: "the game ends at the end of this round"; End of the Game); C9, C13.
+Example: Buildings fills the last site during Phase 2. The Clock step still runs (R-050, with or without a Clock marker), Vrrooomm! and Starting Player still resolve, then the game ends (R-066).
+Source: RB p.2 (Buildings: "the game ends at the end of this round"; End of the Game); C9, C13; D22.
 
 ---
 
 ## 12. Clock and passenger movement
 
-### R-050 — Clock action: advance or pause
-When a Clock marker resolves, its owner chooses **advance** or **pause**. The clock cycles house → office → pub → house. Whichever is chosen, passenger movement (R-054, R-055) then follows, unless the game ended on the pause (R-053).
-Source: RB p.2 (Clock); C10.
+### R-050 — The Clock step every round: advance or pause
+Every round, at the Clock action's place in the resolution order (after Buildings, before Vrrooomm!, R-029), the **Clock step** runs once. First the clock advances (R-051) or pauses (R-052). Then passengers move (R-054, R-055), unless the game ended on the pause (R-053). The clock cycles house → office → pub → house. If a Clock marker was placed this round, its owner chooses advance or pause; the marker replaces the automatic advance, so the clock changes at most once per round. If no Clock marker was placed, the clock advances automatically (no one chooses, no stone is taken). This holds in every round, including round 1 and a round in which every site gets a building (R-049). Buildings built earlier in the same round take part in the step.
+Example: round 1, nobody selects Clock. At the Clock step the clock advances house → office and passengers move; the Vrrooomm! markers then use office.
+Example: P1's Clock marker resolves and P1 chooses advance. The clock moves one space (not two), and P1 takes no stone.
+Source: RB p.2 (Clock: the marker's owner pauses or otherwise advances; "either way" passengers move); D22 (the step runs every round, at the Clock slot, and advances automatically without a marker: the rulebook is silent on the no-marker case; replaces C10; slot confirmed by the user 2026-11-15).
 
 ### R-051 — Advance
-Advance moves the clock hand to the next type in the cycle.
+Advance moves the clock hand to the next type in the cycle. No time stone is taken. It happens automatically when there is no Clock marker, or as the Clock marker owner's choice (R-050).
 Example: clock at office; advance → pub; clock at pub; advance → house.
-Source: RB p.2 (Clock); C10.
+Source: RB p.2 (Clock); C10; D22.
 
 ### R-052 — Pause
-Pause leaves the clock hand unchanged and the owner takes 1 time stone from the clock; each stone the player holds is −1 point at the end of the game (R-068). Pause is legal only while at least one stone remains on the clock; since the game ends when the last stone is taken (R-053), a stone is always available when a Clock marker resolves.
+Only the owner of a Clock marker can pause; it is the only way to keep the clock where it is (R-050). Pause leaves the clock hand unchanged, and the owner takes 1 time stone from the clock; each stone the player holds is −1 point at the end of the game (R-068). Pause is legal only while at least one stone remains on the clock; since the game ends when the last stone is taken (R-053), a stone is always available when a Clock marker resolves.
 Example: 5 stones on the clock (4 or 5 players); after one pause the pausing player holds 1 and 4 remain. In a 3-player game the clock starts with 4 and 3 remain.
-Source: RB p.2 (Clock: "If you pause time, take a Time stone"); C10, C2.
+Source: RB p.2 (Clock: "If you pause time, take a Time stone"); C10, C2; D22.
 
 ### R-053 — Last stone ends the game immediately
 If a pause takes the last stone from the clock, the game ends immediately: no passenger movement, and no further action or marker resolves. The pausing player keeps that stone, and it counts −1 for them in the final score.
 Example: 1 stone left; P1's Clock marker resolves and P1 pauses. The game ends. A Vrrooomm! marker that was to resolve later this round does not resolve.
-Source: RB p.2 (Clock: "ends the game immediately"; End of the Game); C10, C13.
+Source: RB p.2 (Clock: "ends the game immediately"; End of the Game); C10, C13; D22.
 
 ### R-054 — Passengers step out of buildings
-After the clock choice (when the game continues), every passenger standing in a building steps out to a waiting position at that building's node (R-011). This happens for all buildings, whatever their type.
-Source: RB p.2 (Clock: step 1: move passengers on building discs to the intersection); C10.
+After the clock advances or pauses (when the game continues), every passenger standing in a building steps out to a waiting position at that building's node (R-011). This happens for all buildings, whatever their type, in every round's Clock step (R-050).
+Source: RB p.2 (Clock: step 1: move passengers on building discs to the intersection); C10; D22.
 
 ### R-055 — Passengers step into buildings of the clock's type
-Then at each node, waiting passengers enter empty buildings of the clock's current type at that node, one passenger per building, until either runs out. At that point all buildings are empty (R-054), so the number entering at a node is min(waiting passengers there, buildings of the clock's type there). Passengers are identical, so there is no choice; which of several same-type buildings at one node is filled is not rule-relevant (the engine fills in ascending site id for determinism). Passengers who stay out wait at their node.
+Then at each node, waiting passengers enter empty buildings of the clock's current type at that node, one passenger per building, until either runs out. At that point all buildings are empty (R-054), so the number entering at a node is min(waiting passengers there, buildings of the clock's type there). Passengers are identical, so there is no choice; which of several same-type buildings at one node is filled is not rule-relevant (the engine fills in ascending site id for determinism). Passengers who stay out wait at their node. After this step no node has both a waiting passenger and an empty building of the clock's type, and every passenger in a building is in one of the clock's type. Vrrooomm! moves only fill buildings, so both stay true for the rest of the round (R-058, R-059). A state that breaks either of these while Vrrooomm! resolves is not a legal game state (SCENARIOS rejects it).
 Example: clock = pub; node `u` has 3 waiting passengers and 2 pubs and 1 house. Two passengers enter the pubs; one waits at `u`. After a pause, passengers who were in pubs step out and re-enter pubs at the same node.
-Source: RB p.2 (Clock: step 2; "or same destination, if you paused time"; "only 1 passenger per building"); C10.
+Example: clock = house; node `v` has 1 house and 2 waiting passengers. One enters the house and stays there until the next Clock step: it cannot ride this round (R-058). The other waits at `v` and can be carried by Vrrooomm! to an empty house elsewhere on the owner's line (R-059).
+Source: RB p.2 (Clock: step 2; "or same destination, if you paused time"; "only 1 passenger per building"); C10; D22 (scenario rejection: user decision 2026-11-15).
 
 ---
 
 ## 13. Vrrooomm!
 
 ### R-056 — Vrrooomm! marker resolves
-Markers resolve a to f (R-030). A marker does not dwindle: the owner uses **all** their buses in this resolution (R-057). The clock's current type is the destination type (after any Clock action this round, since Clock resolves first).
-Source: RB p.2 (Vrrooomm!); C6, C11.
+Markers resolve a to f (R-030). A marker does not dwindle: the owner uses **all** their buses in this resolution (R-057). The destination type is the clock's current type, as set by this round's Clock step (R-050), which always runs before Vrrooomm!.
+Source: RB p.2 (Vrrooomm!); C6, C11; D22.
 
 ### R-057 — Passengers moved: up to one per bus
-The owner moves passengers one at a time, up to as many passengers as the owner has buses. Each move takes one waiting passenger and delivers it to one empty building of the clock's type. The owner chooses which passenger and which building. Each move scores 1 point (R-062). The buses are not physically moved on the map; each bus is "used" once per resolution.
+The owner moves passengers one at a time, up to as many passengers as the owner has buses. Each move takes one eligible passenger (R-058) and delivers it to one eligible building (R-059). The owner chooses which passenger and which building. Each move scores 1 point (R-062). The buses are not physically moved on the map; each bus is "used" once per resolution.
 Source: RB p.2 (Vrrooomm!: "Only 1 passenger per bus"); C11.
 
 ### R-058 — Which passengers may be carried
-A passenger may be moved only if: (a) it is waiting at a node, not already in a building; and (b) its node is on the owner's line (R-035). Stations and roundabouts count like any other node.
+A passenger may be moved only if: (a) it is waiting at a node, not in a building; and (b) its node is on the owner's line (R-035). Stations and roundabouts count like any other node. After the Clock step every passenger in a building is in one of the clock's type (R-055), so (a) means that a passenger occupying a building of the clock's type is not eligible to be carried. Only passengers outside such a building are eligible: for example, one at a node whose buildings are of other types, or one at a node whose building of the clock's type is occupied by another passenger. So buildings can block transport: a passenger that stepped in at the Clock step neither rides nor frees its building.
 Example: line covers nodes `u`, `v`, `w`. A waiting passenger at `v` qualifies; one at `x` (not on the line) does not; one inside a building at `u` does not.
-Source: RB p.2 (Vrrooomm!: listed conditions); C11.
+Example (clock = office): on P0's line, node `u` has one office and two passengers were waiting there at the Clock step: one stepped into the office, the other still waits. Node `v` has only a house and one waiting passenger. Node `w` has an empty office. Both waiting passengers (at `u` and `v`) are eligible; the one in the office at `u` is not. P0 has 2 buses, but only one office is empty, so P0 moves one of them to `w` (R-060).
+Source: RB p.2 (Vrrooomm!: listed conditions; Example 1: passengers who stepped into offices stay, the others "need to ride"); C11; D22 (user clarification, 2026-11-15).
 
 ### R-059 — Which buildings may receive
-The destination must be an empty building of the clock's type whose node is on the owner's line. Its node need not differ from the passenger's node (R-061).
+The destination must be an empty building of the clock's type whose node is on the owner's line. After the Clock step no such building shares a node with a waiting passenger (R-055), and states that break this are rejected on load, so a passenger is always carried to an empty building of the clock's type elsewhere on the owner's line, never at its own node (the retired R-061 allowed this).
 Example: clock = office. A passenger waits at station node `u` on P1's line; an empty office is at node `v` on P1's line; P1 moves the passenger into the office, +1 point.
-Source: RB p.2 (Vrrooomm! conditions; Example 2); C11.
+Example (blocking): clock = house. P2's line covers `u` and `v`. The only house on the line is at `u`, and a passenger stepped into it at the Clock step. A passenger waits at `v`, which has only a pub. P2's Vrrooomm! moves no one: the passenger at `v` is eligible but has no empty house to go to, and the one in the house at `u` is not eligible (R-058, R-060).
+Source: RB p.2 (Vrrooomm! conditions; Example 2); C11; D22.
 
 ### R-060 — The move count is forced
-The number of moves is exactly min(owner's buses, waiting passengers on the owner's line, empty buildings of the clock's type on the owner's line) — the owner must move that many and cannot choose fewer — so only which passengers and which buildings is a choice. Ineligible markers (count 0) do nothing.
+The number of moves is exactly min(owner's buses, eligible passengers on the owner's line (R-058), empty buildings of the clock's type on the owner's line (R-059)). The owner must move that many and cannot choose fewer, so the only choice is which passengers and which buildings. Every eligible passenger can be carried to every such building (they never share a node, R-059), so this count can always be reached. Ineligible markers (count 0) do nothing.
 Example (from the rulebook's second Vrrooomm! example, paraphrased): a seat with 3 passengers and 3 eligible offices on the line but 2 buses moves 2 passengers and scores 2.
-Source: RB p.2 (Vrrooomm!: "you must try to use each of your buses"; Example 2); C11.
+Example (playtest game 2b0b32, 3 players, round 1; ids from data/board.yaml, for illustration): setup built offices at nodes n10, n14 and n20 and houses at n13, n18 and n21. P0's Passengers put 2 passengers at station n5; nobody selected Clock. At the Clock step the clock advances house → office. No passenger stands at n10, n14 or n20, so nobody steps in, and Vrrooomm! runs with the clock reading office. P0 (1 bus; line n5–n10–n13): eligible passengers at n5 and n13 (the n13 passenger's building is a house, so it is outside any office); one empty office (n10); P0 moves 1. P1 (1 bus; line n13–n17–n20–n25): eligible passengers at n17 (and at n13 if P0 took the n5 one); empty office at n20; P1 moves 1. P2 (2 buses; line n5–n14–n18): eligible passengers at n5 and n18; one empty office (n14); P2 moves 1. In the reported game the clock stayed at house in round 1, and P0 carried a passenger into the house at n13 while another passenger waited there; under D22 that cannot happen.
+Source: RB p.2 (Vrrooomm!: "you must try to use each of your buses"; Example 2); C11; D22.
 
-### R-061 — Passenger already at the destination's node ⚑
-A waiting passenger standing at the same node as an eligible empty building of the clock's type may be moved into it by Vrrooomm!, counted like any other move ⚑.
-Source: C11 (⚑); the rulebook's conditions do not exclude it but its examples do not show it.
+### R-061 — RETIRED (was: Passenger already at the destination's node)
+Retired 2026-11-15 by D22. This entry (a ⚑ default from C11) let Vrrooomm! carry a waiting passenger into an empty building of the clock's type at its own node. Now that the Clock step runs every round (R-050), such a passenger has already stepped in (R-055), and loaded states where it has not are rejected, so the case cannot arise; a passenger is carried only to an empty building of the clock's type elsewhere on the owner's line (R-058, R-059). The ID is kept and is never reused.
+Source: D22.
 
 ### R-062 — Scoring and effects of a move
 Each move places the passenger into the chosen building (building becomes occupied) and gives the owner +1 point. The owner's points can only go up (R-008). The engine also records, for each seat, the move number (the index in the game's decision sequence) at which its points last changed (used by R-070).
@@ -441,3 +448,4 @@ None open.
 
 ### Amendments
 - 2026-11-14 (Phase 1 unit 9, user-approved): R-049 and R-066 say "every site has a building" instead of "every site is occupied" ("occupied" means a passenger inside, R-062); R-046 punctuation. Wording only, no change in meaning.
+- 2026-11-15 (D22, from playtest reports 2b0b32 and a22926; user rulings): the Clock step runs every round, including round 1 and the sites-full round, at the Clock slot (after Buildings, before Vrrooomm!), and advances automatically without a Clock marker; a Clock marker's owner pauses (takes a stone) or advances (no stone) instead (R-029, R-049 example, R-050 to R-055). Starting passengers first step in at the round-1 Clock step; ⚑ removed (R-015). Vrrooomm! carries only passengers outside a building of the clock's type, to an empty building of that type elsewhere on the line; loaded states that break the post-Clock-step invariant are rejected (R-055, R-056 to R-060). R-061 retired. Sources note updated (item 3).

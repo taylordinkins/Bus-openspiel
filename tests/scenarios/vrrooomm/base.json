@@ -1,6 +1,6 @@
 {
  "format": 1,
- "description": "Vrrooomm! base position (round 1, tier order not strict). Lines: P0 nodes 6,7,8; P1 nodes 16,19,20; P2 nodes 22,21,26; P3 nodes 28,29,30. Clock house. Waiting: one each at n16 n19 n20 (P1), n21 n22 n26 (P2), n13 n17 n18 (off every line). Tests build the Vrrooomm! markers around this via helper.",
+ "description": "Vrrooomm! base position (round 1, tier order not strict), a state the Clock step can leave behind with the clock at house (S-CLOCKSTEP, D22). Lines: P0 nodes 6,7,8; P1 nodes 12,17,20,16,19,24; P2 nodes 22,21,26,25; P3 nodes 28,29,30,35. Clock house. House site 2 (n13) holds a passenger. Waiting: one each at n24 n17 n12 (P1, nodes without a building), n25 (P2, station), n13 n18 (off every line). Tests build the Vrrooomm! markers around this via helper.",
  "parameters": {
   "players": 4
  },
@@ -69,7 +69,8 @@
   },
   {
    "site": 2,
-   "type": "house"
+   "type": "house",
+   "occupied": true
   },
   {
    "site": 11,
@@ -105,32 +106,34 @@
   },
   {
    "line": [
+    29,
+    39,
+    38,
     37,
-    38
+    42
    ]
   },
   {
    "line": [
     46,
-    47
+    47,
+    54
    ]
   },
   {
    "line": [
     62,
-    65
+    65,
+    66
    ]
   }
  ],
  "waiting": {
-  "16": 1,
-  "19": 1,
-  "20": 1,
-  "21": 1,
-  "22": 1,
-  "26": 1,
-  "13": 1,
+  "24": 1,
   "17": 1,
+  "12": 1,
+  "25": 1,
+  "13": 1,
   "18": 1
  }
 }

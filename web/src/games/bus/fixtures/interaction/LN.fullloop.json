@@ -1,0 +1,513 @@
+{
+ "id": "923ccbeaa63a41ce9f1484b47b5d3ad1",
+ "game": "bus",
+ "seats": [
+  "human",
+  "human",
+  "human",
+  "human"
+ ],
+ "seat_types": [
+  "human",
+  "human",
+  "human",
+  "human"
+ ],
+ "bot_thinking": false,
+ "bot_error": null,
+ "seat": 0,
+ "history_length": 0,
+ "history": [],
+ "dev_mode": false,
+ "current_player": 0,
+ "is_terminal": false,
+ "legal_actions": [
+  {
+   "id": 29,
+   "label": "P0: extend end 0 via s21 (n8-n12) to n8",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 21,
+    "from_node": 12,
+    "to_node": 8,
+    "setup": null,
+    "shared_end": false
+   }
+  },
+  {
+   "id": 33,
+   "label": "P0: extend end 0 via s25 (n11-n12) to n11",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 25,
+    "from_node": 12,
+    "to_node": 11,
+    "setup": null,
+    "shared_end": false
+   }
+  },
+  {
+   "id": 36,
+   "label": "P0: extend end 0 via s28 (n12-n16) to n16",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 28,
+    "from_node": 12,
+    "to_node": 16,
+    "setup": null,
+    "shared_end": false
+   }
+  },
+  {
+   "id": 99,
+   "label": "P0: extend end 1 via s21 (n8-n12) to n8",
+   "kind": "extend",
+   "params": {
+    "end": 1,
+    "street": 21,
+    "from_node": 12,
+    "to_node": 8,
+    "setup": null,
+    "shared_end": false
+   }
+  },
+  {
+   "id": 103,
+   "label": "P0: extend end 1 via s25 (n11-n12) to n11",
+   "kind": "extend",
+   "params": {
+    "end": 1,
+    "street": 25,
+    "from_node": 12,
+    "to_node": 11,
+    "setup": null,
+    "shared_end": false
+   }
+  },
+  {
+   "id": 106,
+   "label": "P0: extend end 1 via s28 (n12-n16) to n16",
+   "kind": "extend",
+   "params": {
+    "end": 1,
+    "street": 28,
+    "from_node": 12,
+    "to_node": 16,
+    "setup": null,
+    "shared_end": false
+   }
+  }
+ ],
+ "returns": null,
+ "winners": null,
+ "view": {
+  "seat": 0,
+  "current_player": 0,
+  "is_terminal": false,
+  "legal_actions": [
+   {
+    "id": 29,
+    "label": "P0: extend end 0 via s21 (n8-n12) to n8",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 21,
+     "from_node": 12,
+     "to_node": 8,
+     "setup": null,
+     "shared_end": false
+    }
+   },
+   {
+    "id": 33,
+    "label": "P0: extend end 0 via s25 (n11-n12) to n11",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 25,
+     "from_node": 12,
+     "to_node": 11,
+     "setup": null,
+     "shared_end": false
+    }
+   },
+   {
+    "id": 36,
+    "label": "P0: extend end 0 via s28 (n12-n16) to n16",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 28,
+     "from_node": 12,
+     "to_node": 16,
+     "setup": null,
+     "shared_end": false
+    }
+   },
+   {
+    "id": 99,
+    "label": "P0: extend end 1 via s21 (n8-n12) to n8",
+    "kind": "extend",
+    "params": {
+     "end": 1,
+     "street": 21,
+     "from_node": 12,
+     "to_node": 8,
+     "setup": null,
+     "shared_end": false
+    }
+   },
+   {
+    "id": 103,
+    "label": "P0: extend end 1 via s25 (n11-n12) to n11",
+    "kind": "extend",
+    "params": {
+     "end": 1,
+     "street": 25,
+     "from_node": 12,
+     "to_node": 11,
+     "setup": null,
+     "shared_end": false
+    }
+   },
+   {
+    "id": 106,
+    "label": "P0: extend end 1 via s28 (n12-n16) to n16",
+    "kind": "extend",
+    "params": {
+     "end": 1,
+     "street": 28,
+     "from_node": 12,
+     "to_node": 16,
+     "setup": null,
+     "shared_end": false
+    }
+   }
+  ],
+  "returns": null,
+  "winners": null,
+  "view": {
+   "state": {
+    "format": 1,
+    "parameters": {
+     "players": 4,
+     "returns": "win_loss"
+    },
+    "round": 1,
+    "phase": "LN",
+    "current_player": 0,
+    "start_player": 0,
+    "clock": "house",
+    "stones_on_clock": 5,
+    "seats": [
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 19,
+      "line": [
+       27,
+       30,
+       29
+      ],
+      "last_score_move": null
+     },
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 20,
+      "line": [
+       62,
+       65
+      ],
+      "last_score_move": null
+     },
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 20,
+      "line": [
+       58,
+       59
+      ],
+      "last_score_move": null
+     },
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 20,
+      "line": [
+       46,
+       47
+      ],
+      "last_score_move": null
+     }
+    ],
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 1,
+      "type": "office",
+      "occupied": false
+     },
+     {
+      "site": 2,
+      "type": "pub",
+      "occupied": false
+     },
+     {
+      "site": 3,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 4,
+      "type": "office",
+      "occupied": false
+     },
+     {
+      "site": 5,
+      "type": "pub",
+      "occupied": false
+     },
+     {
+      "site": 6,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 7,
+      "type": "office",
+      "occupied": false
+     }
+    ],
+    "waiting": {},
+    "supply": 15,
+    "action_board": {
+     "lines": [
+      0,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "cursor": {
+      "letter": 0
+     },
+     "units_left": 1
+    },
+    "move_offset": 0
+   },
+   "derived": {
+    "seats": [
+     {
+      "line_markers_left": 22,
+      "line_nodes": [
+       12,
+       13,
+       17,
+       12
+      ],
+      "ends": [
+       12,
+       12
+      ],
+      "dropped": false
+     },
+     {
+      "line_markers_left": 23,
+      "line_nodes": [
+       28,
+       29,
+       30
+      ],
+      "ends": [
+       28,
+       30
+      ],
+      "dropped": false
+     },
+     {
+      "line_markers_left": 23,
+      "line_nodes": [
+       27,
+       26,
+       33
+      ],
+      "ends": [
+       27,
+       33
+      ],
+      "dropped": false
+     },
+     {
+      "line_markers_left": 23,
+      "line_nodes": [
+       22,
+       21,
+       26
+      ],
+      "ends": [
+       22,
+       26
+      ],
+      "dropped": false
+     }
+    ],
+    "street_lines": {
+     "27": [
+      0
+     ],
+     "29": [
+      0
+     ],
+     "30": [
+      0
+     ],
+     "62": [
+      1
+     ],
+     "65": [
+      1
+     ],
+     "58": [
+      2
+     ],
+     "59": [
+      2
+     ],
+     "46": [
+      3
+     ],
+     "47": [
+      3
+     ]
+    },
+    "open_tier": "A",
+    "resolving": {
+     "action": "lines",
+     "letter": 0,
+     "owner": 0,
+     "power": 1
+    },
+    "result": null
+   },
+   "prompt": {
+    "phase": "LN",
+    "actor": 0,
+    "units_left": 1,
+    "power": 1,
+    "context": {}
+   },
+   "targets": {
+    "streets": {
+     "21": [
+      29,
+      99
+     ],
+     "25": [
+      33,
+      103
+     ],
+     "28": [
+      36,
+      106
+     ]
+    },
+    "street_ends": {
+     "21": [
+      {
+       "id": 29,
+       "end": 0,
+       "node": 12
+      },
+      {
+       "id": 99,
+       "end": 1,
+       "node": 12
+      }
+     ],
+     "25": [
+      {
+       "id": 33,
+       "end": 0,
+       "node": 12
+      },
+      {
+       "id": 103,
+       "end": 1,
+       "node": 12
+      }
+     ],
+     "28": [
+      {
+       "id": 36,
+       "end": 0,
+       "node": 12
+      },
+      {
+       "id": 106,
+       "end": 1,
+       "node": 12
+      }
+     ]
+    },
+    "sites": {},
+    "stations": {},
+    "nodes": {},
+    "actions": {},
+    "clock": {
+     "advance": null,
+     "pause": null
+    },
+    "buttons": []
+   }
+  }
+ }
+}

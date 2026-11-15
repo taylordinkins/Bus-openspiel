@@ -1,0 +1,6 @@
+{
+  "format": 1,
+  "parameters": {"players": 3, "returns": "win_loss"},
+  "description": "D22 clock-step base: the 12 setup actions of playtest report 2b0b32 (3 players, round 1 selection next, clock house). Buildings: s0 office n10, s2 house n13, s8 office n20, s10 house n21, s6 house n18, s1 office n14. Lines: P0 n5-n10-n13, P1 n13-n17-n20-n25, P2 n5-n14-n18. Roundabout passengers wait at n13 n17 n18 n21.",
+  "history": [154, 149, 173, 178, 166, 152, 31, 47, 41, 22, 122, 21]
+}

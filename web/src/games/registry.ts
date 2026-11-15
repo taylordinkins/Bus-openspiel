@@ -1,0 +1,68 @@
+import { createElement, type ReactNode } from "react";
+import type { GameView, LegalAction } from "../shell/useGame";
+import type { Motion } from "../shell/playback";
+import type { AnimSpeed } from "../shell/settings";
+
+/** The latest shown change to animate (UI_DESIGN §3 motion); null with animation off. */
+export interface BoardMotion extends Motion {
+  speed: Exclude<AnimSpeed, "off">;
+  /** Duration multiplier for the motion tokens (1 = normal). */
+  scale: number;
+}
+import { busPlugin } from "./bus/plugin";
+
+/** Transient UI state shared between the action list and the board. */
+export interface BoardUi {
+  /** Id of the legal action currently hovered/focused in the action list. */
+  hoverAction: number | null;
+  /** True only on a human seat's turn when no request is in flight and no bot is thinking. */
+  canAct?: boolean;
+  /** Submit a legal action by id (same path as the action list). */
+  onAct?: (actionId: number) => void | Promise<unknown>;
+  /** Submit several legal actions in order as one all-or-nothing request. */
+  onActBatch?: (actionIds: number[]) => void | Promise<unknown>;
+  /** Undo to the previous human decision (same path as the toolbar Back). */
+  onBack?: () => void | Promise<unknown>;
+  /** Whether Back is available (not at the start, not at END, no request in flight). */
+  canBack?: boolean;
+  /** Seat whose private information may be shown (hotseat view seat). */
+  viewSeat?: number | null;
+  /** Automatic steps of the latest shown change, for the board to animate (null = none). */
+  motion?: BoardMotion | null;
+}
+
+export interface GamePlugin {
+  id: string;
+  title: string;
+  renderBoard(game: GameView, ui?: BoardUi): ReactNode;
+  /** Optional panels shown above the move area in the side column (seat panels, results). */
+  renderSide?(game: GameView, ui?: BoardUi): ReactNode;
+  /** Optional replacement for the generic action log. */
+  renderLog?(game: GameView): ReactNode;
+  /** Whether the sole legal action on a human turn should be submitted automatically. */
+  autoAdvance?(action: LegalAction, legalActions: LegalAction[]): boolean;
+  phaseLabel?(game: GameView): string | undefined;
+  /** The board is the main control (UI_DESIGN §1.3): the generic action list starts collapsed. */
+  boardDriven?: boolean;
+  seatStyle?(seat: number): { fill: string; ink: string };
+  /** How long (ms) the board animates `motion`; the hotseat hand-off waits for it (UI_DESIGN §7). */
+  motionMs?(motion: BoardMotion): number;
+  actionLabel?(game: GameView, action: LegalAction): string;
+  actionHelp?(game: GameView, action: LegalAction): string | undefined;
+}
+
+export const fallbackPlugin: GamePlugin = {
+  id: "generic",
+  title: "Game",
+  renderBoard: (g) =>
+    createElement("pre", { "aria-label": "Game state" }, JSON.stringify(g.view, null, 2)),
+};
+
+const plugins: Record<string, GamePlugin> = {
+  [busPlugin.id]: busPlugin,
+};
+
+/** Game name (GameView.game) -> plugin; unknown games get the generic fallback. */
+export function getPlugin(id: string): GamePlugin {
+  return (Object.prototype.hasOwnProperty.call(plugins, id) ? plugins[id] : undefined) ?? fallbackPlugin;
+}

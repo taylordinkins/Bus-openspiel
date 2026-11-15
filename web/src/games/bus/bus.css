@@ -1,0 +1,873 @@
+/*
+ * Bus components: prompt bar, board frame and zoom rail, seat panels, log, results, turn frame,
+ * popover, confirm, tooltip (UI_DESIGN §2-§6, theme §3a). Tokens: src/theme/tokens.css.
+ */
+
+/* ================================================================ board column */
+.bus-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-height: 0;
+  flex: 1 1 0;
+  position: relative;
+  container: busmain / size;
+}
+/* the board (and the hotseat frame round it) is a square that hugs the map, centred in the column */
+.bus-turn-frame,
+.bus-main > .bus-board {
+  flex: 1 1 0;
+  min-height: 0;
+  align-self: center;
+  aspect-ratio: 1;
+  max-width: 100%;
+}
+.bus-turn-frame {
+  display: flex;
+  flex-direction: column;
+}
+.bus-board {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  container-type: size;
+}
+.bus-svg-box {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+.bus-svg-box > svg {
+  width: min(100cqw, 100cqh);
+  height: min(100cqw, 100cqh);
+  display: block;
+  flex: none;
+}
+.bus-svg {
+  cursor: grab;
+  background: var(--ink);
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px var(--ink), var(--shadow-3);
+}
+.bus-svg:active {
+  cursor: grabbing;
+}
+.bus-board-loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+/* zoom rail: floats in the margin left of the board */
+.bus-zoom {
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  right: 100%;
+  margin-right: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: var(--paper-raised);
+  border: 1px solid var(--paper-edge);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-2);
+}
+/* no margin beside the board (tall or narrow column): the rail sits on the board's corner */
+@container busmain (max-aspect-ratio: 27 / 25) {
+  .bus-zoom,
+  .bus-turn-frame .bus-zoom {
+    right: auto;
+    left: 8px;
+    top: 8px;
+    margin: 0;
+  }
+}
+.bus-zoom button {
+  width: 32px;
+  min-height: 32px;
+  padding: 0;
+  box-shadow: none;
+  border-width: 1.5px;
+}
+.bus-zoom-level {
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+  padding-bottom: 1px;
+}
+
+/* raw view: a small tab under the zoom rail; opens as an overlay */
+.bus-raw {
+  position: absolute;
+  z-index: 5;
+  bottom: 0;
+  left: 0;
+  max-width: min(36rem, 100%);
+  font-size: var(--fs-xs);
+}
+.bus-raw > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  background: var(--paper-raised);
+  border: 1px solid var(--paper-edge);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  list-style: none;
+}
+.bus-raw > summary::-webkit-details-marker {
+  display: none;
+}
+.bus-raw > summary::before {
+  content: "{ }";
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+.bus-raw[open] > pre {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  width: min(36rem, 60vw);
+  max-height: 60vh;
+  overflow: auto;
+  margin: 0 0 6px;
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--ink-on-dark);
+  background: var(--ink);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-3);
+}
+
+/* ================================================================ prompt bar */
+.bus-prompt {
+  --seat: var(--ink);
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  min-height: 52px;
+  padding: 7px 10px 7px 18px;
+  background: var(--paper-raised);
+  border: var(--rule) solid var(--ink);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-2);
+  font-size: var(--fs-md);
+  line-height: 1.25;
+  color: var(--ink);
+}
+/* seat-colour band down the left edge, keylined in ink */
+.bus-prompt::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 9px;
+  background: var(--seat);
+  border-right: var(--rule) solid var(--ink);
+  border-radius: 6px 0 0 6px;
+}
+.bus-prompt .bus-seat-badge {
+  font-size: var(--fs-lg);
+  min-width: 2.2em;
+  height: 1.6em;
+}
+.bus-prompt-text {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+.bus-prompt-text strong {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--red-dark);
+}
+.bus-prompt[data-phase="END"] .bus-prompt-text strong {
+  color: var(--ink);
+}
+/* the bot-wait note gets its own line above the phase title, clipped rather than overlapping it */
+.bus-prompt-wait {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  margin-bottom: 1px;
+  font-size: var(--fs-sm);
+  color: var(--ink-muted);
+  font-style: italic;
+}
+.bus-prompt-wait-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 0.15em; /* room for the italic overhang */
+}
+.bus-prompt-wait .spinner {
+  width: 14px;
+  height: 14px;
+  border-width: 2px;
+}
+.bus-prompt[data-bot="true"] .bus-prompt-text strong {
+  color: var(--ink-soft);
+}
+.bus-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+/* the map's letter tiles, in ink */
+.bus-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--paper-raised);
+  background: var(--ink);
+  border-radius: var(--r-xs);
+  box-shadow: inset 0 0 0 1.5px var(--ink), inset 0 0 0 2.5px rgba(255, 244, 214, 0.45);
+  white-space: nowrap;
+}
+.bus-prompt-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+}
+.bus-prompt-actions button {
+  min-height: 36px;
+}
+.bus-prompt-plain {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+/* ================================================================ seat badge */
+.bus-seat-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.1em;
+  height: 1.45em;
+  padding: 0 0.35em;
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  border-radius: var(--r-sm);
+  box-shadow: 0 1.5px 0 var(--ink);
+  white-space: nowrap;
+}
+
+/* ================================================================ seat panels */
+.bus-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--ink);
+}
+.bus-panel {
+  --seat: var(--ink);
+  position: relative;
+  padding: 6px 10px 6px 18px;
+  background: var(--paper-raised);
+  border: 1px solid var(--paper-edge);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-1);
+  cursor: default;
+  transition:
+    box-shadow var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+.bus-panel::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: -1px;
+  bottom: -1px;
+  width: 9px;
+  background: var(--seat);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--r) 0 0 var(--r);
+}
+.bus-panel:hover {
+  border-color: var(--sepia);
+  box-shadow: var(--shadow-2);
+}
+.bus-panel:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.bus-panel[data-acting="true"] {
+  border: var(--rule) solid var(--ink);
+  padding: 5px 9px 5px 17px;
+  box-shadow: 0 3px 0 var(--ink), var(--shadow-2);
+  transform: translateY(-1px);
+}
+.bus-panel[data-acting="true"]::before {
+  left: -2px;
+  top: -2px;
+  bottom: -2px;
+  width: 10px;
+  border-width: 2px;
+}
+.bus-panel[data-dropped="true"] {
+  background: var(--paper-sunk);
+  box-shadow: none;
+}
+.bus-panel[data-dropped="true"] .bus-icons,
+.bus-panel[data-dropped="true"] .bus-score {
+  opacity: 0.55;
+}
+.bus-panel header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+.bus-panel-kind {
+  font-size: var(--fs-sm);
+  color: var(--ink-muted);
+}
+.bus-score {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+.bus-score b {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--ink);
+}
+.bus-flag,
+.bus-acting,
+.bus-dropped {
+  display: inline-flex;
+  align-items: center;
+  height: 19px;
+  padding: 0 6px;
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: var(--r-xs);
+  border: 1.5px solid var(--ink);
+  white-space: nowrap;
+}
+.bus-flag {
+  background: var(--paper);
+}
+.bus-acting {
+  background: var(--ink);
+  color: var(--paper-raised);
+}
+.bus-dropped {
+  background: transparent;
+  color: var(--ink-muted);
+  border-style: dashed;
+  border-color: var(--ink-muted);
+}
+.bus-panel-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 4px;
+}
+.bus-small {
+  font-size: var(--fs-xs);
+  color: var(--ink-muted);
+  margin-top: 2px;
+}
+.bus-small b {
+  color: var(--ink);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.bus-icons {
+  display: inline-flex;
+  gap: 3px;
+}
+.bus-icon {
+  overflow: visible;
+}
+.bus-icon .bus-icon-body {
+  fill: var(--ink);
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+.bus-icon .bus-icon-glass {
+  fill: var(--paper-raised);
+}
+.bus-icon .bus-icon-wheel {
+  fill: var(--ink);
+}
+.bus-icon[data-owned="false"] .bus-icon-body {
+  fill: none;
+  stroke: var(--sepia);
+  stroke-dasharray: 2.5 2;
+}
+.bus-icon[data-owned="false"] .bus-icon-glass {
+  fill: none;
+}
+.bus-icon[data-owned="false"] .bus-icon-wheel {
+  fill: var(--sepia);
+}
+.bus-stones {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.bus-stone-icon circle:first-child {
+  fill: var(--stone);
+}
+.bus-stone-icon circle:last-child {
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 1.5;
+}
+.bus-round {
+  margin: 2px 0 0;
+  padding: 5px 10px;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  background: var(--paper-sunk);
+  border-radius: var(--r-sm);
+  box-shadow: var(--inset);
+}
+
+/* ================================================================ log */
+.bus-log {
+  list-style: none;
+  padding: 2px 0 8px !important;
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.35;
+}
+.bus-log li {
+  padding: 3px 12px;
+}
+.bus-log h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 4px;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--red-dark);
+}
+.bus-log h4::after {
+  content: "";
+  flex: 1;
+  height: 0;
+  border-top: 1.5px solid var(--red);
+  box-shadow: 0 2px 0 var(--paper-raised), 0 3.5px 0 var(--red);
+  transform: translateY(-1px);
+}
+.bus-log li:first-child h4:first-child {
+  margin-top: 2px;
+}
+.bus-log-action {
+  border-top: 1px solid var(--paper-sunk);
+}
+.bus-log-event {
+  position: relative;
+  padding-left: 28px !important;
+  color: var(--ink-muted);
+  font-style: italic;
+}
+.bus-log-event::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 0;
+  bottom: 0;
+  border-left: 1.5px dotted var(--sepia);
+}
+.bus-log li:hover,
+.bus-log li:focus-visible {
+  background: var(--glow-soft);
+}
+.bus-log li:focus-visible {
+  outline-offset: -3px;
+}
+.bus-log:empty::after,
+.lg-log ol:empty::after {
+  content: "No moves yet. Decisions and the automatic steps they cause will be listed here.";
+  display: block;
+  padding: 10px 12px;
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+/* ================================================================ results */
+.bus-end {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px 12px;
+  background: var(--paper-raised);
+  border: var(--rule-heavy) solid var(--red);
+  border-radius: var(--r);
+  box-shadow: inset 0 0 0 2px var(--paper-raised), inset 0 0 0 3px var(--red), var(--shadow-2);
+  color: var(--ink);
+}
+.bus-end h3 {
+  font-size: var(--fs-xs);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--red-dark);
+}
+.bus-end-headline {
+  font-family: var(--font-display);
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  line-height: 1;
+}
+.bus-end > p:not(.bus-end-headline):not(.bus-small) {
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+}
+.bus-end-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+.bus-end-table th {
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  border-bottom: var(--rule) solid var(--ink);
+}
+.bus-end-table th,
+.bus-end-table td {
+  padding: 4px 5px;
+  text-align: left;
+}
+.bus-end-table td {
+  border-bottom: 1px solid var(--paper-sunk);
+}
+.bus-end-table td:first-child {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-md);
+}
+.bus-end-table tr[data-winner="true"] td {
+  background: var(--glow-soft);
+  font-weight: 700;
+}
+.bus-end-table tr[data-winner="true"] strong {
+  margin-left: 4px;
+  font-family: var(--font-display);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--red-dark);
+}
+.bus-end-table tbody tr:hover td {
+  background: var(--paper-sunk);
+}
+.bus-end .bus-small {
+  margin-top: 2px;
+}
+
+/* ================================================================ hotseat turn frame and toast */
+/*
+ * The frame is drawn over the board's own ink edge rather than round it, so it costs no layout
+ * space and the board keeps its full size (>= 640 px at 1280 x 720, UI_DESIGN 3a). The element
+ * carries the seat colour as its (zero-width) border colour; the ring inherits it.
+ */
+.bus-turn-frame {
+  position: relative;
+  box-sizing: border-box;
+  border: 0 solid var(--ink);
+}
+.bus-turn-frame::after {
+  content: "";
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  border: 6px solid;
+  border-color: inherit;
+  border-radius: 10px;
+  box-shadow: 0 0 0 1.5px var(--ink), inset 0 0 0 1.5px var(--ink);
+  pointer-events: none;
+}
+.bus-toast {
+  position: absolute;
+  z-index: 20;
+  left: 50%;
+  top: 14px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 8px 18px 8px 10px;
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  color: var(--paper-raised);
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  box-shadow: var(--shadow-3);
+  animation: rise-in var(--t) var(--ease);
+}
+.bus-toast .bus-seat-badge {
+  box-shadow: none;
+}
+
+/* ================================================================ board interaction (UI_DESIGN 4, 6.7) */
+@keyframes bus-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.glow-fx {
+  animation: bus-pulse 1.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .glow-fx {
+    animation: none;
+  }
+}
+.hit.glow {
+  cursor: pointer;
+}
+.handle.hit[data-pending="true"],
+.handle.hit[data-armed="true"] {
+  stroke: var(--ink);
+  stroke-width: 10;
+}
+
+/* building type popover */
+.bus-type-popover {
+  position: absolute;
+  z-index: 10;
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  transform: translate(-50%, calc(-100% - 22px));
+  background: var(--paper-raised);
+  border: var(--rule-heavy) solid var(--red);
+  border-radius: var(--r);
+  box-shadow: inset 0 0 0 2px var(--paper-raised), inset 0 0 0 3px var(--red), var(--shadow-3);
+  animation: rise-in var(--t-fast) var(--ease);
+}
+/* the pointer under the popover */
+.bus-type-popover::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -11px;
+  width: 16px;
+  height: 16px;
+  background: var(--paper-raised);
+  border-right: var(--rule-heavy) solid var(--red);
+  border-bottom: var(--rule-heavy) solid var(--red);
+  transform: translateX(-50%) rotate(45deg);
+}
+.bus-type-popover button {
+  flex-direction: column;
+  gap: 2px;
+  min-width: 68px;
+  min-height: 60px;
+  padding: 6px 8px 4px;
+  font-size: var(--fs-sm);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--paper);
+  border-width: 1.5px;
+  box-shadow: 0 2px 0 var(--ink);
+}
+.bus-type-popover button:hover,
+.bus-type-popover button:focus-visible {
+  --btn-bg: var(--glow);
+}
+
+/* last-stone confirm */
+.bus-confirm {
+  width: min(26rem, 100%);
+}
+.bus-confirm-text {
+  font-family: var(--font-display);
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 4px 0 6px;
+}
+.bus-confirm-sub {
+  color: var(--ink-muted);
+  font-size: var(--fs-sm);
+}
+
+/* board hover tooltip */
+.bus-tip {
+  position: absolute;
+  z-index: 6;
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+  background: var(--ink);
+  color: var(--ink-on-dark);
+  font-size: var(--fs-xs);
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--shadow-2);
+  border-left: 3px solid var(--glow);
+}
+.bus-tip-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--glow);
+  margin-bottom: 1px;
+}
+
+/* ================================================================ motion (unit 9; UI_DESIGN 3) */
+/* fresh pieces ease in; durations scale with the speed setting (--motion-scale on .bus-board) */
+.bus-svg [data-anim="in"] {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bus-place calc(var(--t-place) * var(--motion-scale, 1)) var(--ease) both;
+}
+.bus-svg .bus-line[data-anim="in"],
+.bus-svg .clock-hand[data-anim="in"] {
+  animation-name: bus-fade;
+}
+@keyframes bus-place {
+  from {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes bus-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* the automatic Clock step (clock_advanced, D22): the hand sweeps clockwise from its old type;
+   duration and delay are set inline from the motion plan, the origin is the clock's centre */
+.bus-svg .clock-hand[data-anim="turn"] {
+  transform-box: view-box;
+  animation-name: bus-turn;
+  animation-timing-function: var(--ease-move);
+  animation-fill-mode: both;
+}
+@keyframes bus-turn {
+  from {
+    transform: rotate(var(--turn-from, 0deg));
+  }
+  to {
+    transform: none;
+  }
+}
+.bus-walker {
+  filter: drop-shadow(0 2px 1px rgba(40, 20, 4, 0.35));
+}
+
+/* "+1" from a delivery to the scorer's panel (fixed layer in a body portal) */
+.bus-float-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  overflow: hidden;
+}
+.bus-float {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: inline-grid;
+  place-items: center;
+  min-width: 34px;
+  height: 26px;
+  padding: 0 7px;
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--seat-ink, var(--paper));
+  background: var(--seat, var(--ink));
+  border: var(--rule) solid var(--ink);
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-2);
+  animation-name: bus-float;
+  animation-timing-function: var(--ease-move);
+  animation-fill-mode: both;
+}
+@keyframes bus-float {
+  0% {
+    opacity: 0;
+    transform: translate(var(--fx), var(--fy)) translate(-50%, -50%) scale(0.6);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(var(--fx), calc(var(--fy) - 22px)) translate(-50%, -50%) scale(1.15);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) translate(-50%, -50%) scale(0.85);
+  }
+}

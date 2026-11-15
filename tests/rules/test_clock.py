@@ -448,11 +448,11 @@ def test_R054_no_matching_building_leaves_passenger_waiting() -> None:
     assert waiting(s) == {10: 1}
 
 
-# ---- R-015, R-061: roundabouts and stations ---------------------------------------------------
+# ---- R-015, R-055: roundabouts and stations ---------------------------------------------------
 
 
-def test_R015_roundabout_passengers_enter_only_when_clock_resolves() -> None:
-    """R-015: before the Clock action the four roundabout passengers wait (none in buildings);
+def test_R015_roundabout_passengers_enter_at_the_clock_step() -> None:
+    """R-015: before the round-1 Clock step the four roundabout passengers wait (none in buildings);
     advance to office puts them in the offices at n17 (s4) and n18 (s7); n13 and n21 have no
     office so those wait."""
     s = H.load_fixture("resolve_ck")
@@ -473,8 +473,8 @@ def test_R015_roundabout_passenger_enters_after_pause_with_same_type() -> None:
 
 @pytest.mark.parametrize("clock", TYPES)
 @pytest.mark.parametrize("choice", [CLOCK_ADVANCE, CLOCK_PAUSE])
-def test_R061_stations_never_fill(clock: str, choice: int) -> None:
-    """R-061/R-055: stations have no sites; their waiting passengers (n5: 2, n25: 1) stay
+def test_R055_stations_never_fill(clock: str, choice: int) -> None:
+    """R-012/R-046/R-055: stations have no sites; their waiting passengers (n5: 2, n25: 1) stay
     waiting whatever the clock does."""
     s = ck_state(clock=clock)
     for st in B.stations:

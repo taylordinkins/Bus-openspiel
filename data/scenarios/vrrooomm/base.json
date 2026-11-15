@@ -1,0 +1,139 @@
+{
+ "format": 1,
+ "description": "Vrrooomm! base position (round 1, tier order not strict), a state the Clock step can leave behind with the clock at house (S-CLOCKSTEP, D22). Lines: P0 nodes 6,7,8; P1 nodes 12,17,20,16,19,24; P2 nodes 22,21,26,25; P3 nodes 28,29,30,35. Clock house. House site 2 (n13) holds a passenger. Waiting: one each at n24 n17 n12 (P1, nodes without a building), n25 (P2, station), n13 n18 (off every line). Tests build the Vrrooomm! markers around this via helper.",
+ "parameters": {
+  "players": 4
+ },
+ "round": 1,
+ "clock": "house",
+ "buildings": [
+  {
+   "site": 17,
+   "type": "house"
+  },
+  {
+   "site": 39,
+   "type": "house"
+  },
+  {
+   "site": 8,
+   "type": "house"
+  },
+  {
+   "site": 27,
+   "type": "house"
+  },
+  {
+   "site": 9,
+   "type": "house"
+  },
+  {
+   "site": 10,
+   "type": "house"
+  },
+  {
+   "site": 18,
+   "type": "house"
+  },
+  {
+   "site": 41,
+   "type": "house"
+  },
+  {
+   "site": 20,
+   "type": "house"
+  },
+  {
+   "site": 43,
+   "type": "house"
+  },
+  {
+   "site": 36,
+   "type": "house"
+  },
+  {
+   "site": 35,
+   "type": "house"
+  },
+  {
+   "site": 15,
+   "type": "house"
+  },
+  {
+   "site": 25,
+   "type": "house"
+  },
+  {
+   "site": 22,
+   "type": "house"
+  },
+  {
+   "site": 2,
+   "type": "house",
+   "occupied": true
+  },
+  {
+   "site": 11,
+   "type": "office"
+  },
+  {
+   "site": 30,
+   "type": "office"
+  },
+  {
+   "site": 40,
+   "type": "office"
+  },
+  {
+   "site": 28,
+   "type": "pub"
+  },
+  {
+   "site": 31,
+   "type": "pub"
+  },
+  {
+   "site": 29,
+   "type": "pub"
+  }
+ ],
+ "seats": [
+  {
+   "line": [
+    16,
+    18
+   ]
+  },
+  {
+   "line": [
+    29,
+    39,
+    38,
+    37,
+    42
+   ]
+  },
+  {
+   "line": [
+    46,
+    47,
+    54
+   ]
+  },
+  {
+   "line": [
+    62,
+    65,
+    66
+   ]
+  }
+ ],
+ "waiting": {
+  "24": 1,
+  "17": 1,
+  "12": 1,
+  "25": 1,
+  "13": 1,
+  "18": 1
+ }
+}

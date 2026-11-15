@@ -22,7 +22,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 PACKAGE = "bus"
-ALLOWED_DIRS = ("docs", "tests")
+ALLOWED_DIRS = ("docs", "tests", "web")
 ALLOWED_FILES = ("PLAN.md", "README.md", "CLAUDE.md", "pyproject.toml")
 
 MESSAGE = (
@@ -37,7 +37,7 @@ NEEDS_PATH_MESSAGE = (
 )
 
 # A `bus/...` path anywhere in the command (not `import bus` or `bus.module`).
-PACKAGE_PATH = re.compile(rf"(?<!\w){PACKAGE}/")
+PACKAGE_PATH = re.compile(rf"(?<!\w)(?<!web/src/games/){PACKAGE}/")
 # A bare `bus` token; it only counts when a path-taking command receives it (see bare_path).
 BARE_PACKAGE = {PACKAGE, f"./{PACKAGE}", f"{PACKAGE}/"}
 # Commands whose positional arguments are file or directory paths.

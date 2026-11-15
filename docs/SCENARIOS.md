@@ -124,8 +124,11 @@ Setup phases use `round` 0. `current_player` is derived from turn order starting
 | `S-SETUP` | in `SB`/`L1`/`L2`, seats' buildings/lines inconsistent with `done`; a non-empty line before `L1` |
 | `S-END` | `END` with a missing/invalid `end` block |
 | `S-HISTORY` | an id is illegal or not in range |
+| `S-CLOCKSTEP` | in phase `VP` or `VD`, a state the Clock step (R-050, R-055) cannot leave behind: (a) some node has at least one waiting passenger and at least one empty building (not `occupied`) of the current `clock` type; or (b) an `occupied` building is of a type other than the current `clock` type (R-055, R-058, R-059; D22) |
 
 Not checked (fixtures may be unreachable): whether a resolution node (`LN`, `PX`, `BD`, `VP`, `VD`) has any legal action, whether `moves_left` ≤ the forced count (R-060) or `picked_node` is on the owner's line — the engine never emits such a node (ACTIONS §3), but a fixture may load one and then has `legal_actions() == []`; the tier-fill order of buildings (R-010), whether lines respect R-038/R-039 placement, the relation between points and the number of occupied buildings, who holds which stones. A `"strict": true` flag turns the first of these into an error for editor-built games that start from a fresh setup.
+
+`S-CLOCKSTEP` scope (D22): it applies only in `VP` and `VD`, the states at or after the start of Vrrooomm! resolution. Vrrooomm! moves only fill empty buildings of the clock's type, so neither condition can become true partway through a marker; the check is valid for a state loaded at a later letter or in `VD` after a pick. In `VD` the picked passenger counted at `picked_node` (§9 item 2) does not trip (a), because its node has no empty building of the clock's type either. Other phases after the Clock step (Starting Player, an `END` after a sites-full round) are not checked; that is not ruled.
 
 ## 7. Defaults ("fresh") and shorthand
 `{"format": 1}` is the state right after R-014: round 0, phase `SB`, `done` 0, seat 0 to act, empty board with the four roundabout passengers (R-015). A shorthand scenario lists only differing fields: for example a round-1 selection fixture is `{"format":1,"round":1,"phase":"SEL","seats":[…],"waiting":{…}}` with the setup buildings, lines and waiting passengers supplied (`waiting` is required from round 1 so the four roundabout passengers of R-015 are never dropped silently). The loader resolves shorthand and `dump_scenario` emits it in full.
@@ -164,7 +167,7 @@ Files live in `tests/scenarios/`, named `<id>.json`. Each is described by intent
 | `passengers_step` | buildings of each type and waiting passengers at a node; step-out then step-in count `min(...)` | R-054, R-055 |
 | `vrrooomm_example2` | rulebook Vrrooomm! Example 2: 3 passengers, 3 eligible offices, 2 buses → 2 moves | R-057..R-060 |
 | `vrrooomm_eligibility` | passenger off the line, inside a building, building off the line, wrong type | R-058, R-059 |
-| `vrrooomm_same_node` | passenger and an eligible building at one node | R-061 |
+| `vrrooomm_same_node` | OBSOLETE (D22, 2026-11-15): passenger and an eligible building at one node. R-061 is retired and this shape now fails `S-CLOCKSTEP`; retire the fixture (or turn it into an `S-CLOCKSTEP` rejection case) | ~~R-061~~ |
 | `vrrooomm_canonical` | several empty buildings of the clock's type at one node: `DELIVER_TO` offers only the lowest site id | R-063 |
 | `vrrooomm_zero` | no eligible passenger or no building: no node | R-060 |
 | `start_player_default` | no Starting Player marker: next seat | R-064 |

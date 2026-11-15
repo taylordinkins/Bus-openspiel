@@ -27,9 +27,8 @@ SCENARIO_DIR = Path(__file__).parent / "scenarios"
 
 
 def scenario_module() -> Any:
-    import bus.scenario
-
     import bus.game  # noqa: F401  (registers python_bus)
+    import bus.scenario
 
     return bus.scenario
 

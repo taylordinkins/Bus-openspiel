@@ -1,0 +1,135 @@
+{
+  "format": 1,
+  "parameters": {
+    "players": 4
+  },
+  "round": 1,
+  "buildings": [
+    {
+      "site": 0,
+      "type": "house"
+    },
+    {
+      "site": 1,
+      "type": "office"
+    },
+    {
+      "site": 2,
+      "type": "pub"
+    },
+    {
+      "site": 3,
+      "type": "house",
+      "occupied": true
+    },
+    {
+      "site": 4,
+      "type": "office"
+    },
+    {
+      "site": 5,
+      "type": "pub"
+    },
+    {
+      "site": 6,
+      "type": "house",
+      "occupied": true
+    },
+    {
+      "site": 7,
+      "type": "office"
+    }
+  ],
+  "seats": [
+    {
+      "line": [
+        16,
+        18
+      ],
+      "markers_left": 19
+    },
+    {
+      "line": [
+        37,
+        38
+      ],
+      "markers_left": 19
+    },
+    {
+      "line": [
+        46,
+        47
+      ],
+      "markers_left": 20
+    },
+    {
+      "line": [
+        62,
+        65
+      ],
+      "markers_left": 20
+    }
+  ],
+  "waiting": {
+    "13": 1,
+    "17": 1,
+    "18": 1,
+    "21": 1,
+    "16": 1
+  },
+  "phase": "VP",
+  "action_board": {
+    "lines": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "buses": [
+      null
+    ],
+    "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "clock": [
+      null
+    ],
+    "vrrooomm": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+    ],
+    "starting_player": [
+      null
+    ]
+  },
+  "pending": {
+    "cursor": {
+      "letter": 1
+    },
+    "moves_left": 1
+  },
+  "expect": {
+    "phase": "VP",
+    "current_player": 1
+  },
+  "description": "Vrrooomm! pick step, marker b (seat 1). Clock house after the Clock step (S-CLOCKSTEP, D22): the houses at n13 and n18 hold a passenger each and one more waits at each of those nodes."
+}

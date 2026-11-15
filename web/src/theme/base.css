@@ -1,0 +1,432 @@
+/*
+ * Base layer: element defaults and shared components (buttons, fields, cards, tiles, dialogs,
+ * toasts, tooltips). Reads tokens.css only.
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  line-height: var(--lh);
+  color: var(--ink);
+  background-color: var(--paper-deep);
+  /* faint halftone, like printed card stock */
+  background-image: radial-gradient(rgba(138, 90, 54, 0.11) 1px, transparent 1.2px),
+    linear-gradient(180deg, var(--paper) 0%, var(--paper-deep) 100%);
+  background-size: 6px 6px, 100% 100%;
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--focus);
+}
+
+small {
+  font-size: var(--fs-sm);
+  color: var(--ink-muted);
+}
+
+::selection {
+  background: var(--glow);
+  color: var(--ink);
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- focus: one visible ring everywhere (keyboard only) */
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---- buttons: secondary by default; .btn-primary is the map's red letter tile */
+button,
+.btn,
+input[type="file"]::file-selector-button {
+  --btn-bg: var(--paper-raised);
+  --btn-fg: var(--ink);
+  --btn-border: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--btn-fg);
+  background: var(--btn-bg);
+  border: var(--rule) solid var(--btn-border);
+  border-radius: var(--r-sm);
+  box-shadow: 0 2px 0 var(--btn-border);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition:
+    background-color var(--t-fast) var(--ease),
+    box-shadow var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease);
+}
+button:hover:not(:disabled),
+.btn:hover:not(:disabled) {
+  --btn-bg: var(--paper-sunk);
+}
+button:active:not(:disabled),
+.btn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 var(--btn-border), var(--inset);
+}
+button:disabled,
+.btn:disabled {
+  --btn-bg: var(--paper-sunk);
+  --btn-fg: var(--ink-muted);
+  --btn-border: var(--paper-edge);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-primary {
+  --btn-bg: var(--red);
+  --btn-fg: var(--paper-raised);
+  --btn-border: var(--red-dark);
+  box-shadow: 0 2px 0 var(--red-dark), inset 0 0 0 2px var(--red), inset 0 0 0 3px rgba(255, 244, 214, 0.6);
+}
+.btn-primary:hover:not(:disabled) {
+  --btn-bg: var(--red-hover);
+}
+.btn-primary:active:not(:disabled) {
+  box-shadow: inset 0 0 0 2px var(--red), inset 0 0 0 3px rgba(255, 244, 214, 0.6), var(--inset);
+}
+.btn-primary:disabled {
+  --btn-bg: var(--red-tint);
+  --btn-fg: var(--red-dark);
+  --btn-border: var(--red-tint);
+  opacity: 0.75;
+}
+
+.btn-ghost {
+  --btn-bg: transparent;
+  --btn-border: transparent;
+  box-shadow: none;
+}
+.btn-ghost:hover:not(:disabled) {
+  --btn-bg: rgba(126, 6, 6, 0.08);
+}
+.btn-ghost:active:not(:disabled) {
+  box-shadow: none;
+}
+.btn-ghost:disabled {
+  --btn-bg: transparent;
+  --btn-border: transparent;
+}
+
+.btn-sm {
+  min-height: 28px;
+  padding: 0 9px;
+  font-size: var(--fs-base);
+}
+.btn-lg {
+  min-height: 46px;
+  padding: 0 24px;
+  font-size: var(--fs-lg);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+.btn-icon {
+  width: 32px;
+  padding: 0;
+}
+
+/* ---- fields */
+label {
+  font-weight: 500;
+}
+input:not([type="file"]),
+select,
+textarea {
+  font: inherit;
+  font-size: var(--fs-base);
+  color: var(--ink);
+  background: var(--paper-raised);
+  border: var(--rule) solid var(--ink-soft);
+  border-radius: var(--r-sm);
+  min-height: 34px;
+  padding: 4px 10px;
+  box-shadow: var(--inset);
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
+}
+textarea {
+  resize: vertical;
+  line-height: var(--lh);
+  padding: 8px 10px;
+}
+select {
+  appearance: none;
+  padding-right: 30px;
+  cursor: pointer;
+  /* a small ink chevron */
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%),
+    linear-gradient(135deg, var(--ink) 50%, transparent 50%);
+  background-position:
+    calc(100% - 15px) 52%,
+    calc(100% - 10px) 52%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+input:not([type="file"]):hover,
+select:hover,
+textarea:hover {
+  border-color: var(--ink);
+}
+input:not([type="file"]):focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--focus);
+  box-shadow: var(--inset), 0 0 0 3px rgba(10, 95, 163, 0.3);
+}
+input[aria-invalid="true"] {
+  border-color: var(--red);
+}
+input[type="file"] {
+  font: inherit;
+  font-size: var(--fs-sm);
+  color: var(--ink-muted);
+  max-width: 100%;
+}
+input[type="file"]::file-selector-button {
+  margin-right: 8px;
+  min-height: 28px;
+  font-size: var(--fs-base);
+}
+input[type="file"]:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* ---- cards: paper sheets with a soft shadow */
+.card {
+  background: var(--paper-raised);
+  border: 1px solid var(--paper-edge);
+  border-radius: var(--r);
+  box-shadow: var(--shadow-1);
+}
+/* the map's framed panel: red frame, thin cream rule inside */
+.card-framed {
+  background: var(--paper-raised);
+  border: var(--rule-heavy) solid var(--red);
+  border-radius: var(--r);
+  box-shadow: inset 0 0 0 2px var(--paper-raised), inset 0 0 0 3px var(--red), var(--shadow-2);
+}
+
+/* section heading in the map's style: number tile + condensed title, red rule under it */
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--red-dark);
+}
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+}
+.num-tile {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.45em;
+  height: 1.45em;
+  padding: 0 0.2em;
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--paper-raised);
+  background: var(--ink);
+  border-radius: var(--r-xs);
+  box-shadow: inset 0 0 0 1.5px var(--ink), inset 0 0 0 2.5px rgba(255, 244, 214, 0.55);
+}
+.num-tile.is-red {
+  background: var(--red);
+  box-shadow: inset 0 0 0 1.5px var(--red), inset 0 0 0 2.5px rgba(255, 244, 214, 0.65);
+}
+
+/* small info chip: an ink pill with paper text */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: var(--r-xs);
+  color: var(--ink-soft);
+  background: var(--paper-sunk);
+  border: 1px solid var(--paper-edge);
+  white-space: nowrap;
+}
+
+/* ---- dialogs */
+.dlg-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: var(--sp-6);
+  background: rgba(40, 18, 6, 0.42);
+  backdrop-filter: blur(1.5px) saturate(0.85);
+  animation: fade-in var(--t) var(--ease);
+}
+.dlg {
+  position: relative;
+  width: min(30rem, 100%);
+  padding: var(--sp-5) var(--sp-6) var(--sp-5);
+  background: var(--paper-raised);
+  color: var(--ink);
+  border: var(--rule-heavy) solid var(--red);
+  border-radius: var(--r-lg);
+  box-shadow: inset 0 0 0 3px var(--paper-raised), inset 0 0 0 4.5px var(--red), var(--shadow-3);
+  animation: rise-in var(--t) var(--ease);
+}
+.dlg h2 {
+  font-size: var(--fs-xl);
+  margin-bottom: var(--sp-3);
+}
+.dlg-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+}
+
+/* ---- alerts and status lines */
+.alert {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 8px 12px;
+  border-radius: var(--r);
+  border: var(--rule) solid var(--red);
+  background: #fde9e1;
+  color: var(--red-dark);
+  font-weight: 600;
+}
+.alert::before {
+  content: "!";
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--red);
+  color: var(--paper-raised);
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+.note {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 6px 10px;
+  border-radius: var(--r);
+  background: var(--paper-sunk);
+  color: var(--ink-soft);
+  font-size: var(--fs-sm);
+}
+
+/* spinner used by loading states */
+.spinner {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  border-radius: 50%;
+  border: 3px solid var(--red-tint);
+  border-top-color: var(--red);
+  animation: spin 0.8s linear infinite;
+}
+
+/* ---- scrollbars: thin and warm */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sepia) transparent;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s;
+  }
+  .dlg,
+  .dlg-backdrop {
+    animation: none;
+  }
+}

@@ -1,0 +1,3 @@
+- [Audit patterns](audit_patterns.md) — recurring Bus traps: returns, 5p +1, Lines lookahead, move-number origin, "occupied", O-2, SEL skips, Q-B memo, immediate-END vs loader, stale resolve_* fixtures hidden by INV skip, END fixtures vs end.types, obs-string round trip, Phase-1-close oracle method
+- [Rulebook layout](rulebook_layout.md) — which rules sit on RB p.1 vs p.2 of the 2-sheet PDF
+- [Board audit method](board_audit_method.md) — pdftoppm crops (no PIL), label-on-row-line trap, 2026-11-14 board.yaml baseline

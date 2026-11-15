@@ -1,0 +1,489 @@
+{
+ "id": "f663c38a06b84a4283fb0d6b2e20d1ad",
+ "game": "bus",
+ "seats": [
+  "human",
+  "human",
+  "human",
+  "human"
+ ],
+ "seat_types": [
+  "human",
+  "human",
+  "human",
+  "human"
+ ],
+ "bot_thinking": false,
+ "bot_error": null,
+ "seat": 1,
+ "history_length": 0,
+ "history": [],
+ "dev_mode": false,
+ "current_player": 1,
+ "is_terminal": false,
+ "legal_actions": [
+  {
+   "id": 50,
+   "label": "P1: extend end 0 via s42 (n19-n24) to n24",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 42,
+    "from_node": 19,
+    "to_node": 24,
+    "setup": null,
+    "shared_end": false
+   }
+  },
+  {
+   "id": 51,
+   "label": "P1: extend end 0 via s43 (n19-n25) to n25",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 43,
+    "from_node": 19,
+    "to_node": 25,
+    "setup": null,
+    "shared_end": false
+   }
+  },
+  {
+   "id": 117,
+   "label": "P1: extend end 1 via s39 (n17-n20) to n17",
+   "kind": "extend",
+   "params": {
+    "end": 1,
+    "street": 39,
+    "from_node": 20,
+    "to_node": 17,
+    "setup": null,
+    "shared_end": false
+   }
+  },
+  {
+   "id": 122,
+   "label": "P1: extend end 1 via s44 (n20-n25) to n25",
+   "kind": "extend",
+   "params": {
+    "end": 1,
+    "street": 44,
+    "from_node": 20,
+    "to_node": 25,
+    "setup": null,
+    "shared_end": false
+   }
+  },
+  {
+   "id": 123,
+   "label": "P1: extend end 1 via s45 (n20-n26) to n26",
+   "kind": "extend",
+   "params": {
+    "end": 1,
+    "street": 45,
+    "from_node": 20,
+    "to_node": 26,
+    "setup": null,
+    "shared_end": false
+   }
+  }
+ ],
+ "returns": null,
+ "winners": null,
+ "view": {
+  "seat": 1,
+  "current_player": 1,
+  "is_terminal": false,
+  "legal_actions": [
+   {
+    "id": 50,
+    "label": "P1: extend end 0 via s42 (n19-n24) to n24",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 42,
+     "from_node": 19,
+     "to_node": 24,
+     "setup": null,
+     "shared_end": false
+    }
+   },
+   {
+    "id": 51,
+    "label": "P1: extend end 0 via s43 (n19-n25) to n25",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 43,
+     "from_node": 19,
+     "to_node": 25,
+     "setup": null,
+     "shared_end": false
+    }
+   },
+   {
+    "id": 117,
+    "label": "P1: extend end 1 via s39 (n17-n20) to n17",
+    "kind": "extend",
+    "params": {
+     "end": 1,
+     "street": 39,
+     "from_node": 20,
+     "to_node": 17,
+     "setup": null,
+     "shared_end": false
+    }
+   },
+   {
+    "id": 122,
+    "label": "P1: extend end 1 via s44 (n20-n25) to n25",
+    "kind": "extend",
+    "params": {
+     "end": 1,
+     "street": 44,
+     "from_node": 20,
+     "to_node": 25,
+     "setup": null,
+     "shared_end": false
+    }
+   },
+   {
+    "id": 123,
+    "label": "P1: extend end 1 via s45 (n20-n26) to n26",
+    "kind": "extend",
+    "params": {
+     "end": 1,
+     "street": 45,
+     "from_node": 20,
+     "to_node": 26,
+     "setup": null,
+     "shared_end": false
+    }
+   }
+  ],
+  "returns": null,
+  "winners": null,
+  "view": {
+   "state": {
+    "format": 1,
+    "parameters": {
+     "players": 4,
+     "returns": "win_loss"
+    },
+    "round": 1,
+    "phase": "LN",
+    "current_player": 1,
+    "start_player": 0,
+    "clock": "house",
+    "stones_on_clock": 5,
+    "seats": [
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 19,
+      "line": [
+       16,
+       18
+      ],
+      "last_score_move": null
+     },
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 19,
+      "line": [
+       37,
+       38
+      ],
+      "last_score_move": null
+     },
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 20,
+      "line": [
+       46,
+       47
+      ],
+      "last_score_move": null
+     },
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 20,
+      "line": [
+       62,
+       65
+      ],
+      "last_score_move": null
+     }
+    ],
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 1,
+      "type": "office",
+      "occupied": false
+     },
+     {
+      "site": 2,
+      "type": "pub",
+      "occupied": false
+     },
+     {
+      "site": 3,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 4,
+      "type": "office",
+      "occupied": false
+     },
+     {
+      "site": 5,
+      "type": "pub",
+      "occupied": false
+     },
+     {
+      "site": 6,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 7,
+      "type": "office",
+      "occupied": false
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "supply": 11,
+    "action_board": {
+     "lines": [
+      0,
+      1,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "cursor": {
+      "letter": 1
+     },
+     "units_left": 2
+    },
+    "move_offset": 0
+   },
+   "derived": {
+    "seats": [
+     {
+      "line_markers_left": 23,
+      "line_nodes": [
+       6,
+       7,
+       8
+      ],
+      "ends": [
+       6,
+       8
+      ],
+      "dropped": false
+     },
+     {
+      "line_markers_left": 23,
+      "line_nodes": [
+       19,
+       16,
+       20
+      ],
+      "ends": [
+       19,
+       20
+      ],
+      "dropped": false
+     },
+     {
+      "line_markers_left": 23,
+      "line_nodes": [
+       22,
+       21,
+       26
+      ],
+      "ends": [
+       22,
+       26
+      ],
+      "dropped": false
+     },
+     {
+      "line_markers_left": 23,
+      "line_nodes": [
+       28,
+       29,
+       30
+      ],
+      "ends": [
+       28,
+       30
+      ],
+      "dropped": false
+     }
+    ],
+    "street_lines": {
+     "16": [
+      0
+     ],
+     "18": [
+      0
+     ],
+     "37": [
+      1
+     ],
+     "38": [
+      1
+     ],
+     "46": [
+      2
+     ],
+     "47": [
+      2
+     ],
+     "62": [
+      3
+     ],
+     "65": [
+      3
+     ]
+    },
+    "open_tier": "A",
+    "resolving": {
+     "action": "lines",
+     "letter": 1,
+     "owner": 1,
+     "power": 0
+    },
+    "result": null
+   },
+   "prompt": {
+    "phase": "LN",
+    "actor": 1,
+    "units_left": 2,
+    "power": 0,
+    "context": {}
+   },
+   "targets": {
+    "streets": {
+     "42": [
+      50
+     ],
+     "43": [
+      51
+     ],
+     "39": [
+      117
+     ],
+     "44": [
+      122
+     ],
+     "45": [
+      123
+     ]
+    },
+    "street_ends": {
+     "42": [
+      {
+       "id": 50,
+       "end": 0,
+       "node": 19
+      }
+     ],
+     "43": [
+      {
+       "id": 51,
+       "end": 0,
+       "node": 19
+      }
+     ],
+     "39": [
+      {
+       "id": 117,
+       "end": 1,
+       "node": 20
+      }
+     ],
+     "44": [
+      {
+       "id": 122,
+       "end": 1,
+       "node": 20
+      }
+     ],
+     "45": [
+      {
+       "id": 123,
+       "end": 1,
+       "node": 20
+      }
+     ]
+    },
+    "sites": {},
+    "stations": {},
+    "nodes": {},
+    "actions": {},
+    "clock": {
+     "advance": null,
+     "pause": null
+    },
+    "buttons": []
+   }
+  }
+ }
+}

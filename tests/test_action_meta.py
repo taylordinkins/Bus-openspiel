@@ -256,7 +256,7 @@ def test_ACT5_pick_passenger_fields() -> None:
 
 def test_ACT5_deliver_to_fields() -> None:
     """ACTIONS 5 deliver_to: site, node, tier, building_type (the clock's type), picked_node,
-    same_node (R-061)."""
+    same_node (always false: R-061 is retired, D22; a delivery never goes to the picked node)."""
     pairs = _legal_of("deliver_to")
     assert pairs
     same = set()
@@ -271,7 +271,7 @@ def test_ACT5_deliver_to_fields() -> None:
         assert m["picked_node"] == picked
         assert m["same_node"] is (picked == B.sites[t].node)
         same.add(m["same_node"])
-    assert same == {True, False} or same == {False}
+    assert same == {False}
 
 
 # ---- forced_action ----------------------------

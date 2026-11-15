@@ -1,0 +1,1980 @@
+{
+ "id": "02e4da5dc52445b9a0427e67b2ee466e",
+ "game": "bus",
+ "seats": [
+  "random",
+  "random",
+  "random",
+  "random"
+ ],
+ "seat_types": [
+  "random",
+  "random",
+  "random",
+  "random"
+ ],
+ "bot_thinking": false,
+ "bot_error": null,
+ "seat": 0,
+ "history_length": 150,
+ "history": [
+  {
+   "index": 0,
+   "actor": 0,
+   "id": 183,
+   "label": "P0: build pub at site 11 (A, n26)",
+   "events": []
+  },
+  {
+   "index": 1,
+   "actor": 0,
+   "id": 155,
+   "label": "P0: build office at site 2 (A, n13)",
+   "events": []
+  },
+  {
+   "index": 2,
+   "actor": 1,
+   "id": 161,
+   "label": "P1: build office at site 4 (A, n17)",
+   "events": []
+  },
+  {
+   "index": 3,
+   "actor": 1,
+   "id": 165,
+   "label": "P1: build pub at site 5 (A, n17)",
+   "events": []
+  },
+  {
+   "index": 4,
+   "actor": 2,
+   "id": 148,
+   "label": "P2: build house at site 0 (A, n10)",
+   "events": []
+  },
+  {
+   "index": 5,
+   "actor": 2,
+   "id": 175,
+   "label": "P2: build house at site 9 (A, n21)",
+   "events": []
+  },
+  {
+   "index": 6,
+   "actor": 3,
+   "id": 174,
+   "label": "P3: build pub at site 8 (A, n20)",
+   "events": []
+  },
+  {
+   "index": 7,
+   "actor": 3,
+   "id": 171,
+   "label": "P3: build pub at site 7 (A, n18)",
+   "events": []
+  },
+  {
+   "index": 8,
+   "actor": 0,
+   "id": 8,
+   "label": "P0: start line on s0 (n0-n1)",
+   "events": []
+  },
+  {
+   "index": 9,
+   "actor": 1,
+   "id": 27,
+   "label": "P1: start line on s19 (n7-n11)",
+   "events": []
+  },
+  {
+   "index": 10,
+   "actor": 2,
+   "id": 57,
+   "label": "P2: start line on s49 (n21-n28)",
+   "events": []
+  },
+  {
+   "index": 11,
+   "actor": 3,
+   "id": 59,
+   "label": "P3: start line on s51 (n22-n29)",
+   "events": []
+  },
+  {
+   "index": 12,
+   "actor": 3,
+   "id": 58,
+   "label": "P3: extend end 0 via s50 (n22-n23) to n23",
+   "events": []
+  },
+  {
+   "index": 13,
+   "actor": 2,
+   "id": 54,
+   "label": "P2: extend end 0 via s46 (n21-n22) to n22",
+   "events": []
+  },
+  {
+   "index": 14,
+   "actor": 1,
+   "id": 95,
+   "label": "P1: extend end 1 via s17 (n6-n11) to n6",
+   "events": []
+  },
+  {
+   "index": 15,
+   "actor": 0,
+   "id": 10,
+   "label": "P0: extend end 0 via s2 (n0-n5) to n5",
+   "events": [
+    {
+     "type": "round_started",
+     "round": 1
+    }
+   ]
+  },
+  {
+   "index": 16,
+   "actor": 0,
+   "id": 1,
+   "label": "P0: select Buses",
+   "events": []
+  },
+  {
+   "index": 17,
+   "actor": 1,
+   "id": 4,
+   "label": "P1: select Clock",
+   "events": []
+  },
+  {
+   "index": 18,
+   "actor": 2,
+   "id": 2,
+   "label": "P2: select Passengers",
+   "events": []
+  },
+  {
+   "index": 19,
+   "actor": 3,
+   "id": 2,
+   "label": "P3: select Passengers",
+   "events": []
+  },
+  {
+   "index": 20,
+   "actor": 0,
+   "id": 3,
+   "label": "P0: select Buildings",
+   "events": []
+  },
+  {
+   "index": 21,
+   "actor": 1,
+   "id": 6,
+   "label": "P1: select Starting Player",
+   "events": []
+  },
+  {
+   "index": 22,
+   "actor": 2,
+   "id": 5,
+   "label": "P2: select Vrrooomm!",
+   "events": []
+  },
+  {
+   "index": 23,
+   "actor": 3,
+   "id": 5,
+   "label": "P3: select Vrrooomm!",
+   "events": []
+  },
+  {
+   "index": 24,
+   "actor": 0,
+   "id": 0,
+   "label": "P0: select Lines",
+   "events": []
+  },
+  {
+   "index": 25,
+   "actor": 1,
+   "id": 5,
+   "label": "P1: select Vrrooomm!",
+   "events": []
+  },
+  {
+   "index": 26,
+   "actor": 2,
+   "id": 0,
+   "label": "P2: select Lines",
+   "events": []
+  },
+  {
+   "index": 27,
+   "actor": 3,
+   "id": 5,
+   "label": "P3: select Vrrooomm!",
+   "events": []
+  },
+  {
+   "index": 28,
+   "actor": 0,
+   "id": 2,
+   "label": "P0: select Passengers",
+   "events": []
+  },
+  {
+   "index": 29,
+   "actor": 1,
+   "id": 5,
+   "label": "P1: select Vrrooomm!",
+   "events": []
+  },
+  {
+   "index": 30,
+   "actor": 2,
+   "id": 3,
+   "label": "P2: select Buildings",
+   "events": []
+  },
+  {
+   "index": 31,
+   "actor": 3,
+   "id": 5,
+   "label": "P3: select Vrrooomm!",
+   "events": []
+  },
+  {
+   "index": 32,
+   "actor": 0,
+   "id": 0,
+   "label": "P0: select Lines",
+   "events": []
+  },
+  {
+   "index": 33,
+   "actor": 1,
+   "id": 0,
+   "label": "P1: select Lines",
+   "events": []
+  },
+  {
+   "index": 34,
+   "actor": 2,
+   "id": 2,
+   "label": "P2: select Passengers",
+   "events": []
+  },
+  {
+   "index": 35,
+   "actor": 3,
+   "id": 0,
+   "label": "P3: select Lines",
+   "events": []
+  },
+  {
+   "index": 36,
+   "actor": 0,
+   "id": 7,
+   "label": "P0: drop out",
+   "events": []
+  },
+  {
+   "index": 37,
+   "actor": 1,
+   "id": 0,
+   "label": "P1: select Lines",
+   "events": []
+  },
+  {
+   "index": 38,
+   "actor": 2,
+   "id": 2,
+   "label": "P2: select Passengers",
+   "events": []
+  },
+  {
+   "index": 39,
+   "actor": 3,
+   "id": 7,
+   "label": "P3: drop out",
+   "events": []
+  },
+  {
+   "index": 40,
+   "actor": 1,
+   "id": 3,
+   "label": "P1: select Buildings",
+   "events": []
+  },
+  {
+   "index": 41,
+   "actor": 2,
+   "id": 3,
+   "label": "P2: select Buildings",
+   "events": []
+  },
+  {
+   "index": 42,
+   "actor": 1,
+   "id": 7,
+   "label": "P1: drop out",
+   "events": []
+  },
+  {
+   "index": 43,
+   "actor": 2,
+   "id": 2,
+   "label": "P2: select Passengers",
+   "events": []
+  },
+  {
+   "index": 44,
+   "actor": 2,
+   "id": 3,
+   "label": "P2: select Buildings",
+   "events": []
+  },
+  {
+   "index": 45,
+   "actor": 2,
+   "id": 3,
+   "label": "P2: select Buildings",
+   "events": []
+  },
+  {
+   "index": 46,
+   "actor": 2,
+   "id": 7,
+   "label": "P2: drop out",
+   "events": [
+    {
+     "type": "selection_ended"
+    },
+    {
+     "type": "marker_skipped",
+     "action": "lines",
+     "letter": 5,
+     "owner": 1
+    },
+    {
+     "type": "marker_skipped",
+     "action": "lines",
+     "letter": 4,
+     "owner": 3
+    },
+    {
+     "type": "marker_skipped",
+     "action": "lines",
+     "letter": 3,
+     "owner": 1
+    },
+    {
+     "type": "marker_skipped",
+     "action": "lines",
+     "letter": 2,
+     "owner": 0
+    },
+    {
+     "type": "marker_skipped",
+     "action": "lines",
+     "letter": 1,
+     "owner": 2
+    }
+   ]
+  },
+  {
+   "index": 47,
+   "actor": 0,
+   "id": 22,
+   "label": "P0: extend end 0 via s14 (n5-n14) to n14",
+   "events": [
+    {
+     "type": "bus_added",
+     "seat": 0,
+     "buses": 2
+    }
+   ]
+  },
+  {
+   "index": 48,
+   "actor": 2,
+   "id": 290,
+   "label": "P2: passenger to station n25",
+   "events": []
+  },
+  {
+   "index": 49,
+   "actor": 2,
+   "id": 289,
+   "label": "P2: passenger to station n5",
+   "events": []
+  },
+  {
+   "index": 50,
+   "actor": 3,
+   "id": 290,
+   "label": "P3: passenger to station n25",
+   "events": [
+    {
+     "type": "marker_skipped",
+     "action": "passengers",
+     "letter": 2,
+     "owner": 0
+    },
+    {
+     "type": "marker_skipped",
+     "action": "passengers",
+     "letter": 3,
+     "owner": 2
+    },
+    {
+     "type": "marker_skipped",
+     "action": "passengers",
+     "letter": 4,
+     "owner": 2
+    },
+    {
+     "type": "marker_skipped",
+     "action": "passengers",
+     "letter": 5,
+     "owner": 2
+    },
+    {
+     "type": "marker_skipped",
+     "action": "buildings",
+     "letter": 5,
+     "owner": 2
+    },
+    {
+     "type": "marker_skipped",
+     "action": "buildings",
+     "letter": 4,
+     "owner": 2
+    },
+    {
+     "type": "marker_skipped",
+     "action": "buildings",
+     "letter": 3,
+     "owner": 2
+    },
+    {
+     "type": "marker_skipped",
+     "action": "buildings",
+     "letter": 2,
+     "owner": 1
+    }
+   ]
+  },
+  {
+   "index": 51,
+   "actor": 2,
+   "id": 180,
+   "label": "P2: build pub at site 10 (A, n21)",
+   "events": []
+  },
+  {
+   "index": 52,
+   "actor": 0,
+   "id": 166,
+   "label": "P0: build house at site 6 (A, n18)",
+   "events": []
+  },
+  {
+   "index": 53,
+   "actor": 0,
+   "id": 157,
+   "label": "P0: build house at site 3 (A, n13)",
+   "events": []
+  },
+  {
+   "index": 54,
+   "actor": 1,
+   "id": 291,
+   "label": "P1: clock advance",
+   "events": [
+    {
+     "type": "passengers_moved",
+     "exited": [],
+     "entered": [
+      {
+       "site": 2,
+       "node": 13
+      },
+      {
+       "site": 4,
+       "node": 17
+      }
+     ]
+    },
+    {
+     "type": "marker_skipped",
+     "action": "vrrooomm",
+     "letter": 0,
+     "owner": 2
+    },
+    {
+     "type": "marker_skipped",
+     "action": "vrrooomm",
+     "letter": 1,
+     "owner": 3
+    },
+    {
+     "type": "marker_skipped",
+     "action": "vrrooomm",
+     "letter": 2,
+     "owner": 1
+    },
+    {
+     "type": "marker_skipped",
+     "action": "vrrooomm",
+     "letter": 3,
+     "owner": 3
+    },
+    {
+     "type": "marker_skipped",
+     "action": "vrrooomm",
+     "letter": 4,
+     "owner": 1
+    },
+    {
+     "type": "marker_skipped",
+     "action": "vrrooomm",
+     "letter": 5,
+     "owner": 3
+    },
+    {
+     "type": "round_ended",
+     "round": 1,
+     "start_player": 1
+    },
+    {
+     "type": "round_started",
+     "round": 2
+    }
+   ]
+  },
+  {
+   "index": 55,
+   "actor": 1,
+   "id": 5,
+   "label": "P1: select Vrrooomm!",
+   "events": []
+  },
+  {
+   "index": 56,
+   "actor": 2,
+   "id": 0,
+   "label": "P2: select Lines",
+   "events": []
+  },
+  {
+   "index": 57,
+   "actor": 3,
+   "id": 2,
+   "label": "P3: select Passengers",
+   "events": []
+  },
+  {
+   "index": 58,
+   "actor": 0,
+   "id": 0,
+   "label": "P0: select Lines",
+   "events": []
+  },
+  {
+   "index": 59,
+   "actor": 1,
+   "id": 2,
+   "label": "P1: select Passengers",
+   "events": []
+  },
+  {
+   "index": 60,
+   "actor": 2,
+   "id": 3,
+   "label": "P2: select Buildings",
+   "events": []
+  },
+  {
+   "index": 61,
+   "actor": 3,
+   "id": 2,
+   "label": "P3: select Passengers",
+   "events": []
+  },
+  {
+   "index": 62,
+   "actor": 0,
+   "id": 4,
+   "label": "P0: select Clock",
+   "events": []
+  },
+  {
+   "index": 63,
+   "actor": 1,
+   "id": 5,
+   "label": "P1: select Vrrooomm!",
+   "events": []
+  },
+  {
+   "index": 64,
+   "actor": 2,
+   "id": 7,
+   "label": "P2: drop out",
+   "events": []
+  },
+  {
+   "index": 65,
+   "actor": 3,
+   "id": 0,
+   "label": "P3: select Lines",
+   "events": []
+  },
+  {
+   "index": 66,
+   "actor": 0,
+   "id": 6,
+   "label": "P0: select Starting Player",
+   "events": []
+  },
+  {
+   "index": 67,
+   "actor": 1,
+   "id": 3,
+   "label": "P1: select Buildings",
+   "events": []
+  },
+  {
+   "index": 68,
+   "actor": 3,
+   "id": 7,
+   "label": "P3: drop out",
+   "events": []
+  },
+  {
+   "index": 69,
+   "actor": 0,
+   "id": 1,
+   "label": "P0: select Buses",
+   "events": []
+  },
+  {
+   "index": 70,
+   "actor": 1,
+   "id": 2,
+   "label": "P1: select Passengers",
+   "events": []
+  },
+  {
+   "index": 71,
+   "actor": 0,
+   "id": 3,
+   "label": "P0: select Buildings",
+   "events": []
+  },
+  {
+   "index": 72,
+   "actor": 1,
+   "id": 5,
+   "label": "P1: select Vrrooomm!",
+   "events": []
+  },
+  {
+   "index": 73,
+   "actor": 0,
+   "id": 3,
+   "label": "P0: select Buildings",
+   "events": []
+  },
+  {
+   "index": 74,
+   "actor": 1,
+   "id": 2,
+   "label": "P1: select Passengers",
+   "events": []
+  },
+  {
+   "index": 75,
+   "actor": 0,
+   "id": 0,
+   "label": "P0: select Lines",
+   "events": []
+  },
+  {
+   "index": 76,
+   "actor": 1,
+   "id": 7,
+   "label": "P1: drop out",
+   "events": []
+  },
+  {
+   "index": 77,
+   "actor": 0,
+   "id": 5,
+   "label": "P0: select Vrrooomm!",
+   "events": []
+  },
+  {
+   "index": 78,
+   "actor": 0,
+   "id": 5,
+   "label": "P0: select Vrrooomm!",
+   "events": []
+  },
+  {
+   "index": 79,
+   "actor": 0,
+   "id": 0,
+   "label": "P0: select Lines",
+   "events": []
+  },
+  {
+   "index": 80,
+   "actor": 0,
+   "id": 0,
+   "label": "P0: select Lines",
+   "events": []
+  },
+  {
+   "index": 81,
+   "actor": 0,
+   "id": 7,
+   "label": "P0: drop out",
+   "events": [
+    {
+     "type": "selection_ended"
+    },
+    {
+     "type": "marker_skipped",
+     "action": "lines",
+     "letter": 5,
+     "owner": 0
+    },
+    {
+     "type": "marker_skipped",
+     "action": "lines",
+     "letter": 4,
+     "owner": 0
+    },
+    {
+     "type": "marker_skipped",
+     "action": "lines",
+     "letter": 3,
+     "owner": 0
+    },
+    {
+     "type": "marker_skipped",
+     "action": "lines",
+     "letter": 2,
+     "owner": 3
+    }
+   ]
+  },
+  {
+   "index": 82,
+   "actor": 0,
+   "id": 41,
+   "label": "P0: extend end 0 via s33 (n14-n18) to n18",
+   "events": []
+  },
+  {
+   "index": 83,
+   "actor": 2,
+   "id": 141,
+   "label": "P2: extend end 1 via s63 (n28-n34) to n34",
+   "events": []
+  },
+  {
+   "index": 84,
+   "actor": 2,
+   "id": 139,
+   "label": "P2: extend end 1 via s61 (n27-n34) to n27",
+   "events": [
+    {
+     "type": "bus_added",
+     "seat": 0,
+     "buses": 3
+    }
+   ]
+  },
+  {
+   "index": 85,
+   "actor": 3,
+   "id": 289,
+   "label": "P3: passenger to station n5",
+   "events": []
+  },
+  {
+   "index": 86,
+   "actor": 3,
+   "id": 289,
+   "label": "P3: passenger to station n5",
+   "events": []
+  },
+  {
+   "index": 87,
+   "actor": 3,
+   "id": 290,
+   "label": "P3: passenger to station n25",
+   "events": []
+  },
+  {
+   "index": 88,
+   "actor": 1,
+   "id": 290,
+   "label": "P1: passenger to station n25",
+   "events": []
+  },
+  {
+   "index": 89,
+   "actor": 1,
+   "id": 289,
+   "label": "P1: passenger to station n5",
+   "events": []
+  },
+  {
+   "index": 90,
+   "actor": 3,
+   "id": 289,
+   "label": "P3: passenger to station n5",
+   "events": [
+    {
+     "type": "marker_skipped",
+     "action": "passengers",
+     "letter": 3,
+     "owner": 1
+    },
+    {
+     "type": "marker_skipped",
+     "action": "passengers",
+     "letter": 4,
+     "owner": 1
+    },
+    {
+     "type": "marker_skipped",
+     "action": "buildings",
+     "letter": 3,
+     "owner": 0
+    }
+   ]
+  },
+  {
+   "index": 91,
+   "actor": 0,
+   "id": 153,
+   "label": "P0: build pub at site 1 (A, n14)",
+   "events": []
+  },
+  {
+   "index": 92,
+   "actor": 1,
+   "id": 184,
+   "label": "P1: build house at site 12 (B, n0)",
+   "events": []
+  },
+  {
+   "index": 93,
+   "actor": 1,
+   "id": 203,
+   "label": "P1: build office at site 18 (B, n22)",
+   "events": []
+  },
+  {
+   "index": 94,
+   "actor": 2,
+   "id": 190,
+   "label": "P2: build house at site 14 (B, n9)",
+   "events": []
+  },
+  {
+   "index": 95,
+   "actor": 2,
+   "id": 210,
+   "label": "P2: build pub at site 20 (B, n29)",
+   "events": []
+  },
+  {
+   "index": 96,
+   "actor": 2,
+   "id": 193,
+   "label": "P2: build house at site 15 (B, n8)",
+   "events": []
+  },
+  {
+   "index": 97,
+   "actor": 0,
+   "id": 292,
+   "label": "P0: clock pause",
+   "events": [
+    {
+     "type": "passengers_moved",
+     "exited": [
+      {
+       "site": 2,
+       "node": 13
+      },
+      {
+       "site": 4,
+       "node": 17
+      }
+     ],
+     "entered": [
+      {
+       "site": 2,
+       "node": 13
+      },
+      {
+       "site": 4,
+       "node": 17
+      }
+     ]
+    },
+    {
+     "type": "marker_skipped",
+     "action": "vrrooomm",
+     "letter": 0,
+     "owner": 1
+    },
+    {
+     "type": "marker_skipped",
+     "action": "vrrooomm",
+     "letter": 1,
+     "owner": 1
+    },
+    {
+     "type": "marker_skipped",
+     "action": "vrrooomm",
+     "letter": 2,
+     "owner": 1
+    },
+    {
+     "type": "marker_skipped",
+     "action": "vrrooomm",
+     "letter": 3,
+     "owner": 0
+    },
+    {
+     "type": "marker_skipped",
+     "action": "vrrooomm",
+     "letter": 4,
+     "owner": 0
+    },
+    {
+     "type": "round_ended",
+     "round": 2,
+     "start_player": 0
+    },
+    {
+     "type": "round_started",
+     "round": 3
+    }
+   ]
+  },
+  {
+   "index": 98,
+   "actor": 0,
+   "id": 5,
+   "label": "P0: select Vrrooomm!",
+   "events": []
+  },
+  {
+   "index": 99,
+   "actor": 1,
+   "id": 3,
+   "label": "P1: select Buildings",
+   "events": []
+  },
+  {
+   "index": 100,
+   "actor": 2,
+   "id": 1,
+   "label": "P2: select Buses",
+   "events": []
+  },
+  {
+   "index": 101,
+   "actor": 3,
+   "id": 4,
+   "label": "P3: select Clock",
+   "events": []
+  },
+  {
+   "index": 102,
+   "actor": 0,
+   "id": 2,
+   "label": "P0: select Passengers",
+   "events": []
+  },
+  {
+   "index": 103,
+   "actor": 1,
+   "id": 3,
+   "label": "P1: select Buildings",
+   "events": []
+  },
+  {
+   "index": 104,
+   "actor": 2,
+   "id": 6,
+   "label": "P2: select Starting Player",
+   "events": []
+  },
+  {
+   "index": 105,
+   "actor": 3,
+   "id": 5,
+   "label": "P3: select Vrrooomm!",
+   "events": []
+  },
+  {
+   "index": 106,
+   "actor": 0,
+   "id": 3,
+   "label": "P0: select Buildings",
+   "events": []
+  },
+  {
+   "index": 107,
+   "actor": 1,
+   "id": 2,
+   "label": "P1: select Passengers",
+   "events": []
+  },
+  {
+   "index": 108,
+   "actor": 2,
+   "id": 5,
+   "label": "P2: select Vrrooomm!",
+   "events": []
+  },
+  {
+   "index": 109,
+   "actor": 3,
+   "id": 2,
+   "label": "P3: select Passengers",
+   "events": []
+  },
+  {
+   "index": 110,
+   "actor": 0,
+   "id": 0,
+   "label": "P0: select Lines",
+   "events": []
+  },
+  {
+   "index": 111,
+   "actor": 1,
+   "id": 5,
+   "label": "P1: select Vrrooomm!",
+   "events": []
+  },
+  {
+   "index": 112,
+   "actor": 2,
+   "id": 2,
+   "label": "P2: select Passengers",
+   "events": []
+  },
+  {
+   "index": 113,
+   "actor": 3,
+   "id": 5,
+   "label": "P3: select Vrrooomm!",
+   "events": []
+  },
+  {
+   "index": 114,
+   "actor": 1,
+   "id": 7,
+   "label": "P1: drop out",
+   "events": []
+  },
+  {
+   "index": 115,
+   "actor": 2,
+   "id": 3,
+   "label": "P2: select Buildings",
+   "events": []
+  },
+  {
+   "index": 116,
+   "actor": 3,
+   "id": 2,
+   "label": "P3: select Passengers",
+   "events": []
+  },
+  {
+   "index": 117,
+   "actor": 2,
+   "id": 3,
+   "label": "P2: select Buildings",
+   "events": []
+  },
+  {
+   "index": 118,
+   "actor": 3,
+   "id": 5,
+   "label": "P3: select Vrrooomm!",
+   "events": []
+  },
+  {
+   "index": 119,
+   "actor": 2,
+   "id": 2,
+   "label": "P2: select Passengers",
+   "events": []
+  },
+  {
+   "index": 120,
+   "actor": 3,
+   "id": 7,
+   "label": "P3: drop out",
+   "events": []
+  },
+  {
+   "index": 121,
+   "actor": 2,
+   "id": 7,
+   "label": "P2: drop out",
+   "events": [
+    {
+     "type": "selection_ended"
+    }
+   ]
+  },
+  {
+   "index": 122,
+   "actor": 0,
+   "id": 39,
+   "label": "P0: extend end 0 via s31 (n13-n18) to n13",
+   "events": []
+  },
+  {
+   "index": 123,
+   "actor": 0,
+   "id": 38,
+   "label": "P0: extend end 0 via s30 (n13-n17) to n17",
+   "events": []
+  },
+  {
+   "index": 124,
+   "actor": 0,
+   "id": 81,
+   "label": "P0: extend end 1 via s3 (n1-n4) to n4",
+   "events": [
+    {
+     "type": "bus_added",
+     "seat": 2,
+     "buses": 2
+    }
+   ]
+  },
+  {
+   "index": 125,
+   "actor": 0,
+   "id": 290,
+   "label": "P0: passenger to station n25",
+   "events": []
+  },
+  {
+   "index": 126,
+   "actor": 0,
+   "id": 289,
+   "label": "P0: passenger to station n5",
+   "events": [
+    {
+     "type": "marker_skipped",
+     "action": "passengers",
+     "letter": 1,
+     "owner": 1
+    },
+    {
+     "type": "marker_skipped",
+     "action": "passengers",
+     "letter": 2,
+     "owner": 3
+    },
+    {
+     "type": "marker_skipped",
+     "action": "passengers",
+     "letter": 3,
+     "owner": 2
+    },
+    {
+     "type": "marker_skipped",
+     "action": "passengers",
+     "letter": 4,
+     "owner": 3
+    },
+    {
+     "type": "marker_skipped",
+     "action": "passengers",
+     "letter": 5,
+     "owner": 2
+    },
+    {
+     "type": "marker_skipped",
+     "action": "buildings",
+     "letter": 4,
+     "owner": 2
+    },
+    {
+     "type": "marker_skipped",
+     "action": "buildings",
+     "letter": 3,
+     "owner": 2
+    }
+   ]
+  },
+  {
+   "index": 127,
+   "actor": 0,
+   "id": 187,
+   "label": "P0: build house at site 13 (B, n4)",
+   "events": []
+  },
+  {
+   "index": 128,
+   "actor": 1,
+   "id": 200,
+   "label": "P1: build office at site 17 (B, n16)",
+   "events": []
+  },
+  {
+   "index": 129,
+   "actor": 1,
+   "id": 198,
+   "label": "P1: build pub at site 16 (B, n12)",
+   "events": []
+  },
+  {
+   "index": 130,
+   "actor": 1,
+   "id": 213,
+   "label": "P1: build pub at site 21 (B, n31)",
+   "events": []
+  },
+  {
+   "index": 131,
+   "actor": 1,
+   "id": 205,
+   "label": "P1: build house at site 19 (B, n27)",
+   "events": []
+  },
+  {
+   "index": 132,
+   "actor": 1,
+   "id": 215,
+   "label": "P1: build office at site 22 (B, n33)",
+   "events": []
+  },
+  {
+   "index": 133,
+   "actor": 3,
+   "id": 292,
+   "label": "P3: clock pause",
+   "events": [
+    {
+     "type": "passengers_moved",
+     "exited": [
+      {
+       "site": 2,
+       "node": 13
+      },
+      {
+       "site": 4,
+       "node": 17
+      }
+     ],
+     "entered": [
+      {
+       "site": 2,
+       "node": 13
+      },
+      {
+       "site": 4,
+       "node": 17
+      }
+     ]
+    },
+    {
+     "type": "marker_skipped",
+     "action": "vrrooomm",
+     "letter": 0,
+     "owner": 0
+    },
+    {
+     "type": "marker_skipped",
+     "action": "vrrooomm",
+     "letter": 1,
+     "owner": 3
+    }
+   ]
+  },
+  {
+   "index": 134,
+   "actor": 2,
+   "id": 314,
+   "label": "P2: pick passenger at n21",
+   "events": []
+  },
+  {
+   "index": 135,
+   "actor": 2,
+   "id": 347,
+   "label": "P2: deliver to site 18 (B, n22)",
+   "events": [
+    {
+     "type": "scored",
+     "seat": 2,
+     "points": 1,
+     "node": 21,
+     "site": 18
+    },
+    {
+     "type": "marker_skipped",
+     "action": "vrrooomm",
+     "letter": 3,
+     "owner": 1
+    },
+    {
+     "type": "marker_skipped",
+     "action": "vrrooomm",
+     "letter": 4,
+     "owner": 3
+    },
+    {
+     "type": "marker_skipped",
+     "action": "vrrooomm",
+     "letter": 5,
+     "owner": 3
+    },
+    {
+     "type": "round_ended",
+     "round": 3,
+     "start_player": 2
+    },
+    {
+     "type": "round_started",
+     "round": 4
+    }
+   ]
+  },
+  {
+   "index": 136,
+   "actor": 2,
+   "id": 0,
+   "label": "P2: select Lines",
+   "events": []
+  },
+  {
+   "index": 137,
+   "actor": 3,
+   "id": 3,
+   "label": "P3: select Buildings",
+   "events": []
+  },
+  {
+   "index": 138,
+   "actor": 1,
+   "id": 0,
+   "label": "P1: select Lines",
+   "events": []
+  },
+  {
+   "index": 139,
+   "actor": 3,
+   "id": 6,
+   "label": "P3: select Starting Player",
+   "events": []
+  },
+  {
+   "index": 140,
+   "actor": 1,
+   "id": 1,
+   "label": "P1: select Buses",
+   "events": []
+  },
+  {
+   "index": 141,
+   "actor": 3,
+   "id": 7,
+   "label": "P3: drop out",
+   "events": [
+    {
+     "type": "selection_ended"
+    }
+   ]
+  },
+  {
+   "index": 142,
+   "actor": 1,
+   "id": 26,
+   "label": "P1: extend end 0 via s18 (n7-n8) to n8",
+   "events": []
+  },
+  {
+   "index": 143,
+   "actor": 1,
+   "id": 16,
+   "label": "P1: extend end 0 via s8 (n3-n8) to n3",
+   "events": []
+  },
+  {
+   "index": 144,
+   "actor": 2,
+   "id": 126,
+   "label": "P2: extend end 1 via s48 (n21-n27) to n21",
+   "events": []
+  },
+  {
+   "index": 145,
+   "actor": 2,
+   "id": 119,
+   "label": "P2: extend end 1 via s41 (n18-n21) to n18",
+   "events": []
+  },
+  {
+   "index": 146,
+   "actor": 2,
+   "id": 42,
+   "label": "P2: extend end 0 via s34 (n14-n22) to n14",
+   "events": [
+    {
+     "type": "bus_added",
+     "seat": 1,
+     "buses": 2
+    }
+   ]
+  },
+  {
+   "index": 147,
+   "actor": 3,
+   "id": 230,
+   "label": "P3: build office at site 27 (C, n20)",
+   "events": []
+  },
+  {
+   "index": 148,
+   "actor": 3,
+   "id": 241,
+   "label": "P3: build house at site 31 (C, n33)",
+   "events": []
+  },
+  {
+   "index": 149,
+   "actor": 3,
+   "id": 228,
+   "label": "P3: build pub at site 26 (C, n14)",
+   "events": [
+    {
+     "type": "clock_advanced",
+     "from": "office",
+     "to": "pub"
+    },
+    {
+     "type": "passengers_moved",
+     "exited": [
+      {
+       "site": 2,
+       "node": 13
+      },
+      {
+       "site": 4,
+       "node": 17
+      },
+      {
+       "site": 18,
+       "node": 22
+      }
+     ],
+     "entered": [
+      {
+       "site": 5,
+       "node": 17
+      },
+      {
+       "site": 7,
+       "node": 18
+      }
+     ]
+    },
+    {
+     "type": "round_ended",
+     "round": 4
+    },
+    {
+     "type": "game_ended",
+     "end_types": [
+      "markers"
+     ]
+    }
+   ]
+  }
+ ],
+ "dev_mode": false,
+ "current_player": null,
+ "is_terminal": true,
+ "legal_actions": [],
+ "returns": [
+  -0.3333333333333333,
+  -0.3333333333333333,
+  1.0,
+  -0.3333333333333333
+ ],
+ "winners": [
+  2
+ ],
+ "view": {
+  "seat": 0,
+  "current_player": null,
+  "is_terminal": true,
+  "legal_actions": [],
+  "returns": [
+   -0.3333333333333333,
+   -0.3333333333333333,
+   1.0,
+   -0.3333333333333333
+  ],
+  "winners": [
+   2
+  ],
+  "view": {
+   "state": {
+    "format": 1,
+    "parameters": {
+     "players": 4,
+     "returns": "win_loss"
+    },
+    "round": 4,
+    "phase": "END",
+    "start_player": 3,
+    "clock": "pub",
+    "stones_on_clock": 3,
+    "seats": [
+     {
+      "points": 0,
+      "stones": 1,
+      "buses": 3,
+      "markers_left": 0,
+      "line": [
+       30,
+       31,
+       33,
+       14,
+       2,
+       0,
+       3
+      ],
+      "last_score_move": null
+     },
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 2,
+      "markers_left": 0,
+      "line": [
+       8,
+       18,
+       19,
+       17
+      ],
+      "last_score_move": null
+     },
+     {
+      "points": 1,
+      "stones": 0,
+      "buses": 2,
+      "markers_left": 0,
+      "line": [
+       34,
+       46,
+       49,
+       63,
+       61,
+       48,
+       41
+      ],
+      "last_score_move": 136
+     },
+     {
+      "points": 0,
+      "stones": 1,
+      "buses": 1,
+      "markers_left": 4,
+      "line": [
+       50,
+       51
+      ],
+      "last_score_move": null
+     }
+    ],
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 1,
+      "type": "pub",
+      "occupied": false
+     },
+     {
+      "site": 2,
+      "type": "office",
+      "occupied": false
+     },
+     {
+      "site": 3,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 4,
+      "type": "office",
+      "occupied": false
+     },
+     {
+      "site": 5,
+      "type": "pub",
+      "occupied": true
+     },
+     {
+      "site": 6,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 7,
+      "type": "pub",
+      "occupied": true
+     },
+     {
+      "site": 8,
+      "type": "pub",
+      "occupied": false
+     },
+     {
+      "site": 9,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 10,
+      "type": "pub",
+      "occupied": false
+     },
+     {
+      "site": 11,
+      "type": "pub",
+      "occupied": false
+     },
+     {
+      "site": 12,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 13,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 14,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 15,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 16,
+      "type": "pub",
+      "occupied": false
+     },
+     {
+      "site": 17,
+      "type": "office",
+      "occupied": false
+     },
+     {
+      "site": 18,
+      "type": "office",
+      "occupied": false
+     },
+     {
+      "site": 19,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 20,
+      "type": "pub",
+      "occupied": false
+     },
+     {
+      "site": 21,
+      "type": "pub",
+      "occupied": false
+     },
+     {
+      "site": 22,
+      "type": "office",
+      "occupied": false
+     },
+     {
+      "site": 26,
+      "type": "pub",
+      "occupied": false
+     },
+     {
+      "site": 27,
+      "type": "office",
+      "occupied": false
+     },
+     {
+      "site": 31,
+      "type": "house",
+      "occupied": false
+     }
+    ],
+    "waiting": {
+     "5": 6,
+     "13": 1,
+     "22": 1,
+     "25": 5
+    },
+    "supply": 0,
+    "action_board": {
+     "lines": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {},
+    "end": {
+     "types": [
+      "markers"
+     ]
+    },
+    "move_offset": 150
+   },
+   "derived": {
+    "seats": [
+     {
+      "line_markers_left": 18,
+      "line_nodes": [
+       17,
+       13,
+       18,
+       14,
+       5,
+       0,
+       1,
+       4
+      ],
+      "ends": [
+       17,
+       4
+      ],
+      "dropped": false
+     },
+     {
+      "line_markers_left": 21,
+      "line_nodes": [
+       3,
+       8,
+       7,
+       11,
+       6
+      ],
+      "ends": [
+       3,
+       6
+      ],
+      "dropped": false
+     },
+     {
+      "line_markers_left": 18,
+      "line_nodes": [
+       14,
+       22,
+       21,
+       28,
+       34,
+       27,
+       21,
+       18
+      ],
+      "ends": [
+       14,
+       18
+      ],
+      "dropped": false
+     },
+     {
+      "line_markers_left": 23,
+      "line_nodes": [
+       23,
+       22,
+       29
+      ],
+      "ends": [
+       23,
+       29
+      ],
+      "dropped": false
+     }
+    ],
+    "street_lines": {
+     "0": [
+      0
+     ],
+     "2": [
+      0
+     ],
+     "3": [
+      0
+     ],
+     "14": [
+      0
+     ],
+     "30": [
+      0
+     ],
+     "31": [
+      0
+     ],
+     "33": [
+      0
+     ],
+     "8": [
+      1
+     ],
+     "17": [
+      1
+     ],
+     "18": [
+      1
+     ],
+     "19": [
+      1
+     ],
+     "34": [
+      2
+     ],
+     "41": [
+      2
+     ],
+     "46": [
+      2
+     ],
+     "48": [
+      2
+     ],
+     "49": [
+      2
+     ],
+     "61": [
+      2
+     ],
+     "63": [
+      2
+     ],
+     "50": [
+      3
+     ],
+     "51": [
+      3
+     ]
+    },
+    "open_tier": "C",
+    "resolving": null,
+    "result": {
+     "end_types": [
+      "markers"
+     ],
+     "winners": [
+      2
+     ],
+     "final_scores": [
+      -1,
+      0,
+      1,
+      -1
+     ],
+     "returns": [
+      -0.3333333333333333,
+      -0.3333333333333333,
+      1.0,
+      -0.3333333333333333
+     ]
+    }
+   },
+   "prompt": {
+    "phase": "END",
+    "actor": null,
+    "units_left": null,
+    "power": null,
+    "context": {}
+   },
+   "targets": {
+    "streets": {},
+    "street_ends": {},
+    "sites": {},
+    "stations": {},
+    "nodes": {},
+    "actions": {},
+    "clock": {
+     "advance": null,
+     "pause": null
+    },
+    "buttons": []
+   }
+  }
+ }
+}

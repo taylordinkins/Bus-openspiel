@@ -57,6 +57,8 @@ Point = tuple[int, int]
 MULTI_USE_ACTIONS = ("lines", "passengers", "buildings", "vrrooomm")
 SINGLE_USE_ACTIONS = ("buses", "clock", "starting_player")
 CLOCK_SEGMENTS = ("house", "office", "pub")
+BUS_GRID_COLUMNS = 5  # one per seat
+BUS_GRID_ROWS = 4  # buses 2..5
 
 
 @dataclass(frozen=True, slots=True)
@@ -73,6 +75,16 @@ class Layout:
     clock_angles: Mapping[str, float] = field(hash=False)  # segment -> degrees (0=east, 90=south)
     stones: tuple[Point, ...]
     score_track: tuple[Point, ...]  # cell for score 1..20
+
+    def bus_cell(self, seat: int, bus: int) -> Point:
+        """Centre of the Buses-grid cell for `seat`'s bus number `bus` (2..5; D19).
+
+        The grid is 5 seat columns x 4 rows (reading order in `bus_grid`); bus 2 is the top cell.
+        The starting bus (1) is not drawn on the map.
+        """
+        if not (0 <= seat < BUS_GRID_COLUMNS and 2 <= bus < 2 + BUS_GRID_ROWS):
+            raise ValueError(f"no Buses-grid cell for seat {seat}, bus {bus}")
+        return self.bus_grid[(bus - 2) * BUS_GRID_COLUMNS + seat]
 
 
 @dataclass(frozen=True, slots=True)

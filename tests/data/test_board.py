@@ -90,3 +90,24 @@ def test_layout_counts_and_frame() -> None:
 def test_score_track_runs_downward() -> None:
     ys = [y for _, y in load_board().layout.score_track]
     assert ys == sorted(ys)
+
+
+def test_bus_grid_is_one_column_per_seat() -> None:
+    import pytest
+
+    from bus.board import BUS_GRID_COLUMNS, BUS_GRID_ROWS
+    from bus.constants import BUSES_PER_PLAYER
+
+    lay = load_board().layout
+    assert len(lay.bus_grid) == BUS_GRID_COLUMNS * BUS_GRID_ROWS
+    xs = sorted({x for x, _ in lay.bus_grid})
+    ys = sorted({y for _, y in lay.bus_grid})
+    assert (len(xs), len(ys)) == (5, 4)
+    for seat in range(5):
+        for bus in range(2, BUSES_PER_PLAYER + 1):
+            cell = lay.bus_cell(seat, bus)
+            assert cell in lay.bus_grid
+            assert cell == (xs[seat], ys[bus - 2])  # column = seat, row = bus - 2
+    for seat, bus in ((5, 2), (0, 1), (0, 6)):
+        with pytest.raises(ValueError):
+            lay.bus_cell(seat, bus)

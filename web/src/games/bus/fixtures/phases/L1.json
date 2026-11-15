@@ -1,0 +1,2781 @@
+{
+ "id": "19d13f79daea4704ae8e1fe2668cfbf2",
+ "game": "bus",
+ "seats": [
+  "human",
+  "human",
+  "human",
+  "human"
+ ],
+ "seat_types": [
+  "human",
+  "human",
+  "human",
+  "human"
+ ],
+ "bot_thinking": false,
+ "bot_error": null,
+ "seat": 2,
+ "history_length": 0,
+ "history": [],
+ "dev_mode": false,
+ "current_player": 2,
+ "is_terminal": false,
+ "legal_actions": [
+  {
+   "id": 8,
+   "label": "P2: start line on s0 (n0-n1)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 0,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 9,
+   "label": "P2: start line on s1 (n0-n2)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 1,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 10,
+   "label": "P2: start line on s2 (n0-n5)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 2,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 11,
+   "label": "P2: start line on s3 (n1-n4)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 3,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 12,
+   "label": "P2: start line on s4 (n1-n5)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 4,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 13,
+   "label": "P2: start line on s5 (n2-n5)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 5,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 14,
+   "label": "P2: start line on s6 (n3-n4)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 6,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 15,
+   "label": "P2: start line on s7 (n3-n6)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 7,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 16,
+   "label": "P2: start line on s8 (n3-n8)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 8,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 17,
+   "label": "P2: start line on s9 (n3-n9)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 9,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 18,
+   "label": "P2: start line on s10 (n4-n5)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 10,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 19,
+   "label": "P2: start line on s11 (n4-n9)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 11,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 20,
+   "label": "P2: start line on s12 (n4-n10)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 12,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 21,
+   "label": "P2: start line on s13 (n5-n10)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 13,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 22,
+   "label": "P2: start line on s14 (n5-n14)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 14,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 23,
+   "label": "P2: start line on s15 (n5-n15)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 15,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 24,
+   "label": "P2: start line on s16 (n6-n7)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 16,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 25,
+   "label": "P2: start line on s17 (n6-n11)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 17,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 26,
+   "label": "P2: start line on s18 (n7-n8)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 18,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 27,
+   "label": "P2: start line on s19 (n7-n11)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 19,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 28,
+   "label": "P2: start line on s20 (n8-n9)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 20,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 29,
+   "label": "P2: start line on s21 (n8-n12)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 21,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 30,
+   "label": "P2: start line on s22 (n9-n13)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 22,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 31,
+   "label": "P2: start line on s23 (n10-n13)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 23,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 32,
+   "label": "P2: start line on s24 (n10-n14)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 24,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 33,
+   "label": "P2: start line on s25 (n11-n12)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 25,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 34,
+   "label": "P2: start line on s26 (n11-n16)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 26,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 35,
+   "label": "P2: start line on s27 (n12-n13)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 27,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 36,
+   "label": "P2: start line on s28 (n12-n16)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 28,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 37,
+   "label": "P2: start line on s29 (n12-n17)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 29,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 38,
+   "label": "P2: start line on s30 (n13-n17)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 30,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 39,
+   "label": "P2: start line on s31 (n13-n18)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 31,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 40,
+   "label": "P2: start line on s32 (n14-n15)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 32,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 41,
+   "label": "P2: start line on s33 (n14-n18)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 33,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 42,
+   "label": "P2: start line on s34 (n14-n22)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 34,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 43,
+   "label": "P2: start line on s35 (n14-n23)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 35,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 44,
+   "label": "P2: start line on s36 (n15-n23)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 36,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 45,
+   "label": "P2: start line on s37 (n16-n19)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 37,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 46,
+   "label": "P2: start line on s38 (n16-n20)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 38,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 47,
+   "label": "P2: start line on s39 (n17-n20)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 39,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 48,
+   "label": "P2: start line on s40 (n17-n21)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 40,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 49,
+   "label": "P2: start line on s41 (n18-n21)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 41,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 50,
+   "label": "P2: start line on s42 (n19-n24)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 42,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 51,
+   "label": "P2: start line on s43 (n19-n25)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 43,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 52,
+   "label": "P2: start line on s44 (n20-n25)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 44,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 53,
+   "label": "P2: start line on s45 (n20-n26)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 45,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 54,
+   "label": "P2: start line on s46 (n21-n22)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 46,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 55,
+   "label": "P2: start line on s47 (n21-n26)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 47,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 56,
+   "label": "P2: start line on s48 (n21-n27)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 48,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 57,
+   "label": "P2: start line on s49 (n21-n28)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 49,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 58,
+   "label": "P2: start line on s50 (n22-n23)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 50,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 59,
+   "label": "P2: start line on s51 (n22-n29)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 51,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 60,
+   "label": "P2: start line on s52 (n23-n30)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 52,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 61,
+   "label": "P2: start line on s53 (n24-n25)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 53,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 62,
+   "label": "P2: start line on s54 (n25-n26)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 54,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 63,
+   "label": "P2: start line on s55 (n25-n31)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 55,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 64,
+   "label": "P2: start line on s56 (n25-n32)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 56,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 65,
+   "label": "P2: start line on s57 (n25-n33)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 57,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 66,
+   "label": "P2: start line on s58 (n26-n27)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 58,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 67,
+   "label": "P2: start line on s59 (n26-n33)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 59,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 68,
+   "label": "P2: start line on s60 (n26-n34)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 60,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 69,
+   "label": "P2: start line on s61 (n27-n34)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 61,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 70,
+   "label": "P2: start line on s62 (n28-n29)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 62,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 71,
+   "label": "P2: start line on s63 (n28-n34)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 63,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 72,
+   "label": "P2: start line on s64 (n28-n35)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 64,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 73,
+   "label": "P2: start line on s65 (n29-n30)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 65,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 74,
+   "label": "P2: start line on s66 (n30-n35)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 66,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 75,
+   "label": "P2: start line on s67 (n31-n32)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 67,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 76,
+   "label": "P2: start line on s68 (n32-n33)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 68,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  },
+  {
+   "id": 77,
+   "label": "P2: start line on s69 (n33-n34)",
+   "kind": "extend",
+   "params": {
+    "end": 0,
+    "street": 69,
+    "from_node": null,
+    "to_node": null,
+    "setup": "first",
+    "shared_end": false
+   }
+  }
+ ],
+ "returns": null,
+ "winners": null,
+ "view": {
+  "seat": 2,
+  "current_player": 2,
+  "is_terminal": false,
+  "legal_actions": [
+   {
+    "id": 8,
+    "label": "P2: start line on s0 (n0-n1)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 0,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 9,
+    "label": "P2: start line on s1 (n0-n2)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 1,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 10,
+    "label": "P2: start line on s2 (n0-n5)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 2,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 11,
+    "label": "P2: start line on s3 (n1-n4)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 3,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 12,
+    "label": "P2: start line on s4 (n1-n5)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 4,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 13,
+    "label": "P2: start line on s5 (n2-n5)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 5,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 14,
+    "label": "P2: start line on s6 (n3-n4)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 6,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 15,
+    "label": "P2: start line on s7 (n3-n6)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 7,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 16,
+    "label": "P2: start line on s8 (n3-n8)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 8,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 17,
+    "label": "P2: start line on s9 (n3-n9)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 9,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 18,
+    "label": "P2: start line on s10 (n4-n5)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 10,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 19,
+    "label": "P2: start line on s11 (n4-n9)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 11,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 20,
+    "label": "P2: start line on s12 (n4-n10)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 12,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 21,
+    "label": "P2: start line on s13 (n5-n10)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 13,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 22,
+    "label": "P2: start line on s14 (n5-n14)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 14,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 23,
+    "label": "P2: start line on s15 (n5-n15)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 15,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 24,
+    "label": "P2: start line on s16 (n6-n7)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 16,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 25,
+    "label": "P2: start line on s17 (n6-n11)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 17,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 26,
+    "label": "P2: start line on s18 (n7-n8)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 18,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 27,
+    "label": "P2: start line on s19 (n7-n11)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 19,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 28,
+    "label": "P2: start line on s20 (n8-n9)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 20,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 29,
+    "label": "P2: start line on s21 (n8-n12)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 21,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 30,
+    "label": "P2: start line on s22 (n9-n13)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 22,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 31,
+    "label": "P2: start line on s23 (n10-n13)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 23,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 32,
+    "label": "P2: start line on s24 (n10-n14)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 24,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 33,
+    "label": "P2: start line on s25 (n11-n12)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 25,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 34,
+    "label": "P2: start line on s26 (n11-n16)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 26,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 35,
+    "label": "P2: start line on s27 (n12-n13)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 27,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 36,
+    "label": "P2: start line on s28 (n12-n16)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 28,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 37,
+    "label": "P2: start line on s29 (n12-n17)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 29,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 38,
+    "label": "P2: start line on s30 (n13-n17)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 30,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 39,
+    "label": "P2: start line on s31 (n13-n18)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 31,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 40,
+    "label": "P2: start line on s32 (n14-n15)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 32,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 41,
+    "label": "P2: start line on s33 (n14-n18)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 33,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 42,
+    "label": "P2: start line on s34 (n14-n22)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 34,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 43,
+    "label": "P2: start line on s35 (n14-n23)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 35,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 44,
+    "label": "P2: start line on s36 (n15-n23)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 36,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 45,
+    "label": "P2: start line on s37 (n16-n19)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 37,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 46,
+    "label": "P2: start line on s38 (n16-n20)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 38,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 47,
+    "label": "P2: start line on s39 (n17-n20)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 39,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 48,
+    "label": "P2: start line on s40 (n17-n21)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 40,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 49,
+    "label": "P2: start line on s41 (n18-n21)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 41,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 50,
+    "label": "P2: start line on s42 (n19-n24)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 42,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 51,
+    "label": "P2: start line on s43 (n19-n25)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 43,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 52,
+    "label": "P2: start line on s44 (n20-n25)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 44,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 53,
+    "label": "P2: start line on s45 (n20-n26)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 45,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 54,
+    "label": "P2: start line on s46 (n21-n22)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 46,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 55,
+    "label": "P2: start line on s47 (n21-n26)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 47,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 56,
+    "label": "P2: start line on s48 (n21-n27)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 48,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 57,
+    "label": "P2: start line on s49 (n21-n28)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 49,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 58,
+    "label": "P2: start line on s50 (n22-n23)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 50,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 59,
+    "label": "P2: start line on s51 (n22-n29)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 51,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 60,
+    "label": "P2: start line on s52 (n23-n30)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 52,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 61,
+    "label": "P2: start line on s53 (n24-n25)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 53,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 62,
+    "label": "P2: start line on s54 (n25-n26)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 54,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 63,
+    "label": "P2: start line on s55 (n25-n31)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 55,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 64,
+    "label": "P2: start line on s56 (n25-n32)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 56,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 65,
+    "label": "P2: start line on s57 (n25-n33)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 57,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 66,
+    "label": "P2: start line on s58 (n26-n27)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 58,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 67,
+    "label": "P2: start line on s59 (n26-n33)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 59,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 68,
+    "label": "P2: start line on s60 (n26-n34)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 60,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 69,
+    "label": "P2: start line on s61 (n27-n34)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 61,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 70,
+    "label": "P2: start line on s62 (n28-n29)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 62,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 71,
+    "label": "P2: start line on s63 (n28-n34)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 63,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 72,
+    "label": "P2: start line on s64 (n28-n35)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 64,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 73,
+    "label": "P2: start line on s65 (n29-n30)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 65,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 74,
+    "label": "P2: start line on s66 (n30-n35)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 66,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 75,
+    "label": "P2: start line on s67 (n31-n32)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 67,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 76,
+    "label": "P2: start line on s68 (n32-n33)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 68,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   },
+   {
+    "id": 77,
+    "label": "P2: start line on s69 (n33-n34)",
+    "kind": "extend",
+    "params": {
+     "end": 0,
+     "street": 69,
+     "from_node": null,
+     "to_node": null,
+     "setup": "first",
+     "shared_end": false
+    }
+   }
+  ],
+  "returns": null,
+  "winners": null,
+  "view": {
+   "state": {
+    "format": 1,
+    "parameters": {
+     "players": 4,
+     "returns": "win_loss"
+    },
+    "round": 0,
+    "phase": "L1",
+    "current_player": 2,
+    "start_player": 0,
+    "clock": "house",
+    "stones_on_clock": 5,
+    "seats": [
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 20,
+      "line": [
+       16
+      ],
+      "last_score_move": null
+     },
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 20,
+      "line": [
+       37
+      ],
+      "last_score_move": null
+     },
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 20,
+      "line": [],
+      "last_score_move": null
+     },
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 20,
+      "line": [],
+      "last_score_move": null
+     }
+    ],
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 1,
+      "type": "office",
+      "occupied": false
+     },
+     {
+      "site": 2,
+      "type": "pub",
+      "occupied": false
+     },
+     {
+      "site": 3,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 4,
+      "type": "office",
+      "occupied": false
+     },
+     {
+      "site": 5,
+      "type": "pub",
+      "occupied": false
+     },
+     {
+      "site": 6,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 7,
+      "type": "office",
+      "occupied": false
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "supply": 11,
+    "action_board": {
+     "lines": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "done": 2
+    },
+    "move_offset": 0
+   },
+   "derived": {
+    "seats": [
+     {
+      "line_markers_left": 24,
+      "line_nodes": [
+       6,
+       7
+      ],
+      "ends": [
+       6,
+       7
+      ],
+      "dropped": false
+     },
+     {
+      "line_markers_left": 24,
+      "line_nodes": [
+       16,
+       19
+      ],
+      "ends": [
+       16,
+       19
+      ],
+      "dropped": false
+     },
+     {
+      "line_markers_left": 25,
+      "line_nodes": [],
+      "ends": null,
+      "dropped": false
+     },
+     {
+      "line_markers_left": 25,
+      "line_nodes": [],
+      "ends": null,
+      "dropped": false
+     }
+    ],
+    "street_lines": {
+     "16": [
+      0
+     ],
+     "37": [
+      1
+     ]
+    },
+    "open_tier": "A",
+    "resolving": null,
+    "result": null
+   },
+   "prompt": {
+    "phase": "L1",
+    "actor": 2,
+    "units_left": null,
+    "power": null,
+    "context": {
+     "done": 2
+    }
+   },
+   "targets": {
+    "streets": {
+     "0": [
+      8
+     ],
+     "1": [
+      9
+     ],
+     "2": [
+      10
+     ],
+     "3": [
+      11
+     ],
+     "4": [
+      12
+     ],
+     "5": [
+      13
+     ],
+     "6": [
+      14
+     ],
+     "7": [
+      15
+     ],
+     "8": [
+      16
+     ],
+     "9": [
+      17
+     ],
+     "10": [
+      18
+     ],
+     "11": [
+      19
+     ],
+     "12": [
+      20
+     ],
+     "13": [
+      21
+     ],
+     "14": [
+      22
+     ],
+     "15": [
+      23
+     ],
+     "16": [
+      24
+     ],
+     "17": [
+      25
+     ],
+     "18": [
+      26
+     ],
+     "19": [
+      27
+     ],
+     "20": [
+      28
+     ],
+     "21": [
+      29
+     ],
+     "22": [
+      30
+     ],
+     "23": [
+      31
+     ],
+     "24": [
+      32
+     ],
+     "25": [
+      33
+     ],
+     "26": [
+      34
+     ],
+     "27": [
+      35
+     ],
+     "28": [
+      36
+     ],
+     "29": [
+      37
+     ],
+     "30": [
+      38
+     ],
+     "31": [
+      39
+     ],
+     "32": [
+      40
+     ],
+     "33": [
+      41
+     ],
+     "34": [
+      42
+     ],
+     "35": [
+      43
+     ],
+     "36": [
+      44
+     ],
+     "37": [
+      45
+     ],
+     "38": [
+      46
+     ],
+     "39": [
+      47
+     ],
+     "40": [
+      48
+     ],
+     "41": [
+      49
+     ],
+     "42": [
+      50
+     ],
+     "43": [
+      51
+     ],
+     "44": [
+      52
+     ],
+     "45": [
+      53
+     ],
+     "46": [
+      54
+     ],
+     "47": [
+      55
+     ],
+     "48": [
+      56
+     ],
+     "49": [
+      57
+     ],
+     "50": [
+      58
+     ],
+     "51": [
+      59
+     ],
+     "52": [
+      60
+     ],
+     "53": [
+      61
+     ],
+     "54": [
+      62
+     ],
+     "55": [
+      63
+     ],
+     "56": [
+      64
+     ],
+     "57": [
+      65
+     ],
+     "58": [
+      66
+     ],
+     "59": [
+      67
+     ],
+     "60": [
+      68
+     ],
+     "61": [
+      69
+     ],
+     "62": [
+      70
+     ],
+     "63": [
+      71
+     ],
+     "64": [
+      72
+     ],
+     "65": [
+      73
+     ],
+     "66": [
+      74
+     ],
+     "67": [
+      75
+     ],
+     "68": [
+      76
+     ],
+     "69": [
+      77
+     ]
+    },
+    "street_ends": {
+     "0": [
+      {
+       "id": 8,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "1": [
+      {
+       "id": 9,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "2": [
+      {
+       "id": 10,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "3": [
+      {
+       "id": 11,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "4": [
+      {
+       "id": 12,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "5": [
+      {
+       "id": 13,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "6": [
+      {
+       "id": 14,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "7": [
+      {
+       "id": 15,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "8": [
+      {
+       "id": 16,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "9": [
+      {
+       "id": 17,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "10": [
+      {
+       "id": 18,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "11": [
+      {
+       "id": 19,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "12": [
+      {
+       "id": 20,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "13": [
+      {
+       "id": 21,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "14": [
+      {
+       "id": 22,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "15": [
+      {
+       "id": 23,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "16": [
+      {
+       "id": 24,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "17": [
+      {
+       "id": 25,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "18": [
+      {
+       "id": 26,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "19": [
+      {
+       "id": 27,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "20": [
+      {
+       "id": 28,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "21": [
+      {
+       "id": 29,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "22": [
+      {
+       "id": 30,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "23": [
+      {
+       "id": 31,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "24": [
+      {
+       "id": 32,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "25": [
+      {
+       "id": 33,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "26": [
+      {
+       "id": 34,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "27": [
+      {
+       "id": 35,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "28": [
+      {
+       "id": 36,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "29": [
+      {
+       "id": 37,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "30": [
+      {
+       "id": 38,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "31": [
+      {
+       "id": 39,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "32": [
+      {
+       "id": 40,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "33": [
+      {
+       "id": 41,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "34": [
+      {
+       "id": 42,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "35": [
+      {
+       "id": 43,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "36": [
+      {
+       "id": 44,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "37": [
+      {
+       "id": 45,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "38": [
+      {
+       "id": 46,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "39": [
+      {
+       "id": 47,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "40": [
+      {
+       "id": 48,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "41": [
+      {
+       "id": 49,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "42": [
+      {
+       "id": 50,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "43": [
+      {
+       "id": 51,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "44": [
+      {
+       "id": 52,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "45": [
+      {
+       "id": 53,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "46": [
+      {
+       "id": 54,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "47": [
+      {
+       "id": 55,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "48": [
+      {
+       "id": 56,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "49": [
+      {
+       "id": 57,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "50": [
+      {
+       "id": 58,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "51": [
+      {
+       "id": 59,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "52": [
+      {
+       "id": 60,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "53": [
+      {
+       "id": 61,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "54": [
+      {
+       "id": 62,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "55": [
+      {
+       "id": 63,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "56": [
+      {
+       "id": 64,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "57": [
+      {
+       "id": 65,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "58": [
+      {
+       "id": 66,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "59": [
+      {
+       "id": 67,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "60": [
+      {
+       "id": 68,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "61": [
+      {
+       "id": 69,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "62": [
+      {
+       "id": 70,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "63": [
+      {
+       "id": 71,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "64": [
+      {
+       "id": 72,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "65": [
+      {
+       "id": 73,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "66": [
+      {
+       "id": 74,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "67": [
+      {
+       "id": 75,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "68": [
+      {
+       "id": 76,
+       "end": 0,
+       "node": null
+      }
+     ],
+     "69": [
+      {
+       "id": 77,
+       "end": 0,
+       "node": null
+      }
+     ]
+    },
+    "sites": {},
+    "stations": {},
+    "nodes": {},
+    "actions": {},
+    "clock": {
+     "advance": null,
+     "pause": null
+    },
+    "buttons": []
+   }
+  }
+ }
+}

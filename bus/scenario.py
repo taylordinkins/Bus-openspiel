@@ -582,10 +582,35 @@ def _build(d: dict[str, Any], game: Any) -> tuple[Core, str]:
     elif explicit_cp is not None and explicit_cp != current:
         raise _err("S-PHASE", f"current_player must be {current} in {phase}")
 
+    if phase in (rules.PHASE_VP, rules.PHASE_VD):
+        _check_clock_step(core)
+
     if strict and _tier_skipped(site_types):
         raise _err("S-SITES", "strict: buildings do not fill tier by tier (R-010)")
 
     return replace(core, seats=tuple(seats), current=current), mode
+
+
+def _check_clock_step(core: Core) -> None:
+    """S-CLOCKSTEP: a VP/VD state must be one the Clock step can leave behind. Implements
+    R-055, R-058, R-059 (D22)."""
+    sites = rules.board().sites
+    for t, ty in enumerate(core.site_types):
+        if ty == EMPTY:
+            continue
+        if t in core.occupied:
+            if ty != core.clock:
+                raise _err(
+                    "S-CLOCKSTEP",
+                    f"site {t} is occupied but is a {C.BUILDING_TYPES[ty]}, the clock reads "
+                    f"{C.BUILDING_TYPES[core.clock]}",
+                )
+        elif ty == core.clock and core.waiting[sites[t].node] > 0:
+            raise _err(
+                "S-CLOCKSTEP",
+                f"a passenger waits at n{sites[t].node} beside the empty "
+                f"{C.BUILDING_TYPES[ty]} on site {t}",
+            )
 
 
 def _tier_skipped(site_types: tuple[int, ...]) -> bool:
@@ -608,8 +633,14 @@ def _check_expect_schema(d: dict[str, Any]) -> None:
         _only_keys(e, EXPECT_KEYS, "expect")
 
 
-def load_scenario(doc: dict[str, Any] | str | Path, game: Any = None) -> BusState:
-    """Load, validate and play out a scenario document. Implements SCENARIOS 2-6 and 9."""
+def load_scenario(
+    doc: dict[str, Any] | str | Path, game: Any = None, *, require_legal: bool = False
+) -> BusState:
+    """Load, validate and play out a scenario document. Implements SCENARIOS 2-6 and 9.
+
+    ``require_legal`` (server import path) also rejects a non-terminal final position with no
+    legal action, which fixtures may rest at (SCENARIOS 6) but a played game never reaches.
+    """
     d = _read(doc)
     core, mode = _build(d, game)
     _check_expect_schema(d)
@@ -624,6 +655,8 @@ def load_scenario(doc: dict[str, Any] | str | Path, game: Any = None) -> BusStat
         if a not in rules.legal_actions(state.core):
             raise _err("S-HISTORY", f"action {a} is illegal in phase {state.core.phase}")
         state.apply_action(a)
+    if require_legal and not state.is_terminal() and not rules.legal_actions(state.core):
+        raise _err("S-PHASE", f"{state.core.phase} is not terminal but has no legal action")
     return state
 
 

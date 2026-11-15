@@ -13,7 +13,8 @@ merged by PR.
 - Lint/format/types: `uv run ruff check .` · `uv run ruff format .` · `uv run pyright`
 - From Phase 1: `uv run python -m tools.play_text --players 4 --seed 7 [--human 0]`,
   `uv run python -m tools.replay <file.json> [--steps]`
-- From Phase 2: server `uv run uvicorn server.app:app --reload`; web `cd web && npm ci && npm run dev|test|typecheck|build|e2e`
+- From Phase 2: `tools/dev.sh` starts API (:8000) and web (:5173) together, Ctrl-C stops both.
+  Separately: server `uv run uvicorn server.app:app --reload`; web `cd web && npm ci && npm run dev|test|typecheck|build|e2e`
 
 ## Model and agent policy
 The main session orchestrates; it delegates rather than writing large changes itself.

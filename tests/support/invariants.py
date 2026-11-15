@@ -66,6 +66,18 @@ def check_invariants(state: Any, prev: Any = None) -> list[str]:
         if any(state.site_building(t) is None for t in sites):
             seen_empty = True
 
+    # after the Clock step, while Vrrooomm! resolves (R-055, S-CLOCKSTEP; D22, playtest 2b0b32)
+    if state.phase in ("VP", "VD"):
+        for t, site in enumerate(board.sites):
+            ty = state.site_building(t)
+            if ty is None:
+                continue
+            if state.is_occupied(t):
+                if ty != state.clock:
+                    out.append(f"Clock step: site {t} is an occupied {ty}, clock {state.clock}")
+            elif ty == state.clock and state.waiting_at(site.node) > 0:
+                out.append(f"Clock step: a passenger waits at n{site.node} beside empty {ty} {t}")
+
     # stones (R-006)
     total = state.stones_on_clock + sum(s.stones for s in seats)
     if total != C.time_stones(n):

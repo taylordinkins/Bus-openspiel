@@ -371,6 +371,11 @@ def _positions(core: Core) -> list[tuple[int, int]]:
     return out
 
 
+def resolution_positions(core: Core) -> list[tuple[int, int]]:
+    """Public view of the resolution order of the markers on the board. Implements R-029, R-030."""
+    return _positions(core)
+
+
 def _line_nodes(core: Core, seat: int) -> set[int]:
     from bus.lines import line_nodes
 
@@ -524,8 +529,8 @@ def _ck_apply(core: Core, action: int) -> Core:
 
     if action not in _ck_legal(core):
         raise ValueError(f"illegal action {action} in {core.phase}")
-    if action == CLOCK_ADVANCE:  # R-051
-        nxt = replace(core, clock=(core.clock + 1) % len(C.BUILDING_TYPES))
+    if action == CLOCK_ADVANCE:  # R-051: replaces the automatic advance, no stone
+        nxt = advance_clock(core)
     else:  # R-052
         p = core.current
         seat = core.seats[p]
@@ -555,7 +560,11 @@ def _vp_apply(core: Core, action: int) -> Core:
 
 
 def _vd_targets(core: Core) -> dict[int, int]:
-    """Lowest-id empty clock-type building per line node (R-058, R-061, R-063)."""
+    """Lowest-id empty clock-type building per line node (R-059, R-063).
+
+    After the Clock step no such building shares a node with a waiting passenger (R-055,
+    S-CLOCKSTEP), so the picked passenger's own node is never among them (R-061 retired, D22).
+    """
     nodes = _line_nodes(core, core.current)
     sites = board().sites
     out: dict[int, int] = {}
@@ -567,7 +576,7 @@ def _vd_targets(core: Core) -> dict[int, int]:
 
 
 def _vd_legal(core: Core) -> list[int]:
-    """Implements R-058, R-061, R-063: one delivery site per node on the line."""
+    """Implements R-059, R-063: one delivery site per node on the line."""
     from bus.actions import encode_deliver_to
 
     return sorted(encode_deliver_to(t) for t in _vd_targets(core).values())
@@ -607,16 +616,38 @@ def _resolve_buses(core: Core, owner: int) -> Core:
     return replace(core, seats=seats)
 
 
+def advance_clock(core: Core) -> Core:
+    """Move the clock hand one space: house -> office -> pub -> house. Implements R-051."""
+    return replace(core, clock=(core.clock + 1) % len(C.BUILDING_TYPES))
+
+
+def automatic_clock_step(core: Core) -> Core:
+    """The Clock step of a round with no Clock marker: advance, then step-out and step-in; no
+    stone, no decision. Implements R-029, R-050, R-051, R-054, R-055 (D22)."""
+    return move_passengers(advance_clock(core))
+
+
 def _resolve_from(core: Core, index: int) -> Core:
-    """Resolve markers from position ``index`` on until a decision node or the round's end."""
+    """Resolve markers from position ``index`` on until a decision node or the round's end.
+
+    Implements R-029, R-050: without a Clock marker the automatic Clock step runs once, when
+    resolution crosses the Clock slot (after Buildings, before Vrrooomm!).
+    """
     positions = _positions(core)
+    auto = not core.action_board[ACT_CLOCK]
+    prev = positions[index - 1][0] if index > 0 else -1
     for a, k in positions[index:]:
+        if auto and prev < ACT_CLOCK < a:
+            core = automatic_clock_step(core)
+        prev = a
         if a == ACT_BUSES:
             core = _resolve_buses(core, core.action_board[a][k])
             continue
         node = _enter(core, a, k)
         if node is not None:
             return node
+    if auto and prev < ACT_CLOCK:
+        core = automatic_clock_step(core)
     return end_round(core)
 
 
@@ -642,6 +673,11 @@ _PHASE_ACTION = {
     PHASE_VP: ACT_VRROOOMM,
     PHASE_VD: ACT_VRROOOMM,
 }
+
+
+def resolving_action(core: Core) -> int | None:
+    """Action kind of the marker being resolved, or None outside resolution. Implements R-029."""
+    return _PHASE_ACTION.get(core.phase)
 
 
 def end_round(core: Core) -> Core:

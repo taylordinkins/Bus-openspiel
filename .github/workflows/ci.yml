@@ -20,5 +20,65 @@ jobs:
         # exit code 5 means no slow tests were collected
         run: uv run pytest -q -m slow -rxX || test $? -eq 5
 
-  # The web and e2e jobs (typecheck, vitest, build, generated API types, Playwright) are added
-  # in Phase 2 when web/ exists; copy them from the lignum repo's ci.yml.
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      # check:api exports the OpenAPI schema from the Python server
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+        working-directory: .
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: Generated API types are up to date
+        run: npm run check:api
+
+  e2e:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      # the Playwright config starts the FastAPI server with uv
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked
+        working-directory: .
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('web/package-lock.json') }}
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+      - name: Screenshot baselines (advisory; pixels depend on the machine's fonts)
+        id: shots
+        continue-on-error: true
+        run: npm run e2e:shots
+      - uses: actions/upload-artifact@v4
+        if: failure() || steps.shots.outcome == 'failure'
+        with:
+          name: playwright-report
+          path: |
+            web/playwright-report
+            web/test-results

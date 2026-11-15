@@ -126,12 +126,13 @@ The owner gets +1 bus if they have fewer than 5; otherwise nothing. No decision,
 - `CLOCK_PAUSE` that takes the last stone ends the game immediately (R-053): terminal, nothing else resolves, the marker already spent.
 - After the choice (if the game continues) passenger movement runs **automatically** with no further decision: step-out (R-054), then step-in at each node by ascending site id (R-055).
 - **Pending state:** none beyond the marker owner.
+- **No Clock marker (D22):** the Clock step still runs every round at the Clock slot (after Buildings, before Vrrooomm!, R-029, R-050), as an **automatic** step: the clock advances one space, no stone is taken, then step-out and step-in run as above. It adds no action id and no decision node. The `CK` node exists only when a Clock marker resolves; its owner's `CLOCK_ADVANCE` replaces the automatic advance (the clock moves once, not twice).
 
 ### 3.10 `VP` / `VD` — Vrrooomm! (R-056..R-063)
 - **Who:** the marker owner; letter a first. Not dwindling (R-056).
 - **Forced count** (R-060): `moves = min(buses, waiting passengers on the owner's line, empty buildings of the clock's type on the owner's line)`, computed when the marker starts. If it is 0 no node is emitted. Each move reduces all three quantities by 1, so the count is always achievable whatever the owner picks; the owner cannot stop early.
 - **`VP` legal:** `PICK_PASSENGER(n)` for each node `n` that is on the owner's line (R-058) and has at least one waiting passenger. Passengers inside buildings are not eligible.
-- **`VD` legal:** `DELIVER_TO(t)` where `t` is the **canonical site**: for every node `m` on the owner's line that has at least one empty building of the clock's type, the **lowest site id** among those empty buildings at `m` (R-059, R-063). The passenger's own node is allowed (R-061).
+- **`VD` legal:** `DELIVER_TO(t)` where `t` is the **canonical site**: for every node `m` on the owner's line that has at least one empty building of the clock's type, the **lowest site id** among those empty buildings at `m` (R-059, R-063). The picked passenger's own node never qualifies: after the Clock step it has no empty building of the clock's type (R-055), and loaded states where it would are rejected (`S-CLOCKSTEP`), so every delivery goes elsewhere on the line (R-061 retired, D22).
 - **Pending state:** `moves_left` (1..5), `picked_node` (none in `VP`, set in `VD`), the owner. `DELIVER_TO` moves the passenger, fills the building, adds 1 point, sets `last_score_move[owner]` to the move number (R-062), decrements `moves_left`; the next node is `VP` while `moves_left > 0`.
 - No sequence of moves is ever blocked: after any `PICK_PASSENGER` at least one `DELIVER_TO` is legal.
 
@@ -142,7 +143,7 @@ The Starting Player marker (if any) sets the next start player; otherwise the st
 No legal actions. `returns()` per R-071 / R-072. The recorded end-type list (R-066) and winners (R-069) are exposed through the observer string and `game_result(state)`.
 
 ### Automatic steps (no node, no id)
-Skipped seats in `SEL`; power ≤ 0 markers; Lines with no legal extension; the Buses action; Passengers with empty supply; Buildings with no empty site; Vrrooomm! with `moves = 0`; passenger step-out and step-in after the Clock choice; Starting Player and round-end bookkeeping. They are applied by the transition that produced them, so the next state is always a decision node or terminal.
+Skipped seats in `SEL`; power ≤ 0 markers; Lines with no legal extension; the Buses action; Passengers with empty supply; Buildings with no empty site; Vrrooomm! with `moves = 0`; passenger step-out and step-in after the Clock choice; the Clock step (advance, step-out, step-in) in a round with no Clock marker (D22); Starting Player and round-end bookkeeping. They are applied by the transition that produced them, so the next state is always a decision node or terminal.
 
 ## 4. `action_to_string` format
 
@@ -177,7 +178,7 @@ Returns a JSON-serialisable dict for any legal action (and, via `decode_action`,
 | `clock_advance` | `from` and `to` clock types |
 | `clock_pause` | `stones_left_after`, `ends_game` (bool) |
 | `pick_passenger` | `node`, `waiting` (count there) |
-| `deliver_to` | `site`, `node`, `tier`, `building_type`, `picked_node`, `same_node` (bool) |
+| `deliver_to` | `site`, `node`, `tier`, `building_type`, `picked_node`, `same_node` (bool; always false for a legal delivery since D22 retired R-061, kept so the metadata shape is stable) |
 
 The UI makes every legal action reachable by clicking: streets for `extend`, sites for `build` (type chosen in a popover, `building_type` per id), station nodes for `passenger_to`, the clock for `clock_*`, passenger nodes then site nodes for `pick`/`deliver`, and the action board for `select`/`drop_out` (D9).
 
