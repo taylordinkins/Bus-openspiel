@@ -219,7 +219,7 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 - [x] 2. Bot framework: `bots/` package, `Bot` protocol, registry, `RandomBot` moved (server re-exports), parameterised seat types (`mcts:200`), server seat pattern from registry — `implementer` (2026-11-15; 1693 tests)
 - [x] 3. Heuristic bot (`bots/heuristic.py`): greedy over hand features via `action_meta`; always legal, deterministic per seed, beats random in a 40-game smoke match — `implementer` (2026-11-15; 0.05 ms/decision, smoke 0.875 vs 3 random; 1700 tests)
 - [x] 4. MCTS bot (`bots/mcts.py`): Python `MCTSBot`, random/heuristic rollouts, simulation cap and wall-clock think-time limit; always legal, respects limits — `implementer` (2026-11-15; seat type `mcts:N` or `mcts:N-heuristic`; 200 sims ≈0.7 s random / 1.2 s heuristic rollouts; `with_time_limit(s)` for the server; 1718 tests)
-- [ ] 5. `tools/tournament.py`: seat rotation, process pool, seeded, Wilson 95% CIs, JSON output; reproducible 20-game run — `implementer`
+- [x] 5. `tools/tournament.py`: seat rotation, process pool, seeded, Wilson 95% CIs, JSON output; reproducible 20-game run — `implementer` (2026-11-15; 1724 tests; 20-game smoke: heuristic 82.5% vs 3 random)
 - [ ] 6. Server and lobby bot seats (`heuristic`, `mcts`) with per-seat think-time cap and fallback; server tests, vitest, Playwright game with a heuristic seat, `check:api` — `implementer`
 - [ ] 7. Strength evaluation and tuning: ≥200 4-player games each, MCTS vs random and heuristic vs random, Wilson lower bound > 50%; report `docs/phase-reports/phase-3-bots.md` — `sim-runner`, `implementer`
 - [ ] 8. ✋ Playtest #2: you play against the bots and file reports
