@@ -1,0 +1,904 @@
+{
+ "id": "9c8ae9e6463f450cb142756425982ce4",
+ "game": "bus",
+ "seats": [
+  "human",
+  "human",
+  "human",
+  "human"
+ ],
+ "seat_types": [
+  "human",
+  "human",
+  "human",
+  "human"
+ ],
+ "bot_thinking": false,
+ "bot_error": null,
+ "seat": 1,
+ "history_length": 0,
+ "history": [],
+ "dev_mode": false,
+ "current_player": 1,
+ "is_terminal": false,
+ "legal_actions": [
+  {
+   "id": 157,
+   "label": "P1: build house at site 3 (A, n13)",
+   "kind": "build",
+   "params": {
+    "site": 3,
+    "node": 13,
+    "tier": "A",
+    "building_type": "house",
+    "setup": true
+   }
+  },
+  {
+   "id": 158,
+   "label": "P1: build office at site 3 (A, n13)",
+   "kind": "build",
+   "params": {
+    "site": 3,
+    "node": 13,
+    "tier": "A",
+    "building_type": "office",
+    "setup": true
+   }
+  },
+  {
+   "id": 159,
+   "label": "P1: build pub at site 3 (A, n13)",
+   "kind": "build",
+   "params": {
+    "site": 3,
+    "node": 13,
+    "tier": "A",
+    "building_type": "pub",
+    "setup": true
+   }
+  },
+  {
+   "id": 160,
+   "label": "P1: build house at site 4 (A, n17)",
+   "kind": "build",
+   "params": {
+    "site": 4,
+    "node": 17,
+    "tier": "A",
+    "building_type": "house",
+    "setup": true
+   }
+  },
+  {
+   "id": 161,
+   "label": "P1: build office at site 4 (A, n17)",
+   "kind": "build",
+   "params": {
+    "site": 4,
+    "node": 17,
+    "tier": "A",
+    "building_type": "office",
+    "setup": true
+   }
+  },
+  {
+   "id": 162,
+   "label": "P1: build pub at site 4 (A, n17)",
+   "kind": "build",
+   "params": {
+    "site": 4,
+    "node": 17,
+    "tier": "A",
+    "building_type": "pub",
+    "setup": true
+   }
+  },
+  {
+   "id": 163,
+   "label": "P1: build house at site 5 (A, n17)",
+   "kind": "build",
+   "params": {
+    "site": 5,
+    "node": 17,
+    "tier": "A",
+    "building_type": "house",
+    "setup": true
+   }
+  },
+  {
+   "id": 164,
+   "label": "P1: build office at site 5 (A, n17)",
+   "kind": "build",
+   "params": {
+    "site": 5,
+    "node": 17,
+    "tier": "A",
+    "building_type": "office",
+    "setup": true
+   }
+  },
+  {
+   "id": 165,
+   "label": "P1: build pub at site 5 (A, n17)",
+   "kind": "build",
+   "params": {
+    "site": 5,
+    "node": 17,
+    "tier": "A",
+    "building_type": "pub",
+    "setup": true
+   }
+  },
+  {
+   "id": 166,
+   "label": "P1: build house at site 6 (A, n18)",
+   "kind": "build",
+   "params": {
+    "site": 6,
+    "node": 18,
+    "tier": "A",
+    "building_type": "house",
+    "setup": true
+   }
+  },
+  {
+   "id": 167,
+   "label": "P1: build office at site 6 (A, n18)",
+   "kind": "build",
+   "params": {
+    "site": 6,
+    "node": 18,
+    "tier": "A",
+    "building_type": "office",
+    "setup": true
+   }
+  },
+  {
+   "id": 168,
+   "label": "P1: build pub at site 6 (A, n18)",
+   "kind": "build",
+   "params": {
+    "site": 6,
+    "node": 18,
+    "tier": "A",
+    "building_type": "pub",
+    "setup": true
+   }
+  },
+  {
+   "id": 169,
+   "label": "P1: build house at site 7 (A, n18)",
+   "kind": "build",
+   "params": {
+    "site": 7,
+    "node": 18,
+    "tier": "A",
+    "building_type": "house",
+    "setup": true
+   }
+  },
+  {
+   "id": 170,
+   "label": "P1: build office at site 7 (A, n18)",
+   "kind": "build",
+   "params": {
+    "site": 7,
+    "node": 18,
+    "tier": "A",
+    "building_type": "office",
+    "setup": true
+   }
+  },
+  {
+   "id": 171,
+   "label": "P1: build pub at site 7 (A, n18)",
+   "kind": "build",
+   "params": {
+    "site": 7,
+    "node": 18,
+    "tier": "A",
+    "building_type": "pub",
+    "setup": true
+   }
+  },
+  {
+   "id": 172,
+   "label": "P1: build house at site 8 (A, n20)",
+   "kind": "build",
+   "params": {
+    "site": 8,
+    "node": 20,
+    "tier": "A",
+    "building_type": "house",
+    "setup": true
+   }
+  },
+  {
+   "id": 173,
+   "label": "P1: build office at site 8 (A, n20)",
+   "kind": "build",
+   "params": {
+    "site": 8,
+    "node": 20,
+    "tier": "A",
+    "building_type": "office",
+    "setup": true
+   }
+  },
+  {
+   "id": 174,
+   "label": "P1: build pub at site 8 (A, n20)",
+   "kind": "build",
+   "params": {
+    "site": 8,
+    "node": 20,
+    "tier": "A",
+    "building_type": "pub",
+    "setup": true
+   }
+  },
+  {
+   "id": 175,
+   "label": "P1: build house at site 9 (A, n21)",
+   "kind": "build",
+   "params": {
+    "site": 9,
+    "node": 21,
+    "tier": "A",
+    "building_type": "house",
+    "setup": true
+   }
+  },
+  {
+   "id": 176,
+   "label": "P1: build office at site 9 (A, n21)",
+   "kind": "build",
+   "params": {
+    "site": 9,
+    "node": 21,
+    "tier": "A",
+    "building_type": "office",
+    "setup": true
+   }
+  },
+  {
+   "id": 177,
+   "label": "P1: build pub at site 9 (A, n21)",
+   "kind": "build",
+   "params": {
+    "site": 9,
+    "node": 21,
+    "tier": "A",
+    "building_type": "pub",
+    "setup": true
+   }
+  },
+  {
+   "id": 178,
+   "label": "P1: build house at site 10 (A, n21)",
+   "kind": "build",
+   "params": {
+    "site": 10,
+    "node": 21,
+    "tier": "A",
+    "building_type": "house",
+    "setup": true
+   }
+  },
+  {
+   "id": 179,
+   "label": "P1: build office at site 10 (A, n21)",
+   "kind": "build",
+   "params": {
+    "site": 10,
+    "node": 21,
+    "tier": "A",
+    "building_type": "office",
+    "setup": true
+   }
+  },
+  {
+   "id": 180,
+   "label": "P1: build pub at site 10 (A, n21)",
+   "kind": "build",
+   "params": {
+    "site": 10,
+    "node": 21,
+    "tier": "A",
+    "building_type": "pub",
+    "setup": true
+   }
+  },
+  {
+   "id": 181,
+   "label": "P1: build house at site 11 (A, n26)",
+   "kind": "build",
+   "params": {
+    "site": 11,
+    "node": 26,
+    "tier": "A",
+    "building_type": "house",
+    "setup": true
+   }
+  },
+  {
+   "id": 182,
+   "label": "P1: build office at site 11 (A, n26)",
+   "kind": "build",
+   "params": {
+    "site": 11,
+    "node": 26,
+    "tier": "A",
+    "building_type": "office",
+    "setup": true
+   }
+  },
+  {
+   "id": 183,
+   "label": "P1: build pub at site 11 (A, n26)",
+   "kind": "build",
+   "params": {
+    "site": 11,
+    "node": 26,
+    "tier": "A",
+    "building_type": "pub",
+    "setup": true
+   }
+  }
+ ],
+ "returns": null,
+ "winners": null,
+ "view": {
+  "seat": 1,
+  "current_player": 1,
+  "is_terminal": false,
+  "legal_actions": [
+   {
+    "id": 157,
+    "label": "P1: build house at site 3 (A, n13)",
+    "kind": "build",
+    "params": {
+     "site": 3,
+     "node": 13,
+     "tier": "A",
+     "building_type": "house",
+     "setup": true
+    }
+   },
+   {
+    "id": 158,
+    "label": "P1: build office at site 3 (A, n13)",
+    "kind": "build",
+    "params": {
+     "site": 3,
+     "node": 13,
+     "tier": "A",
+     "building_type": "office",
+     "setup": true
+    }
+   },
+   {
+    "id": 159,
+    "label": "P1: build pub at site 3 (A, n13)",
+    "kind": "build",
+    "params": {
+     "site": 3,
+     "node": 13,
+     "tier": "A",
+     "building_type": "pub",
+     "setup": true
+    }
+   },
+   {
+    "id": 160,
+    "label": "P1: build house at site 4 (A, n17)",
+    "kind": "build",
+    "params": {
+     "site": 4,
+     "node": 17,
+     "tier": "A",
+     "building_type": "house",
+     "setup": true
+    }
+   },
+   {
+    "id": 161,
+    "label": "P1: build office at site 4 (A, n17)",
+    "kind": "build",
+    "params": {
+     "site": 4,
+     "node": 17,
+     "tier": "A",
+     "building_type": "office",
+     "setup": true
+    }
+   },
+   {
+    "id": 162,
+    "label": "P1: build pub at site 4 (A, n17)",
+    "kind": "build",
+    "params": {
+     "site": 4,
+     "node": 17,
+     "tier": "A",
+     "building_type": "pub",
+     "setup": true
+    }
+   },
+   {
+    "id": 163,
+    "label": "P1: build house at site 5 (A, n17)",
+    "kind": "build",
+    "params": {
+     "site": 5,
+     "node": 17,
+     "tier": "A",
+     "building_type": "house",
+     "setup": true
+    }
+   },
+   {
+    "id": 164,
+    "label": "P1: build office at site 5 (A, n17)",
+    "kind": "build",
+    "params": {
+     "site": 5,
+     "node": 17,
+     "tier": "A",
+     "building_type": "office",
+     "setup": true
+    }
+   },
+   {
+    "id": 165,
+    "label": "P1: build pub at site 5 (A, n17)",
+    "kind": "build",
+    "params": {
+     "site": 5,
+     "node": 17,
+     "tier": "A",
+     "building_type": "pub",
+     "setup": true
+    }
+   },
+   {
+    "id": 166,
+    "label": "P1: build house at site 6 (A, n18)",
+    "kind": "build",
+    "params": {
+     "site": 6,
+     "node": 18,
+     "tier": "A",
+     "building_type": "house",
+     "setup": true
+    }
+   },
+   {
+    "id": 167,
+    "label": "P1: build office at site 6 (A, n18)",
+    "kind": "build",
+    "params": {
+     "site": 6,
+     "node": 18,
+     "tier": "A",
+     "building_type": "office",
+     "setup": true
+    }
+   },
+   {
+    "id": 168,
+    "label": "P1: build pub at site 6 (A, n18)",
+    "kind": "build",
+    "params": {
+     "site": 6,
+     "node": 18,
+     "tier": "A",
+     "building_type": "pub",
+     "setup": true
+    }
+   },
+   {
+    "id": 169,
+    "label": "P1: build house at site 7 (A, n18)",
+    "kind": "build",
+    "params": {
+     "site": 7,
+     "node": 18,
+     "tier": "A",
+     "building_type": "house",
+     "setup": true
+    }
+   },
+   {
+    "id": 170,
+    "label": "P1: build office at site 7 (A, n18)",
+    "kind": "build",
+    "params": {
+     "site": 7,
+     "node": 18,
+     "tier": "A",
+     "building_type": "office",
+     "setup": true
+    }
+   },
+   {
+    "id": 171,
+    "label": "P1: build pub at site 7 (A, n18)",
+    "kind": "build",
+    "params": {
+     "site": 7,
+     "node": 18,
+     "tier": "A",
+     "building_type": "pub",
+     "setup": true
+    }
+   },
+   {
+    "id": 172,
+    "label": "P1: build house at site 8 (A, n20)",
+    "kind": "build",
+    "params": {
+     "site": 8,
+     "node": 20,
+     "tier": "A",
+     "building_type": "house",
+     "setup": true
+    }
+   },
+   {
+    "id": 173,
+    "label": "P1: build office at site 8 (A, n20)",
+    "kind": "build",
+    "params": {
+     "site": 8,
+     "node": 20,
+     "tier": "A",
+     "building_type": "office",
+     "setup": true
+    }
+   },
+   {
+    "id": 174,
+    "label": "P1: build pub at site 8 (A, n20)",
+    "kind": "build",
+    "params": {
+     "site": 8,
+     "node": 20,
+     "tier": "A",
+     "building_type": "pub",
+     "setup": true
+    }
+   },
+   {
+    "id": 175,
+    "label": "P1: build house at site 9 (A, n21)",
+    "kind": "build",
+    "params": {
+     "site": 9,
+     "node": 21,
+     "tier": "A",
+     "building_type": "house",
+     "setup": true
+    }
+   },
+   {
+    "id": 176,
+    "label": "P1: build office at site 9 (A, n21)",
+    "kind": "build",
+    "params": {
+     "site": 9,
+     "node": 21,
+     "tier": "A",
+     "building_type": "office",
+     "setup": true
+    }
+   },
+   {
+    "id": 177,
+    "label": "P1: build pub at site 9 (A, n21)",
+    "kind": "build",
+    "params": {
+     "site": 9,
+     "node": 21,
+     "tier": "A",
+     "building_type": "pub",
+     "setup": true
+    }
+   },
+   {
+    "id": 178,
+    "label": "P1: build house at site 10 (A, n21)",
+    "kind": "build",
+    "params": {
+     "site": 10,
+     "node": 21,
+     "tier": "A",
+     "building_type": "house",
+     "setup": true
+    }
+   },
+   {
+    "id": 179,
+    "label": "P1: build office at site 10 (A, n21)",
+    "kind": "build",
+    "params": {
+     "site": 10,
+     "node": 21,
+     "tier": "A",
+     "building_type": "office",
+     "setup": true
+    }
+   },
+   {
+    "id": 180,
+    "label": "P1: build pub at site 10 (A, n21)",
+    "kind": "build",
+    "params": {
+     "site": 10,
+     "node": 21,
+     "tier": "A",
+     "building_type": "pub",
+     "setup": true
+    }
+   },
+   {
+    "id": 181,
+    "label": "P1: build house at site 11 (A, n26)",
+    "kind": "build",
+    "params": {
+     "site": 11,
+     "node": 26,
+     "tier": "A",
+     "building_type": "house",
+     "setup": true
+    }
+   },
+   {
+    "id": 182,
+    "label": "P1: build office at site 11 (A, n26)",
+    "kind": "build",
+    "params": {
+     "site": 11,
+     "node": 26,
+     "tier": "A",
+     "building_type": "office",
+     "setup": true
+    }
+   },
+   {
+    "id": 183,
+    "label": "P1: build pub at site 11 (A, n26)",
+    "kind": "build",
+    "params": {
+     "site": 11,
+     "node": 26,
+     "tier": "A",
+     "building_type": "pub",
+     "setup": true
+    }
+   }
+  ],
+  "returns": null,
+  "winners": null,
+  "view": {
+   "state": {
+    "format": 1,
+    "parameters": {
+     "players": 4,
+     "returns": "win_loss"
+    },
+    "round": 0,
+    "phase": "SB",
+    "current_player": 1,
+    "start_player": 0,
+    "clock": "house",
+    "stones_on_clock": 5,
+    "seats": [
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 20,
+      "line": [],
+      "last_score_move": null
+     },
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 20,
+      "line": [],
+      "last_score_move": null
+     },
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 20,
+      "line": [],
+      "last_score_move": null
+     },
+     {
+      "points": 0,
+      "stones": 0,
+      "buses": 1,
+      "markers_left": 20,
+      "line": [],
+      "last_score_move": null
+     }
+    ],
+    "buildings": [
+     {
+      "site": 0,
+      "type": "house",
+      "occupied": false
+     },
+     {
+      "site": 1,
+      "type": "office",
+      "occupied": false
+     },
+     {
+      "site": 2,
+      "type": "pub",
+      "occupied": false
+     }
+    ],
+    "waiting": {
+     "13": 1,
+     "17": 1,
+     "18": 1,
+     "21": 1
+    },
+    "supply": 11,
+    "action_board": {
+     "lines": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buses": [
+      null
+     ],
+     "passengers": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "buildings": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "clock": [
+      null
+     ],
+     "vrrooomm": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+     ],
+     "starting_player": [
+      null
+     ]
+    },
+    "pending": {
+     "done": 3
+    },
+    "move_offset": 0
+   },
+   "derived": {
+    "seats": [
+     {
+      "line_markers_left": 25,
+      "line_nodes": [],
+      "ends": null,
+      "dropped": false
+     },
+     {
+      "line_markers_left": 25,
+      "line_nodes": [],
+      "ends": null,
+      "dropped": false
+     },
+     {
+      "line_markers_left": 25,
+      "line_nodes": [],
+      "ends": null,
+      "dropped": false
+     },
+     {
+      "line_markers_left": 25,
+      "line_nodes": [],
+      "ends": null,
+      "dropped": false
+     }
+    ],
+    "street_lines": {},
+    "open_tier": "A",
+    "resolving": null,
+    "result": null
+   },
+   "prompt": {
+    "phase": "SB",
+    "actor": 1,
+    "units_left": null,
+    "power": null,
+    "context": {
+     "done": 3
+    }
+   },
+   "targets": {
+    "streets": {},
+    "sites": {
+     "3": [
+      157,
+      158,
+      159
+     ],
+     "4": [
+      160,
+      161,
+      162
+     ],
+     "5": [
+      163,
+      164,
+      165
+     ],
+     "6": [
+      166,
+      167,
+      168
+     ],
+     "7": [
+      169,
+      170,
+      171
+     ],
+     "8": [
+      172,
+      173,
+      174
+     ],
+     "9": [
+      175,
+      176,
+      177
+     ],
+     "10": [
+      178,
+      179,
+      180
+     ],
+     "11": [
+      181,
+      182,
+      183
+     ]
+    },
+    "stations": {},
+    "nodes": {},
+    "actions": {},
+    "clock": {
+     "advance": null,
+     "pause": null
+    },
+    "buttons": []
+   }
+  }
+ }
+}

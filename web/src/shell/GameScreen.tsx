@@ -197,7 +197,7 @@ export default function GameScreen({
         {error && <p role="alert">Error: {error}</p>}
         {!game && !error && !covered && <p>Loading…</p>}
         {raw && covered && viewSeat !== null && (
-          <Curtain seat={viewSeat} disabled={mismatch} onReveal={() => setAckSeat(viewSeat)} />
+          <Curtain seat={viewSeat} accent={plugin.seatStyle?.(viewSeat)} disabled={mismatch} onReveal={() => setAckSeat(viewSeat)} />
         )}
         {game && ui && !covered && (
           <>
@@ -209,6 +209,7 @@ export default function GameScreen({
               </div>
               <div className="lg-side">
                 <div className="lg-pane-play">
+                  {plugin.renderSide?.(game, ui)}
                   {botThinking && cp !== null && (
                     <p role="status">{thinkingText(game.seats[cp] ?? "", cp)}</p>
                   )}
@@ -251,7 +252,11 @@ export default function GameScreen({
                 </div>
                 <div className="lg-log lg-pane-log">
                   <h3>Action log</h3>
-                  <ActionLog history={game.history} actorStyle={plugin.seatStyle} />
+                  {plugin.renderLog ? (
+                    plugin.renderLog(game)
+                  ) : (
+                    <ActionLog history={game.history} actorStyle={plugin.seatStyle} />
+                  )}
                 </div>
               </div>
             </div>

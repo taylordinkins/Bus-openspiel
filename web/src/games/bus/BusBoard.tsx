@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import type { BusGeometry } from "./geometry";
+import { useHighlight, type BusHighlight } from "./hoverStore";
 import { busInfo, markerInfo, nodeInfo, scoreInfo, siteInfo, streetInfo } from "./hoverInfo";
 import {
   INK,
@@ -32,6 +33,15 @@ import {
   type Viewport,
 } from "./viewport";
 
+const HL = "#FFD24A";
+
+/** Streets to light: those named directly plus every street of a highlighted seat's line. */
+function hlStreets(data: BusViewData, hl: BusHighlight): number[] {
+  const out = new Set<number>(hl.streets);
+  for (const s of hl.seats) for (const sid of data.state.seats[s]?.line ?? []) out.add(sid);
+  return [...out];
+}
+
 export const MAP_SRC = "/bus-map.png";
 
 interface Hover {
@@ -47,6 +57,7 @@ export default function BusBoard({ geo, data }: { geo: BusGeometry; data: BusVie
   const size = geo.map.width;
   const [vp, setVp] = useState<Viewport>(() => fitViewport(size));
   const [hover, setHover] = useState<Hover | null>(null);
+  const hl = useHighlight();
   const wrap = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<{ x: number; y: number } | null>(null);
@@ -280,7 +291,7 @@ export default function BusBoard({ geo, data }: { geo: BusGeometry; data: BusVie
   const zoomButton = (factor: number) => () => setVp((v) => zoomAt(v, size, factor));
 
   return (
-    <div className="bus-board" ref={wrap} style={{ position: "relative", maxWidth: 900 }}>
+    <div className="bus-board" ref={wrap}>
       <div role="group" aria-label="Board zoom" style={{ display: "flex", gap: 4, marginBottom: 4 }}>
         <button type="button" aria-label="Zoom in" onClick={zoomButton(1.25)} disabled={vp.scale >= 2.5}>+</button>
         <button type="button" aria-label="Zoom out" onClick={zoomButton(1 / 1.25)} disabled={vp.scale <= 1}>−</button>
@@ -289,6 +300,7 @@ export default function BusBoard({ geo, data }: { geo: BusGeometry; data: BusVie
           {Math.round(vp.scale * 100)}%
         </span>
       </div>
+      <div className="bus-svg-box">
       <svg
         ref={svgRef}
         role="img"
@@ -298,13 +310,40 @@ export default function BusBoard({ geo, data }: { geo: BusGeometry; data: BusVie
         data-cx={vp.cx}
         data-cy={vp.cy}
         viewBox={viewBoxOf(clampViewport(vp, size), size)}
-        style={{ width: "100%", height: "auto", aspectRatio: "1 / 1", touchAction: "none", cursor: "grab", background: "#2B2B2B" }}
+        style={{ touchAction: "none", cursor: "grab", background: "#2B2B2B" }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
         onPointerLeave={endDrag}
       >
         <image href={MAP_SRC} x={0} y={0} width={size} height={geo.map.height} />
+        <g className="hover-layer" pointerEvents="none" fill="none" data-testid="hover-layer">
+          {hlStreets(data, hl).map((sid) => (
+            <path
+              key={`hs${sid}`}
+              className="hl-street"
+              data-street={sid}
+              d={pathD(streetPoints(geo, sid))}
+              stroke={HL}
+              strokeWidth={30}
+              strokeOpacity={0.85}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ))}
+          {hl.sites.flatMap((id) => {
+            const t = geo.sites[id];
+            return t
+              ? [<circle key={`hst${id}`} className="hl-site" data-site={id} cx={t.x} cy={t.y} r={36} stroke={HL} strokeWidth={8} />]
+              : [];
+          })}
+          {hl.nodes.flatMap((id) => {
+            const n = geo.nodes[id];
+            return n
+              ? [<circle key={`hn${id}`} className="hl-node" data-node={id} cx={n.x} cy={n.y} r={30} stroke={HL} strokeWidth={8} />]
+              : [];
+          })}
+        </g>
         <g className="hit-layer" fill="none">
           {geo.streets.map((s) => (
             <path
@@ -363,6 +402,7 @@ export default function BusBoard({ geo, data }: { geo: BusGeometry; data: BusVie
         {layers.markerEls}
         {layers.scoreEls}
       </svg>
+      </div>
       {hover && (
         <div
           role="tooltip"

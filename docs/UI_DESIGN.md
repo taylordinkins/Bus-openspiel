@@ -88,7 +88,7 @@ Only legal streets are highlighted in `LN`; streets excluded by maximal resoluti
 
 ## 6. Adapter view contract (`server/adapters/bus.py`)
 
-The server's `GameView.view` for Bus is a dict with four keys. Seats are 0-based everywhere.
+The adapter's view for Bus (at `GameView.view.view`, see §6.5) is a dict with four keys. Seats are 0-based everywhere.
 
 ### 6.1 `state` — the position as scenario JSON
 A dict in the format of `docs/SCENARIOS.md` (`format: 1`, `parameters`, `round`, `phase`, `current_player`, `start_player`, `clock`, `stones_on_clock`, `seats`, `buildings`, `waiting`, `supply`, `action_board`, `pending`, `end` at END, `move_offset`), with no `history`/`expect`. **Contract:** loading `view.state` with the scenario loader gives a state whose observer string equals the viewed state's (the round trip of D11 and unit 10). Canonical forms: `seats` as a list; `buildings` sorted by site; `waiting` with string node keys and counts ≥ 1; `action_board` keyed by the action names `lines`, `buses`, `passengers`, `buildings`, `clock`, `vrrooomm`, `starting_player` (as in `layout.actions` of `data/board.yaml`) with every list at full length (6 or 1) and `null` for free spaces; `move_offset` = the scenario move number of the viewed position (history length plus the original offset).
@@ -118,7 +118,7 @@ Built only from the legal actions and `action_meta`:
 
 ### 6.5 Clarifications (unit 2 test hand-off)
 1. `LegalAction.params` is a dict (the server schema changes from `list[int]`). The adapter's `action_meta` returns `{"label", "kind", "params"}` with the ACTIONS §5 keys other than `id`, `kind`, `player`, `label` inside `params`.
-2. The four keys sit in `GameView.view`.
+2. The four keys sit one level down, in `GameView.view.view` (`GameView.view` itself is the server's per-seat envelope: `seat`, `current_player`, `is_terminal`, `legal_actions`, `returns`, `winners`, `view`). The web plugin reads them through `busInner()` in `model.ts`, which also accepts the keys directly in `view` for hand-made fixtures.
 3. Single-id groups (`stations`, `nodes`, `actions`) map to an int; `streets` and `sites` map to lists; `clock.advance`/`clock.pause` are int or null.
 4. `targets.actions` and `resolving.action` use the lowercase board names (`lines` … `starting_player`).
 5. `context` for LN is `{}`.

@@ -20,6 +20,10 @@ export interface GamePlugin {
   id: string;
   title: string;
   renderBoard(game: GameView, ui?: BoardUi): ReactNode;
+  /** Optional panels shown above the move area in the side column (seat panels, results). */
+  renderSide?(game: GameView, ui?: BoardUi): ReactNode;
+  /** Optional replacement for the generic action log. */
+  renderLog?(game: GameView): ReactNode;
   /** Whether the sole legal action on a human turn should be submitted automatically. */
   autoAdvance?(action: LegalAction, legalActions: LegalAction[]): boolean;
   phaseLabel?(game: GameView): string | undefined;

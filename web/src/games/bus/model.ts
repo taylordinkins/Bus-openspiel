@@ -27,6 +27,7 @@ export interface SeatState {
   buses: number;
   markers_left: number;
   line: number[];
+  last_score_move?: number | null;
 }
 
 export interface BusState {
@@ -44,15 +45,52 @@ export interface BusState {
 }
 
 export interface BusDerived {
-  seats: { line_markers_left: number; line_nodes: number[]; ends: [number, number] | null }[];
+  seats: {
+    line_markers_left: number;
+    line_nodes: number[];
+    ends: [number, number] | null;
+    dropped?: boolean;
+  }[];
   street_lines: Record<string, number[]>;
   open_tier: string | null;
+  resolving?: { action: string; letter: number; owner: number; power: number | null } | null;
+  result?: {
+    end_types: string[];
+    winners: number[];
+    final_scores: number[];
+    returns: number[];
+  } | null;
+}
+
+/** UI_DESIGN 6.3; `context` keys depend on the phase. */
+export interface BusPrompt {
+  phase?: string;
+  actor?: number | null;
+  units_left?: number | null;
+  power?: number | null;
+  context?: Record<string, unknown>;
+}
+
+export interface BusTargets {
+  clock?: { advance: number | null; pause: number | null };
+  buttons?: { id: number; kind: string }[];
 }
 
 export interface BusViewData {
   state: BusState;
   derived: BusDerived;
-  prompt?: { phase?: string; actor?: number | null };
+  prompt?: BusPrompt;
+  targets?: BusTargets;
+}
+
+/**
+ * The adapter's four keys (state, derived, prompt, targets). The server's GameView.view nests them
+ * one level down at `view.view`; hand-made fixtures may put them directly in `view`.
+ */
+export function busInner(game: { view: unknown }): Record<string, unknown> {
+  const v = (game.view ?? {}) as Record<string, unknown>;
+  const inner = v.view;
+  return inner && typeof inner === "object" ? (inner as Record<string, unknown>) : v;
 }
 
 /** The adapter view (UI_DESIGN §6) when it has the expected shape, else null. */

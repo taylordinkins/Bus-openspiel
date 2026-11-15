@@ -23,7 +23,7 @@ describe("Bus plugin board", () => {
     const { rerender, container } = render(<>{plugin.renderBoard(game)}</>);
     expect(await screen.findByTestId("bus-svg")).toBeInTheDocument();
     expect(container.querySelectorAll(".building").length).toBeGreaterThan(0);
-    expect(screen.getByTestId("bus-prompt")).toHaveTextContent("P2 to act");
+    expect(screen.getByTestId("bus-prompt")).toHaveTextContent(/P2.*Selection: place an Action marker/);
     rerender(<>{plugin.renderBoard({ ...game })}</>);
     expect(GET).toHaveBeenCalledTimes(1);
     expect(GET).toHaveBeenCalledWith("/api/boards/{game}", { params: { path: { game: "bus" } } });
