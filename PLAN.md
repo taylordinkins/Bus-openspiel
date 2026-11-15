@@ -195,6 +195,7 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 
 **Phase 2 — Server + polished board UI ✋ playtest #1**
 - Port server and shell (D3); Bus adapter (views, labels, `action_meta`); SVG board plugin per §5.5 and the agreed preview; scenario JSON load/export (editor deferred, D20); random seats; Playwright test that finishes a game; CI web + e2e jobs.
+- **Model note (user, 2026-11-15):** for the rest of Phase 2 (units 9–11) the `implementer` runs as **Opus 5.5, medium effort** (`model: opus`, `effort: medium` on the Agent call), overriding the Sonnet default in CLAUDE.md. The UI look from units 6–8b is approved; later units refine behaviour, not the visual direction.
 - [x] 1. Port the server shell (lignum `server/`: app, sessions, random bots, reports, schemas, `adapters/base.py`; toy adapter and game-agnostic server tests; fastapi/uvicorn/httpx deps) — `implementer` (2026-11-14; 90 server tests)
 - [x] 2. Bus adapter: `view`, labels, `prompt`, `targets` (UI_DESIGN §6; ACTIONS §5) — done: every legal action in random 3/4/5-player games has a label and a target; view matches fixtures — `spec-test-writer` → `implementer` (2026-11-14; contract UI_DESIGN §6.5)
 - [x] 3. Bus adapter: per-action automatic-step `events`, board-geometry endpoint, strict scenario load (backlog: reject non-terminal no-legal-action states), random seats — done: all-random game to END via the API; events match state diffs — `implementer` (2026-11-14; 1560 tests; contract UI_DESIGN §6.6)
