@@ -217,7 +217,7 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 - Heuristic and Python MCTS seats; `tools/tournament.py` with Wilson CIs; server seats with think-time limits.
 - [x] 1. Speed groundwork: `Core`/`Seat` copy shortcuts, memoised R-042 lookahead (backlog items); playthroughs and suite unchanged; clone ~3× faster — `implementer`, `sim-runner` benchmark (2026-11-15; clone 95→29 µs, rollouts 120→155 games/s; 1674 tests)
 - [x] 2. Bot framework: `bots/` package, `Bot` protocol, registry, `RandomBot` moved (server re-exports), parameterised seat types (`mcts:200`), server seat pattern from registry — `implementer` (2026-11-15; 1693 tests)
-- [ ] 3. Heuristic bot (`bots/heuristic.py`): greedy over hand features via `action_meta`; always legal, deterministic per seed, beats random in a 40-game smoke match — `implementer`
+- [x] 3. Heuristic bot (`bots/heuristic.py`): greedy over hand features via `action_meta`; always legal, deterministic per seed, beats random in a 40-game smoke match — `implementer` (2026-11-15; 0.05 ms/decision, smoke 0.875 vs 3 random; 1700 tests)
 - [ ] 4. MCTS bot (`bots/mcts.py`): Python `MCTSBot`, random/heuristic rollouts, simulation cap and wall-clock think-time limit; always legal, respects limits — `implementer`
 - [ ] 5. `tools/tournament.py`: seat rotation, process pool, seeded, Wilson 95% CIs, JSON output; reproducible 20-game run — `implementer`
 - [ ] 6. Server and lobby bot seats (`heuristic`, `mcts`) with per-seat think-time cap and fallback; server tests, vitest, Playwright game with a heuristic seat, `check:api` — `implementer`

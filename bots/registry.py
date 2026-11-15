@@ -12,6 +12,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from bots.base import Bot
+from bots.heuristic import HeuristicBot
 from bots.random_bot import RandomBot
 
 HUMAN = "human"
@@ -43,6 +44,15 @@ def _random_factory(param: str | None) -> Bot:
 
 
 register("random", _random_factory)
+
+
+def _heuristic_factory(param: str | None) -> Bot:
+    if param is not None:
+        raise ValueError("heuristic takes no parameter")
+    return HeuristicBot()
+
+
+register("heuristic", _heuristic_factory)
 
 
 def parse_seat_type(s: str) -> tuple[str, str | None]:
