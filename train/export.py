@@ -10,6 +10,7 @@ from typing import Any
 import numpy as np
 
 from bots.net_forward import layout_hash
+from train.atomic import atomic_write
 from train.model import BusNet
 
 
@@ -35,4 +36,4 @@ def export_npz(model: BusNet, path: str | Path, meta: dict[str, Any] | None = No
         "n_seats": model.n_seats,
         "layout_hash": layout_hash(),
     }
-    np.savez(Path(path), meta=np.array(json.dumps(info)), **arrays)
+    atomic_write(Path(path), lambda f: np.savez(f, meta=np.array(json.dumps(info)), **arrays))

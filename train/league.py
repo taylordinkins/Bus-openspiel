@@ -29,6 +29,7 @@ from typing import Any
 import numpy as np
 
 from bots.net_forward import NetWeights, layout_hash
+from train.atomic import atomic_write, atomic_write_text
 
 CURRENT = "current"
 RANDOM = "random"
@@ -104,7 +105,7 @@ def save_weights(w: NetWeights, path: Path, extra: dict[str, Any] | None = None)
         "obs_size": w.obs_size, "n_actions": w.n_actions, "n_seats": w.n_seats,
         "layout_hash": layout_hash(),
     }  # fmt: skip
-    np.savez(path, meta=np.array(json.dumps(info)), **arrays)
+    atomic_write(path, lambda f: np.savez(f, meta=np.array(json.dumps(info)), **arrays))
 
 
 class League:
@@ -158,11 +159,41 @@ class League:
             evicted.append(old)
             if self.directory is not None:
                 (self.directory / f"snap_{old}.npz").unlink(missing_ok=True)
-        if self.directory is not None:
-            (self.directory / "pool.json").write_text(
-                json.dumps({"ids": self._ids, "pool_size": self.pool_size})
-            )
+        self._write_index()
         return evicted
+
+    def _write_index(self) -> None:
+        if self.directory is not None:
+            atomic_write_text(
+                self.directory / "pool.json",
+                json.dumps({"ids": self._ids, "pool_size": self.pool_size}),
+            )
+
+    def restore(self, ids: list[int], max_id: int | None = None) -> list[int]:
+        """Rebuild the pool after a resume from the snapshot files on disk.
+
+        Keeps the ids in ``ids`` (oldest first) that are ``<= max_id`` and whose file exists,
+        trims to ``pool_size``, and deletes every other ``snap_*.npz`` (taken after the
+        checkpoint, or evicted). Returns the ids kept.
+        """
+        if self.directory is None:
+            return []
+        keep = [
+            i for i in ids
+            if (max_id is None or i <= max_id) and (self.directory / f"snap_{i}.npz").exists()
+        ]  # fmt: skip
+        keep = keep[-self.pool_size :]
+        for f in self.directory.glob("snap_*.npz"):
+            try:
+                sid = int(f.stem.split("_", 1)[1])
+            except ValueError:
+                continue
+            if sid not in keep:
+                f.unlink(missing_ok=True)
+        self._ids = list(keep)
+        self._weights = {i: NetWeights.load(self.directory / f"snap_{i}.npz") for i in keep}
+        self._write_index()
+        return list(keep)
 
     def label(self, snap_id: int) -> str:
         return f"{SNAP_PREFIX}{snap_id}"

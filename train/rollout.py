@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import os
 import shutil
-import tempfile
+import signal
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -37,6 +37,7 @@ from bots.net_forward import NetWeights
 from train.env import BusEnv, shaped_return
 from train.features import MAX_SEATS
 from train.league import LeagueSpec, game_type, sample_assignment
+from train.shm import make_spill_dir
 
 END_TYPES = ("last_stone", "sites_full", "markers")
 CURRENT = "current"
@@ -44,6 +45,7 @@ RANDOM = "random"
 SNAP_PREFIX = "snap:"
 Opponents = dict[str, Any]  # label -> NetWeights | npz path
 _OPP_CACHE: dict[str, tuple[Any, NetWeights]] = {}  # per process: label -> (source, weights)
+_OWNER_PID = 0  # trainer pid, set in pool workers (names the spill dirs)
 
 
 @dataclass(frozen=True)
@@ -303,14 +305,6 @@ def run_task(task: Task) -> dict[str, Any]:
     return play_games(weights, n_games, seed, cfg, egos, first_index, opponents)
 
 
-def _spill_dir() -> str:
-    """tmpfs when it has room (samples can be hundreds of MB per update), else the system temp."""
-    shm = "/dev/shm"
-    if os.path.isdir(shm) and shutil.disk_usage(shm).free > 1_500_000_000:
-        return shm
-    return tempfile.gettempdir()
-
-
 def run_task_spill(task: Task) -> dict[str, Any]:
     """``run_task`` for pool workers: samples go through tmpfs files, not the result pipe.
 
@@ -318,10 +312,14 @@ def run_task_spill(task: Task) -> dict[str, Any]:
     the rollout itself and serialised on the parent (unit 3b measurements). The parent reads the
     files back with ``load_spilled``.
     """
+    kill_flag = os.environ.get("BUS_TRAIN_KILL_ONCE")  # fault injection for the recovery test
+    if kill_flag and not os.path.exists(kill_flag):
+        open(kill_flag, "w").close()
+        os._exit(9)
     res = run_task(task)
     samples = res["samples"]
     if samples is not None:
-        d = tempfile.mkdtemp(prefix="bus_rollout_", dir=_spill_dir())
+        d = make_spill_dir(_OWNER_PID or os.getppid())
         for k, v in samples.items():
             np.save(os.path.join(d, k + ".npy"), v)
         res["samples"] = {"__spill__": d}
@@ -340,9 +338,15 @@ def load_spilled(res: dict[str, Any]) -> dict[str, Any]:
     return res
 
 
-def worker_init() -> None:
-    """Keep each worker single-threaded (set before numpy loads only for spawned children)."""
-    import os
+def worker_init(owner_pid: int = 0) -> None:
+    """Pool worker setup: single-threaded BLAS, ignore terminal signals, remember the trainer pid.
 
+    Ctrl-C reaches the whole foreground process group; the trainer alone decides how to stop, so
+    workers ignore SIGINT/SIGTERM (the trainer kills them when it needs to).
+    """
+    global _OWNER_PID
+    _OWNER_PID = owner_pid
     for k in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
         os.environ.setdefault(k, "1")
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
