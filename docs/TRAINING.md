@@ -10,6 +10,16 @@ uv run python -m tools.train_ppo --name long --players 4 --updates 400 --workers
     --ckpt-every 10 --eval-every 10
 ```
 
+Long run (stage A + stage B): `--updates` must be the total horizon of the whole run, set in stage
+A; stage B (resume) changes only `--games-per-update` (and other whitelisted, schedule-neutral
+options):
+
+```
+uv run python -m tools.train_ppo --name long --players 3,4,5 --updates 2000 --workers 8 \
+    --games-per-update 64 --lr-decay --ent-coef 0.01 --ent-coef-final 0.002 --best-keep 5
+uv run python -m tools.train_ppo --resume runs/long --games-per-update 256   # stage B
+```
+
 - `--updates` is the fixed horizon. The lr decay (`--lr-decay`), the entropy schedule
   (`--ent-coef-final`) and the reward-mix anneal are pure functions of the update counter and
   `--updates`, so stopping early (Ctrl-C, SIGTERM, `--max-minutes`, `--stop-after N`) never
@@ -34,12 +44,14 @@ uv run python -m tools.train_ppo --name long --players 4 --updates 400 --workers
 `args.json` of the run is loaded; command-line options given next to `--resume` override it only
 for this whitelist: `--max-minutes --workers --eval-every --eval-games --eval-mcts/--no-eval-mcts
 --eval-greedy --ckpt-every --keep-every --lr --lr-decay/--no-lr-decay --ent-coef
---ent-coef-final --players --player-weights --league --snapshot-every --pool-size --updates
+--ent-coef-final --players --player-weights --league --snapshot-every --pool-size
 --device --stop-after --task-timeout --max-retries --games-per-update --ratings-every
 --ratings-games`. Anything else (`--hidden`, `--seed`, `--name`, `--out-dir`, `--value-trunk`, ...) that differs from the run is rejected with an error (exit code 2); so
 is a checkpoint whose `features_version`, observation layout hash or hidden sizes do not match the
-code. Changing `--lr`, `--lr-decay`, `--ent-coef*` or `--updates` changes the schedules from the
-resume point on by design. Extending `--updates` is allowed and recorded.
+code. Changing `--lr`, `--lr-decay` or `--ent-coef*` changes the schedules from the resume point
+on by design. `--updates` is the horizon of the cosine/linear LR and the entropy schedule, so
+extending it would make the LR jump up: a changed `--updates` is rejected on resume unless
+`--allow-horizon-change` is also given (logged as `horizon_change` in `resume_log.json`).
 
 Every resume appends an entry (time, update, checkpoint, old/new value of each override, argv) to
 `resume_log.json`; `args.json` is updated and the very first one is kept as `args.original.json`.
@@ -52,7 +64,8 @@ Every resume appends an entry (time, update, checkpoint, old/new value of each o
 | `ckpt_<u>.pt` | model, optimizer, config and run state (RNGs, total games, elapsed time, best record) |
 | `ckpt_<u>.npz` | numpy export for `bots.net_forward` / the server |
 | `latest.json` | newest complete checkpoint; if missing or corrupt, resume scans for the newest `ckpt_*.pt` that loads |
-| `best.pt`, `best.npz`, `best.json` | best model so far by the fixed composite (below), taken from the periodic eval |
+| `best.pt`, `best.npz`, `best.json` | copy of the top shortlist entry (below) |
+| `best_<u>.pt/.npz`, `best_list.json` | top `--best-keep` (5) checkpoints by composite; the list holds update, composite, formula tag, parts and eval stats |
 | `ratings.csv` | Elo ratings from the periodic round-robin (below) |
 | `pool/snap_<id>.npz`, `pool/hof_<name>.npz`, `pool/pool.json` | recent snapshots, hall of fame, and their index (ids, hof entries, win-rate EMAs) |
 | `args.json`, `args.original.json`, `resume_log.json` | configuration history |
@@ -63,7 +76,7 @@ either the old or the new file, never a partial one.
 ## Retention
 
 After each checkpoint the trainer keeps the last 3 `ckpt_*` pairs, every update that is a multiple
-of `--keep-every` (default 250, 0 = none), and `best.*`; older pairs are deleted once the new one
+of `--keep-every` (default 250, 0 = none), and `best*` files; older pairs are deleted once the new one
 and `latest.json` are fully written. League snapshots follow `--pool-size` (oldest evicted).
 
 ## Workers and shared memory
@@ -115,7 +128,7 @@ pool (`--pool-size`, oldest evicted every `--snapshot-every` updates).
   and stays there. Both are pure functions of the update counter and the horizon.
 - `--players 3,4,5` samples player counts with `--player-weights` (default 0.3,0.4,0.3 for exactly
   3,4,5; otherwise uniform).
-- Suggested long run: `--players 3,4,5 --updates N --lr-decay --ent-coef 0.01 --ent-coef-final 0.002`.
+- Suggested long run: see the stage A / stage B commands at the top (`--updates` = whole run).
 
 ## Evaluation, ratings, best model
 
@@ -125,7 +138,13 @@ pool (`--pool-size`, oldest evicted every `--snapshot-every` updates).
   The `eval_win/lo/hi` columns of `log.csv` are the random rows pooled over counts.
 - `log.csv` also has `ev_q1..ev_q4` (explained variance of the value head, by quarter of each
   seat's own decision sequence, first to last), `hof_size`, `eval_composite`, `rating_latest`.
-- **Best model composite** (computed at each evaluation, strictly greater replaces the record):
+- **Best model shortlist.** Each evaluation's composite may enter a shortlist of the top
+  `--best-keep` (default 5) records; the lowest is evicted (its `best_<u>.*` deleted) and ties keep
+  the older. The shortlist is in the checkpoint state and restored on resume (files of records made
+  after the checkpoint are removed). Each record carries a `formula` tag: `h+hof` (reference net
+  present) or `h-only`. Their scales differ, so composites are only compared within a formula and
+  any `h+hof` record outranks any `h-only` one (a run normally uses one formula throughout).
+- **Best model composite** (computed at each evaluation):
   `0.8 * H + 0.2 * R`, where `H` is the mean over the evaluated player counts of the win rate vs 3
   heuristic seats and `R` the same vs 3 copies of the hall-of-fame reference; without a reference,
   `H` alone. `best.json` stores the parts and the criterion text. (The rating round is too

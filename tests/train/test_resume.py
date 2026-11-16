@@ -142,12 +142,20 @@ def test_resume_cli_overrides_and_rejections(tmp_path: Path, capsys: Any) -> Non
         assert main(["--resume", str(run), *bad]) == 2
     assert "cannot change --hidden" in capsys.readouterr().err
     # extend the horizon and override eval cadence
-    assert main(["--resume", str(run), "--updates", "3", "--eval-every", "3"]) == 0
+    assert main(["--resume", str(run), "--updates", "3", "--eval-every", "3"]) == 2
+    assert "--allow-horizon-change" in capsys.readouterr().err
+    assert not (run / "resume_log.json").exists()
+    assert (
+        main(
+            ["--resume", str(run), "--updates", "3", "--eval-every", "3", "--allow-horizon-change"]
+        )
+        == 0
+    )
     log = json.loads((run / "resume_log.json").read_text())
     assert len(log) == 1 and log[0]["from_update"] == 2
     assert log[0]["overrides"]["updates"] == {"old": 2, "new": 3}
     assert log[0]["overrides"]["eval_every"] == {"old": 2, "new": 3}
-    assert log[0]["time"]
+    assert log[0]["time"] and log[0]["horizon_change"] is True
     assert json.loads((run / "args.original.json").read_text())["updates"] == 2
     cur = json.loads((run / "args.json").read_text())
     assert cur["updates"] == 3 and cur["eval_every"] == 3 and cur["hidden"] == "32,32"
@@ -346,7 +354,8 @@ def test_sigterm_saves_cleans_and_resumes(tmp_path: Path) -> None:
         assert not list(root.glob(f"{shm.PREFIX}{proc.pid}_*"))
     r = subprocess.run(
         [sys.executable, "-m", "tools.train_ppo", "--resume", str(run), "--stop-after", "2",
-         "--updates", str(n + 2)],
+         "--updates", str(n + 2),
+         "--allow-horizon-change"],
         cwd=ROOT, capture_output=True, text=True, timeout=180,
     )  # fmt: skip
     assert r.returncode == 0, r.stdout + r.stderr

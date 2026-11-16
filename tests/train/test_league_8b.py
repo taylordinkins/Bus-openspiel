@@ -406,7 +406,20 @@ def test_resume_allows_games_per_update_override(tmp_path: Path) -> None:
     from tools.train_ppo import main
 
     assert main(run_args(tmp_path, "g", "--updates", "2")) == 0
-    assert main(["--resume", str(tmp_path / "g"), "--updates", "3", "--games-per-update", "6"]) == 0
+    assert (
+        main(
+            [
+                "--resume",
+                str(tmp_path / "g"),
+                "--updates",
+                "3",
+                "--games-per-update",
+                "6",
+                "--allow-horizon-change",
+            ]
+        )
+        == 0
+    )
     cur = json.loads((tmp_path / "g" / "args.json").read_text())
     assert cur["games_per_update"] == 6
     log = json.loads((tmp_path / "g" / "resume_log.json").read_text())

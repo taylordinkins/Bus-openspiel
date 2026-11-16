@@ -20,10 +20,11 @@ from train.atomic import atomic_write, atomic_write_json
 CKPT_RE = re.compile(r"^ckpt_(\d+)\.pt$")
 
 # Options that may change on --resume (argparse dests). Everything else must equal args.json.
+# ``updates`` (the schedule horizon) additionally needs --allow-horizon-change.
 RESUME_WHITELIST = frozenset({
     "max_minutes", "workers", "eval_every", "eval_games", "eval_mcts", "eval_greedy",
     "ckpt_every", "keep_every", "lr", "lr_decay", "ent_coef", "ent_coef_final", "players",
-    "league", "snapshot_every", "pool_size", "updates", "device", "stop_after", "task_timeout",
+    "league", "snapshot_every", "pool_size", "device", "stop_after", "task_timeout",
     "max_retries", "games_per_update", "player_weights", "ratings_every", "ratings_games",
 })  # fmt: skip
 
@@ -110,6 +111,64 @@ def apply_retention(run: Path, keep_last: int = 3, keep_every: int = 250) -> lis
     return gone
 
 
+# ---------------------------------------------------------------- best-model shortlist
+
+
+def formula_of(rec: dict[str, Any]) -> str:
+    """Composite formula of a best-model record: ``h+hof`` (with a hall-of-fame reference) or
+    ``h-only``. Records from before the tag existed are classified by their parts."""
+    return rec.get("formula") or ("h+hof" if "hof_ref" in rec else "h-only")
+
+
+def rank_key(rec: dict[str, Any]) -> tuple[int, float]:
+    return (1 if formula_of(rec) == "h+hof" else 0, float(rec.get("composite", -1.0)))
+
+
+def beats(rec: dict[str, Any], other: dict[str, Any]) -> bool:
+    """Strictly better. Composites are only compared within one formula; a record with a
+    reference outranks any record without (the two scales are not comparable)."""
+    return rank_key(rec) > rank_key(other)
+
+
+def shortlist_insert(
+    short: list[dict[str, Any]], rec: dict[str, Any], keep: int
+) -> tuple[list[dict[str, Any]], bool, list[dict[str, Any]]]:
+    """Top-``keep`` shortlist (best first). Returns (new list, admitted, evicted records)."""
+    if keep <= 0 or (len(short) >= keep and not beats(rec, short[-1])):
+        return short, False, []
+    new = sorted([*short, rec], key=rank_key, reverse=True)  # stable: ties keep the older first
+    return new[:keep], True, new[keep:]
+
+
+def _copy_atomic(src: Path, dst: Path) -> None:
+    import shutil
+
+    def w(f: Any) -> None:
+        with open(src, "rb") as fh:
+            shutil.copyfileobj(fh, f)
+
+    atomic_write(dst, w)
+
+
+def sync_best_files(run: Path, short: list[dict[str, Any]]) -> None:
+    """Make the run directory match ``short``: remove ``best_<u>.*`` of records not in it, point
+    ``best.pt/.npz/.json`` at the top one and write ``best_list.json``."""
+    want = {int(r["update"]) for r in short}
+    for p in run.glob("best_*.pt"):
+        m = re.fullmatch(r"best_(\d+)\.pt", p.name)
+        if m and int(m.group(1)) not in want:
+            p.unlink(missing_ok=True)
+            (run / f"best_{m.group(1)}.npz").unlink(missing_ok=True)
+    if short:
+        top = int(short[0]["update"])
+        for ext in ("pt", "npz"):
+            src = run / f"best_{top}.{ext}"
+            if src.exists():
+                _copy_atomic(src, run / f"best.{ext}")
+        atomic_write_json(run / "best.json", short[0])
+    atomic_write_json(run / "best_list.json", short)
+
+
 def remove_stray_tmp(run: Path) -> None:
     for p in list(run.glob(".*.tmp*")) + list((run / "pool").glob(".*.tmp*")):
         p.unlink(missing_ok=True)
@@ -194,12 +253,18 @@ def merge_resume_args(
     merged = dict(base)
     changes: dict[str, dict[str, Any]] = {}
     for k, v in explicit.items():
-        if k == "resume":
+        if k in ("resume", "allow_horizon_change"):
             continue
         if _norm(v) == _norm(base.get(k)):
             continue
+        if k == "updates" and not explicit.get("allow_horizon_change"):
+            raise ResumeError(
+                f"--updates {v} differs from the run's {base.get(k)!r}: the lr cosine and entropy "
+                "schedules are functions of --updates, so this changes the LR from the resume "
+                "point on; add --allow-horizon-change if that is intended"
+            )
         flag = "--" + k.replace("_", "-")
-        if k not in RESUME_WHITELIST:
+        if k not in RESUME_WHITELIST and k != "updates":
             raise ResumeError(
                 f"cannot change {flag} on resume (run has {base.get(k)!r}, got {v!r}); "
                 f"allowed overrides: "

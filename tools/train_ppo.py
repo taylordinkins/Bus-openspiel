@@ -29,6 +29,7 @@ import json
 import multiprocessing as mp
 import os
 import random
+import shutil
 import signal
 import sys
 import time
@@ -75,6 +76,7 @@ from train.runstate import (  # noqa: E402
     ResumeError,
     append_resume_log,
     apply_retention,
+    beats,
     explicit_options,
     find_latest_checkpoint,
     merge_resume_args,
@@ -83,6 +85,8 @@ from train.runstate import (  # noqa: E402
     remove_stray_tmp,
     rss_mb,
     save_pt,
+    shortlist_insert,
+    sync_best_files,
     truncate_csv,
     write_latest,
 )
@@ -203,6 +207,11 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--league-seed", type=int, default=0, help="extra seed for league sampling")
     ap.add_argument("--resume", default=None, metavar="RUN_DIR", help="continue a stopped run")
     ap.add_argument("--keep-every", type=int, default=250, help="milestone ckpt every N (0 = off)")
+    ap.add_argument("--best-keep", type=int, default=5, help="top-K best checkpoints kept")
+    ap.add_argument(
+        "--allow-horizon-change", action="store_true",
+        help="with --resume: accept a changed --updates (stretches the lr/entropy schedules)",
+    )  # fmt: skip
     ap.add_argument("--stop-after", type=int, default=0, help="stop after N updates this session")
     ap.add_argument("--task-timeout", type=float, default=1800.0, help="s per batch; 0 = off")
     ap.add_argument("--max-retries", type=int, default=3, help="pool rebuilds per batch")
@@ -404,10 +413,11 @@ def composite_score(rows: list[dict[str, Any]]) -> tuple[float, dict[str, float]
     ref = mean_wr(lambda o: o.startswith("hof_ref:"))
     if h is None:
         return -1.0, {}
-    detail = {"heuristic": h}
+    detail: dict[str, Any] = {"heuristic": h, "formula": "h-only"}
     if ref is None:
         return h, detail
     detail["hof_ref"] = ref
+    detail["formula"] = "h+hof"
     return COMPOSITE_WEIGHTS[0] * h + COMPOSITE_WEIGHTS[1] * ref, detail
 
 
@@ -559,20 +569,35 @@ def save_checkpoint(
 
 def save_best(
     out: Path, update: int, model: BusNet, args: argparse.Namespace, rec: dict[str, Any]
-) -> None:  # fmt: skip
+) -> None:
+    """Write ``best_<update>.pt/.npz`` (a shortlist member; retention never touches them)."""
     meta = {
         "update": update, "hidden": list(model.hidden), "features_version": FEATURES_VERSION,
         "layout_hash": layout_hash(), "obs_size": model.obs_size, "best": rec,
     }  # fmt: skip
-    save_pt(out / "best.pt", {"model": model.state_dict(), "update": update, "meta": meta})
-    export_npz(model, out / "best.npz", meta)
-    atomic_write_json(out / "best.json", rec)
+    save_pt(
+        out / f"best_{update}.pt", {"model": model.state_dict(), "update": update, "meta": meta}
+    )
+    export_npz(model, out / f"best_{update}.npz", meta)
 
 
 def is_better(rec: dict[str, Any], best: dict[str, Any] | None) -> bool:
-    """Best-model criterion: strictly higher ``composite`` (``composite_score``). A record from
-    before unit 8b has none and always loses to a new one."""
-    return best is None or rec["composite"] > best.get("composite", -1.0)
+    """Best-model criterion: strictly higher ``composite`` within one formula; a record with a
+    hall-of-fame reference (``h+hof``) outranks any without (``h-only``). See ``beats``."""
+    return best is None or beats(rec, best)
+
+
+def update_shortlist(
+    out: Path, short: list[dict[str, Any]], rec: dict[str, Any], model: BusNet,
+    args: argparse.Namespace,
+) -> list[dict[str, Any]]:  # fmt: skip
+    """Admit ``rec`` to the top-``--best-keep`` shortlist if it ranks, saving its files, evicting
+    the lowest and refreshing ``best.*`` / ``best_list.json``."""
+    new, admitted, _ = shortlist_insert(short, rec, args.best_keep)
+    if admitted:
+        save_best(out, int(rec["update"]), model, args, rec)
+        sync_best_files(out, new)
+    return new
 
 
 def append_rows(path: Path, header: list[str], rows: list[dict[str, Any]]) -> None:
@@ -676,7 +701,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     start_update = 0
     total_games = 0
     elapsed_base = 0.0
-    best: dict[str, Any] | None = None
+    best: list[dict[str, Any]] = []
     pool_ids: list[int] = []
     league_state: dict[str, Any] | None = None
     if res is not None:
@@ -690,7 +715,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             _restore_rng(st["rng"])
             total_games = int(st["total_games"])
             elapsed_base = float(st["elapsed_s"])
-            best = st.get("best")
+            best = list(st.get("best_list") or ([st["best"]] if st.get("best") else []))
             league_state = st.get("league")
         else:
             print(
@@ -698,8 +723,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             total_games = int(ck["meta"].get("games", 0))
         pool_ids = list(ck["meta"].get("pool_ids", []))
-        if (out / "best.json").exists():
-            best = json.loads((out / "best.json").read_text())
+        if not best and (out / "best.json").exists():  # run from before the shortlist
+            best = [json.loads((out / "best.json").read_text())]
+            top = int(best[0]["update"])
+            for ext in ("pt", "npz"):
+                if (out / f"best.{ext}").exists() and not (out / f"best_{top}.{ext}").exists():
+                    shutil.copyfile(out / f"best.{ext}", out / f"best_{top}.{ext}")
+        if best:  # drop files of records made after this checkpoint, re-point best.*
+            sync_best_files(out, best)
         if not (out / "args.original.json").exists():
             atomic_write_json(
                 out / "args.original.json", json.loads((out / "args.json").read_text())
@@ -708,6 +739,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             out,
             {"time": now_iso(), "from_update": start_update,
              "checkpoint": f"ckpt_{start_update}.pt", "overrides": res["changes"],
+             "horizon_change": "updates" in res["changes"],
              "argv": res["argv"]},
         )  # fmt: skip
     atomic_write_json(out / "args.json", vars(args))
@@ -759,7 +791,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         nonlocal last_ckpt
         state = {
             "gen": gen.get_state(), "rng": _rng_state(), "total_games": total_games,
-            "elapsed_s": elapsed(), "best": best,
+            "elapsed_s": elapsed(),
+            "best": best[0] if best else None, "best_list": best,
             "league": league.state() if league is not None else None,
         }  # fmt: skip
         save_checkpoint(
@@ -930,9 +963,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                                     "0.2 * mean win rate vs hall-of-fame reference, "
                                     "means over player counts",
                                 }  # fmt: skip
-                                if is_better(rec, best):
-                                    best = rec
-                                    save_best(out, update, model, args, best)
+                                best = update_shortlist(out, best, rec, model, args)
                     if do_ratings and new_w is not None:
                         tr = time.perf_counter()
                         try:
