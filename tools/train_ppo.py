@@ -44,7 +44,14 @@ from train.ppo import (  # noqa: E402
     net_to_weights,
     ppo_update,
 )
-from train.rollout import END_TYPES, RolloutConfig, run_task, worker_init  # noqa: E402
+from train.rollout import (  # noqa: E402
+    END_TYPES,
+    RolloutConfig,
+    load_spilled,
+    run_task,
+    run_task_spill,
+    worker_init,
+)
 
 from .tournament import wilson_interval  # noqa: E402
 
@@ -73,7 +80,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--games-per-update", type=int, default=128)
     ap.add_argument("--max-minutes", type=float, default=0.0, help="stop after this (0 = off)")
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
-    ap.add_argument("--envs-per-worker", type=int, default=8)
+    ap.add_argument("--envs-per-worker", type=int, default=32)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--hidden", default="512,512")
     ap.add_argument("--device", default="auto", help="auto, cpu or cuda")
@@ -116,7 +123,7 @@ class Runner:
     def map(self, tasks: list[Any]) -> list[dict[str, Any]]:
         if self.pool is None:
             return [run_task(t) for t in tasks]
-        return self.pool.map(run_task, tasks, chunksize=1)
+        return [load_spilled(r) for r in self.pool.imap(run_task_spill, tasks, chunksize=1)]
 
     def close(self) -> None:
         if self.pool is not None:
@@ -214,7 +221,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )  # fmt: skip
                 weights = net_to_weights(model)
                 te = time.perf_counter()
-                sizes = _chunks(args.games_per_update, max(args.workers, 1) * 2)
+                sizes = _chunks(args.games_per_update, max(args.workers, 1))
                 base = args.seed * 1_000_003 + update * 1009
                 tasks = [(weights, sz, base + i, rcfg, None, 0) for i, sz in enumerate(sizes)]
                 results = runner.map(tasks)

@@ -21,6 +21,9 @@ the seat's own Monte Carlo return, and the other entries are auxiliary.
 
 from __future__ import annotations
 
+import os
+import shutil
+import tempfile
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -241,6 +244,45 @@ def run_task(
     """Picklable pool entry point."""
     weights, n_games, seed, cfg, egos, first_index = task
     return play_games(weights, n_games, seed, cfg, egos, first_index)
+
+
+def _spill_dir() -> str:
+    """tmpfs when it has room (samples can be hundreds of MB per update), else the system temp."""
+    shm = "/dev/shm"
+    if os.path.isdir(shm) and shutil.disk_usage(shm).free > 1_500_000_000:
+        return shm
+    return tempfile.gettempdir()
+
+
+def run_task_spill(
+    task: tuple[NetWeights, int, int, RolloutConfig, list[int] | None, int],
+) -> dict[str, Any]:
+    """``run_task`` for pool workers: samples go through tmpfs files, not the result pipe.
+
+    Pickling ~1 GB of float32 observations per update through ``Pool``'s pipe took longer than
+    the rollout itself and serialised on the parent (unit 3b measurements). The parent reads the
+    files back with ``load_spilled``.
+    """
+    res = run_task(task)
+    samples = res["samples"]
+    if samples is not None:
+        d = tempfile.mkdtemp(prefix="bus_rollout_", dir=_spill_dir())
+        for k, v in samples.items():
+            np.save(os.path.join(d, k + ".npy"), v)
+        res["samples"] = {"__spill__": d}
+    return res
+
+
+def load_spilled(res: dict[str, Any]) -> dict[str, Any]:
+    """Inverse of ``run_task_spill`` (no-op for results that were not spilled); deletes files."""
+    samples = res["samples"]
+    if isinstance(samples, dict) and "__spill__" in samples:
+        d = samples["__spill__"]
+        try:
+            res["samples"] = {f[:-4]: np.load(os.path.join(d, f)) for f in sorted(os.listdir(d))}
+        finally:
+            shutil.rmtree(d, ignore_errors=True)
+    return res
 
 
 def worker_init() -> None:
