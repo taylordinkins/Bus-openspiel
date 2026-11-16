@@ -67,3 +67,26 @@ describe("Lobby seat picker", () => {
     expect(body.bot_think_time_s).toBe(2.5);
   });
 });
+
+describe("Lobby trained-net seats", () => {
+  it("lists server models that support the player count, and posts the seat type", async () => {
+    const { api } = await import("../api/client");
+    vi.mocked(api.GET).mockResolvedValueOnce({
+      data: [
+        { seat_type: "net:ppo-smoke", label: "Trained net (smoke)", description: "", players: [3, 4, 5] },
+        { seat_type: "net:four-only", label: "Four only", description: "", players: [4] },
+      ],
+    } as never);
+    render(<Lobby onCreated={vi.fn()} />);
+    await waitFor(() => expect(Array.from(seat(1).options).map((o) => o.value)).toContain("net:ppo-smoke"));
+    const values = Array.from(seat(1).options).map((o) => o.value);
+    expect(values).toContain("net:four-only");
+    fireEvent.change(screen.getByLabelText(/Players/), { target: { value: "3" } });
+    await waitFor(() => expect(Array.from(seat(1).options).map((o) => o.value)).not.toContain("net:four-only"));
+    fireEvent.change(seat(1), { target: { value: "net:ppo-smoke" } });
+    expect(think()).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Create game" }));
+    await waitFor(() => expect(POST).toHaveBeenCalled());
+    expect((POST.mock.calls[0]?.[1] as { body: { seats: string[] } }).body.seats[1]).toBe("net:ppo-smoke");
+  });
+});

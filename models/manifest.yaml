@@ -1,0 +1,9 @@
+# Allow-list of trained nets playable as `net:<name>` seats. Only names listed here resolve;
+# `file` is relative to this directory. `features_version` must equal train.features.FEATURES_VERSION.
+models:
+  - name: ppo-smoke
+    file: ppo-smoke.npz
+    label: Trained net (smoke)
+    description: 20-minute PPO self-play smoke model, trained at 4 players only.
+    players: [3, 4, 5]
+    features_version: 1

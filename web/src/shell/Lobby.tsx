@@ -15,6 +15,7 @@ import { errorText, type SeatType } from "./useGame";
 
 type ScenarioSummary = components["schemas"]["ScenarioSummary"];
 type GameExport = components["schemas"]["GameExport"];
+type BotModel = components["schemas"]["BotModel"];
 
 interface Props {
   onCreated: (gameId: string) => void;
@@ -58,18 +59,38 @@ export default function Lobby({ onCreated }: Props) {
   const [text, setTextRaw] = useState("");
   const [named, setNamed] = useState<ScenarioSummary[] | null>(null);
   const [namedId, setNamedId] = useState("");
+  const [models, setModels] = useState<BotModel[]>([]);
   const replaySeats = useRef("");
   const alertRef = useRef<HTMLParagraphElement>(null);
   // The form can run past a short screen in Scenario mode: bring a new error into view.
   useEffect(() => {
     if (error) alertRef.current?.scrollIntoView?.({ block: "nearest" });
   }, [error]);
+  // Trained nets offered by the server (models/manifest.yaml); none if the call fails.
+  useEffect(() => {
+    let live = true;
+    void (async () => {
+      try {
+        const res = await api.GET("/api/bot-models");
+        if (live && Array.isArray(res?.data)) setModels(res.data);
+      } catch {
+        /* no trained seats offered */
+      }
+    })();
+    return () => {
+      live = false;
+    };
+  }, []);
   const seatStyle = getPlugin("bus").seatStyle;
 
   const parsed = mode === "scenario" ? parseStartDoc(text) : null;
   const docPlayers =
     parsed && (parsed.kind === "scenario" || parsed.kind === "replay") ? parsed.players : null;
   const n = mode === "scenario" ? (docPlayers ?? 4) : players;
+  const netPresets = models
+    .filter((m) => m.players.includes(n))
+    .map((m) => ({ value: m.seat_type as SeatType, label: m.label }));
+  const seatOptions = [...SEAT_PRESETS, ...netPresets];
 
   /** Set the document text; a newly loaded replay brings its own seat types. */
   function setText(t: string) {
@@ -288,8 +309,8 @@ export default function Lobby({ onCreated }: Props) {
                     setSeats(seats.map((x, j) => (j === i ? (e.target.value as SeatType) : x)))
                   }
                 >
-                  {SEAT_PRESETS.some((p) => p.value === s) ? null : <option value={s}>{s}</option>}
-                  {SEAT_PRESETS.map((p) => (
+                  {seatOptions.some((p) => p.value === s) ? null : <option value={s}>{s}</option>}
+                  {seatOptions.map((p) => (
                     <option key={p.value} value={p.value}>
                       {p.label}
                     </option>

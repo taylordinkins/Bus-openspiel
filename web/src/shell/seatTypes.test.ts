@@ -18,6 +18,7 @@ describe("seat presets", () => {
     expect(seatTypeName("mcts:50")).toBe("MCTS (50 sims)");
     expect(seatTypeName("mcts")).toBe("MCTS");
     expect(seatTypeName("heuristic")).toBe("Heuristic");
+    expect(seatTypeName("net:ppo-smoke")).toBe("Trained net (ppo-smoke)");
     expect(seatTypeName("mcts:200-heuristic")).toBe("MCTS (200 sims, heuristic rollouts)");
   });
   it("builds the thinking text", () => {

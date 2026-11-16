@@ -54,6 +54,40 @@
         "title": "BoardGeometry",
         "type": "object"
       },
+      "BotModel": {
+        "description": "A trained net offered as a `net:<name>` seat (models/manifest.yaml).",
+        "properties": {
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "players": {
+            "description": "Player counts the model may be seated in.",
+            "items": {
+              "type": "integer"
+            },
+            "title": "Players",
+            "type": "array"
+          },
+          "seat_type": {
+            "description": "Seat type to post, `net:<name>`.",
+            "title": "Seat Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "seat_type",
+          "label",
+          "players"
+        ],
+        "title": "BotModel",
+        "type": "object"
+      },
       "CreateGameRequest": {
         "properties": {
           "bot_think_time_s": {
@@ -773,6 +807,28 @@
           }
         },
         "summary": "Get Board"
+      }
+    },
+    "/api/bot-models": {
+      "get": {
+        "operationId": "list_bot_models",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BotModel"
+                  },
+                  "title": "Response List Bot Models",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Bot Models"
       }
     },
     "/api/games": {

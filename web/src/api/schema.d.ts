@@ -21,6 +21,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/bot-models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Bot Models */
+        get: operations["list_bot_models"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/games": {
         parameters: {
             query?: never;
@@ -256,6 +273,29 @@ export interface components {
             geometry: {
                 [key: string]: unknown;
             };
+        };
+        /**
+         * BotModel
+         * @description A trained net offered as a `net:<name>` seat (models/manifest.yaml).
+         */
+        BotModel: {
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /** Label */
+            label: string;
+            /**
+             * Players
+             * @description Player counts the model may be seated in.
+             */
+            players: number[];
+            /**
+             * Seat Type
+             * @description Seat type to post, `net:<name>`.
+             */
+            seat_type: string;
         };
         /** CreateGameRequest */
         CreateGameRequest: {
@@ -606,6 +646,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_bot_models: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BotModel"][];
                 };
             };
         };

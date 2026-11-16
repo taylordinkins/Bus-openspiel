@@ -23,6 +23,7 @@ export function seatTypeName(t: string): string {
   if (t === "mcts-fast") return "MCTS (fast)";
   const m = /^mcts(?::(\d+)(?:-(\w+))?)?$/.exec(t);
   if (m) return m[1] ? `MCTS (${m[1]} sims${m[2] ? `, ${m[2]} rollouts` : ""})` : "MCTS";
+  if (t.startsWith("net:")) return `Trained net (${t.slice(4)})`;
   if (t.startsWith("trained:")) return `Trained (${t.slice(8)})`;
   return t.charAt(0).toUpperCase() + t.slice(1);
 }

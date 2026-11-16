@@ -11,6 +11,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, FastAPI, HTTPException, Query
 
+from bots.net import manifest
 from server.adapters import default_adapters
 from server.adapters.base import GameAdapter
 from server.reports import DEFAULT_REPORTS_DIR, write_report
@@ -18,6 +19,7 @@ from server.schemas import (
     ActionRequest,
     BatchActionRequest,
     BoardGeometry,
+    BotModel,
     CreateGameRequest,
     ErrorResponse,
     GameExport,
@@ -193,6 +195,18 @@ def create_app(
         if adapter is None:
             raise HTTPException(404, f"unknown game {game!r}")
         return [{**sc, "game": game} for sc in adapter.named_scenarios()]
+
+    @api.get("/bot-models", operation_id="list_bot_models")
+    def list_bot_models() -> list[BotModel]:
+        return [
+            BotModel(
+                seat_type=f"net:{m.name}",
+                label=m.label,
+                description=m.description,
+                players=list(m.players),
+            )
+            for m in manifest().values()
+        ]
 
     @api.get("/scenarios", operation_id="list_scenarios", responses={404: _ERR})
     def list_scenarios(game: Annotated[str, Query()] = "bus") -> list[ScenarioSummary]:

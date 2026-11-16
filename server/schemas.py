@@ -6,12 +6,14 @@ from typing import Annotated, Any, Literal
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator
 
-from server.bots import SEAT_TYPE_PATTERN, is_valid_seat_type
+from bots.registry import seat_type_error
+from server.bots import SEAT_TYPE_PATTERN
 
 
 def _check_seat_type(v: str) -> str:
-    if not is_valid_seat_type(v):
-        raise ValueError(f"unknown seat type {v!r}")
+    err = seat_type_error(v)
+    if err is not None:
+        raise ValueError(err)
     return v
 
 
@@ -153,6 +155,15 @@ class GameExport(BaseModel):
         le=60,
         description="Per-move think-time cap in seconds for search bots (mcts seats); default 5.",
     )
+
+
+class BotModel(BaseModel):
+    """A trained net offered as a `net:<name>` seat (models/manifest.yaml)."""
+
+    seat_type: str = Field(description="Seat type to post, `net:<name>`.")
+    label: str
+    description: str = ""
+    players: list[int] = Field(description="Player counts the model may be seated in.")
 
 
 class ScenarioSummary(BaseModel):
