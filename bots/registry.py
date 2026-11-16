@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from bots.base import Bot
 from bots.heuristic import HeuristicBot
 from bots.mcts import parse_mcts_param
+from bots.mcts_net import parse_mcts_net_param
 from bots.net import parse_net_param
 from bots.random_bot import RandomBot
 
@@ -69,6 +70,13 @@ def _net_factory(param: str | None) -> Bot:
 
 
 register("net", _net_factory)
+
+
+def _mcts_net_factory(param: str | None) -> Bot:
+    return parse_mcts_net_param(param)
+
+
+register("mcts_net", _mcts_net_factory)
 
 
 def parse_seat_type(s: str) -> tuple[str, str | None]:

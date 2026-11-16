@@ -20,6 +20,7 @@ from server.schemas import (
     BatchActionRequest,
     BoardGeometry,
     BotModel,
+    BotSearchOption,
     CreateGameRequest,
     ErrorResponse,
     GameExport,
@@ -51,6 +52,9 @@ def _to_adapter_params(p: GameParams) -> dict[str, Any]:
 
 def _from_adapter_params(session: Session) -> GameParams:
     return GameParams.model_validate({**session.params, "num_players": session.game.num_players()})
+
+
+SEARCH_TIERS = (("Quick 50", 50), ("Normal 200", 200), ("Strong 1000", 1000))
 
 
 def create_app(
@@ -204,6 +208,12 @@ def create_app(
                 label=m.label,
                 description=m.description,
                 players=list(m.players),
+                search=[
+                    BotSearchOption(
+                        seat_type=f"mcts_net:{sims}-{m.name}", label=f"{m.label} + MCTS · {tier}"
+                    )
+                    for tier, sims in SEARCH_TIERS
+                ],
             )
             for m in manifest().values()
         ]

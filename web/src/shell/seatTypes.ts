@@ -15,7 +15,7 @@ export const DEFAULT_THINK_TIME_S = 5;
 export const MIN_THINK_TIME_S = 0.1;
 export const MAX_THINK_TIME_S = 60;
 
-export const isMctsSeat = (t: string): boolean => t === "mcts" || t.startsWith("mcts:");
+export const isMctsSeat = (t: string): boolean => t === "mcts" || t.startsWith("mcts:") || t.startsWith("mcts_net:");
 
 /** Display name for a seat type, e.g. "Heuristic", "MCTS Medium", "MCTS (50 sims)". */
 export function seatTypeName(t: string): string {
@@ -23,6 +23,8 @@ export function seatTypeName(t: string): string {
   if (t === "mcts-fast") return "MCTS (fast)";
   const m = /^mcts(?::(\d+)(?:-(\w+))?)?$/.exec(t);
   if (m) return m[1] ? `MCTS (${m[1]} sims${m[2] ? `, ${m[2]} rollouts` : ""})` : "MCTS";
+  const mn = /^mcts_net:(\d+)-(.+)$/.exec(t);
+  if (mn) return `Trained net + MCTS (${mn[2]}, ${mn[1]} sims)`;
   if (t.startsWith("net:")) return `Trained net (${t.slice(4)})`;
   if (t.startsWith("trained:")) return `Trained (${t.slice(8)})`;
   return t.charAt(0).toUpperCase() + t.slice(1);

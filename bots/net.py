@@ -131,3 +131,5 @@ def check_players(seat_type: str, players: int) -> None:
     kind, _, name = seat_type.partition(":")
     if kind == "net":
         resolve_model(name, players)
+    elif kind == "mcts_net":
+        resolve_model(name.partition("-")[2], players)

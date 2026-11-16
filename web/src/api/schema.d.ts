@@ -292,9 +292,24 @@ export interface components {
              */
             players: number[];
             /**
+             * Search
+             * @description Net-guided MCTS seats (`mcts_net:<sims>-<name>`).
+             */
+            search?: components["schemas"]["BotSearchOption"][];
+            /**
              * Seat Type
              * @description Seat type to post, `net:<name>`.
              */
+            seat_type: string;
+        };
+        /**
+         * BotSearchOption
+         * @description A net-guided MCTS seat offered for a model, e.g. `mcts_net:50-<name>`.
+         */
+        BotSearchOption: {
+            /** Label */
+            label: string;
+            /** Seat Type */
             seat_type: string;
         };
         /** CreateGameRequest */

@@ -182,6 +182,9 @@ def run_tournament(
     if workers <= 1:
         rows = [play_game(j) for j in jobs]
     else:
+        # Spawned workers inherit this: one BLAS thread each, else net seats oversubscribe the CPUs.
+        for k in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
+            os.environ.setdefault(k, "1")
         ctx = mp.get_context("spawn")
         with ctx.Pool(workers) as pool:
             rows = pool.map(play_game, jobs, chunksize=1)

@@ -89,7 +89,10 @@ export default function Lobby({ onCreated }: Props) {
   const n = mode === "scenario" ? (docPlayers ?? 4) : players;
   const netPresets = models
     .filter((m) => m.players.includes(n))
-    .map((m) => ({ value: m.seat_type as SeatType, label: m.label }));
+    .flatMap((m) => [
+      { value: m.seat_type as SeatType, label: m.label },
+      ...(m.search ?? []).map((o) => ({ value: o.seat_type as SeatType, label: o.label })),
+    ]);
   const seatOptions = [...SEAT_PRESETS, ...netPresets];
 
   /** Set the document text; a newly loaded replay brings its own seat types. */

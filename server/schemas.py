@@ -157,6 +157,13 @@ class GameExport(BaseModel):
     )
 
 
+class BotSearchOption(BaseModel):
+    """A net-guided MCTS seat offered for a model, e.g. `mcts_net:50-<name>`."""
+
+    seat_type: str
+    label: str
+
+
 class BotModel(BaseModel):
     """A trained net offered as a `net:<name>` seat (models/manifest.yaml)."""
 
@@ -164,6 +171,9 @@ class BotModel(BaseModel):
     label: str
     description: str = ""
     players: list[int] = Field(description="Player counts the model may be seated in.")
+    search: list[BotSearchOption] = Field(
+        default_factory=lambda: [], description="Net-guided MCTS seats (`mcts_net:<sims>-<name>`)."
+    )
 
 
 class ScenarioSummary(BaseModel):

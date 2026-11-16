@@ -74,6 +74,14 @@
             "title": "Players",
             "type": "array"
           },
+          "search": {
+            "description": "Net-guided MCTS seats (`mcts_net:<sims>-<name>`).",
+            "items": {
+              "$ref": "#/components/schemas/BotSearchOption"
+            },
+            "title": "Search",
+            "type": "array"
+          },
           "seat_type": {
             "description": "Seat type to post, `net:<name>`.",
             "title": "Seat Type",
@@ -86,6 +94,25 @@
           "players"
         ],
         "title": "BotModel",
+        "type": "object"
+      },
+      "BotSearchOption": {
+        "description": "A net-guided MCTS seat offered for a model, e.g. `mcts_net:50-<name>`.",
+        "properties": {
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "seat_type": {
+            "title": "Seat Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "seat_type",
+          "label"
+        ],
+        "title": "BotSearchOption",
         "type": "object"
       },
       "CreateGameRequest": {

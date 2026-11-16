@@ -173,3 +173,26 @@ def test_net_seat_wrong_player_count_rejected() -> None:
     c = TestClient(create_app(inline_bots=True))
     r = c.post("/api/games", json={"game": "bus", "seats": ["net:ppo-smoke", "random"]})
     assert 400 <= r.status_code < 500, r.text
+
+
+def test_net_mcts_seat_listed_and_plays_a_full_game() -> None:
+    c = TestClient(create_app(inline_bots=True))
+    model = c.get("/api/bot-models").json()[0]
+    assert [o["seat_type"] for o in model["search"]] == [
+        "mcts_net:50-ppo-smoke",
+        "mcts_net:200-ppo-smoke",
+        "mcts_net:1000-ppo-smoke",
+    ]
+    seats = ["mcts_net:3-ppo-smoke", "random", "net:ppo-smoke", "heuristic"]
+    g = _create(c, seats, bot_think_time_s=2)
+    assert g["is_terminal"] and g["bot_error"] is None and g["seat_types"] == seats
+
+
+@pytest.mark.parametrize("seat", ["mcts_net:5-missing", "mcts_net:5-../x", "mcts_net:ppo-smoke"])
+def test_net_mcts_bad_seat_rejected(seat: str) -> None:
+    c = TestClient(create_app(inline_bots=True))
+    r = c.post(
+        "/api/games",
+        json={"game": "bus", "params": {"num_players": 3}, "seats": [seat, "random", "random"]},
+    )
+    assert r.status_code in (400, 422)
