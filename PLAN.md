@@ -11,7 +11,7 @@
 - [x] Phase 0 — Scaffold, board data, rules spec, board look ✋ *you review spec, §4 defaults and the board preview*
 - [x] Phase 1 — Engine: the full game, 3–5 players (2026-11-14; report `docs/phase-reports/phase-1.md`)
 - [x] Phase 2 — Server + polished board UI ✋ *playtest #1*
-- [ ] Phase 3 — Bots (random, heuristic, MCTS) ✋ *playtest #2*
+- [x] Phase 3 — Bots (random, heuristic, MCTS) ✋ *playtest #2* (user: treat as finished, 2026-11-15)
 - [ ] Phase 4 — Trained agents *(starts with a mini-interview)*
 
 ---
@@ -223,10 +223,21 @@ Each phase starts with `/start-phase N` (task list for your approval) and ends w
 - [x] 5. `tools/tournament.py`: seat rotation, process pool, seeded, Wilson 95% CIs, JSON output; reproducible 20-game run — `implementer` (2026-11-15; 1724 tests; 20-game smoke: heuristic 82.5% vs 3 random)
 - [x] 6. Server and lobby bot seats (`heuristic`, `mcts`) with per-seat think-time cap and fallback; server tests, vitest, Playwright game with a heuristic seat, `check:api` — `implementer` (2026-11-15; `bot_think_time_s` per game, MCTS errors fall back to heuristic; seat select has Heuristic and MCTS Quick/Normal/Strong; 1738 pytest, 451 vitest, 17 e2e; UI_DESIGN §6.10)
 - [x] 7. Strength evaluation and tuning: ≥200 4-player games each, MCTS vs random and heuristic vs random, Wilson lower bound > 50%; report `docs/phase-reports/phase-3-bots.md` — `sim-runner`, `implementer` (2026-11-15; heuristic 72.6% [65.9, 78.2], mcts:200 95.0% [91.0, 97.3] vs 3 random, 200 games each; no tuning needed; `docs/phase-reports/phase-3-bots.md`)
-- [ ] 8. ✋ Playtest #2: you play against the bots and file reports
+- [x] 8. ✋ Playtest #2: you play against the bots and file reports (user waived 2026-11-15; Phase 3 treated as finished)
 - *Exit:* MCTS beats random and the heuristic beats random over a few hundred 4-player games; you play against them.
 
 **Phase 4 — Trained agents** *(mini-interview: algorithm, compute budget, evaluation, C++ port only on measured need)*
+- Interview (2026-11-15): PPO self-play from scratch (no behaviour cloning), reward shaping as needed (blend 0.7 win_loss + 0.3 margin annealed to win_loss; eval on win_loss only, D7); opponent mix ~50% current / 30% snapshots / 20% heuristic+random; local compute, smoke runs first then hours-to-a-day; evaluation by `tools/tournament.py` vs random, heuristic, `mcts:200` (Elo later if needed); torch in a `train` dependency group, numpy inference in the server; MCTS on top of the net is in scope; C++ port only on measured need (env >50% of wall time and <~10k decisions/s over 11 workers while curves still rise).
+- [ ] 1. Env wrapper and observation v2: ego-rotated seats, 5-seat padding with player-count one-hot, final score and tiebreak features, derived heuristic planes, legal mask, forced moves skipped — done: tests green, decisions/s per process measured and recorded — `spec-test-writer` → `implementer`
+- [ ] 2. `train` dependency group, policy/value MLP, `.npz` export, numpy forward in `bots/net.py` — done: torch and numpy outputs match within 1e-5, server path imports no torch — `implementer`
+- [ ] 3. PPO trainer `tools/train_ppo.py`: CPU actor pool, batched GPU learner, GAE, masking, reward blend with anneal, checkpoints, CSV log, seeded — done: 15-minute smoke run trains stably — `implementer`, `sim-runner`
+- [ ] 4. Opponent league (current/snapshots/heuristic/random) and periodic tournament evaluation — done: win-rate table logged during a smoke run — `implementer`
+- [ ] 5. ✋ Smoke gate (30 min): zero illegal actions, entropy falls without collapse, win rate vs random rising, 100 games vs 3 heuristic Wilson lower bound ≥ 20%; reward-shaping adjustments if it fails — `sim-runner`, `implementer`
+- [ ] 6. `net:<name>` seat type: allow-listed `models/` manifest, registry, server/lobby seat, tournament support — done: server tests, vitest, e2e, `check:api` green — `implementer`
+- [ ] 7. Net-guided MCTS (`mcts:N-net`): net as prior/value/rollout in the Python MCTS — done: legal, respects limits, tournament vs plain `mcts:N` — `implementer`
+- [ ] 8. Long run and evaluation: ≥200 games each vs random, heuristic, `mcts:200`; report `docs/phase-reports/phase-4-agents.md` — `sim-runner`, `rules-auditor`/`code-reviewer` at close
+- [ ] 9. C++ port decision (conditional): only if unit 1/3 measurements meet the trigger above; propose to the user before starting
+- *Exit:* trained bot has a Wilson lower bound > 25% vs 3 heuristic seats, is playable as a lobby seat, and MCTS-on-net is compared against plain MCTS.
 
 ## 8. Working agreement for agent sessions
 
