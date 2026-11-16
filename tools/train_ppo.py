@@ -4,13 +4,17 @@
     uv run --group train python -m tools.train_ppo --name smoke --players 4 --updates 40 \\
         --games-per-update 128 --workers 11
 
-One shared ego-rotated policy plays every seat (pure self-play; the opponent league is unit 4).
-Rollouts run in a spawn ``multiprocessing`` pool on CPU with a numpy copy of the weights
-(``train.rollout``); the learner (``train.ppo``) runs on the GPU when available. Reward is the
-shaped return ``mix * win_loss + (1 - mix) * margin`` with ``mix`` annealed linearly to 1.0;
-the periodic evaluation is always pure win_loss against 3 random bots.
+One shared ego-rotated policy plays the "current" seats; by default ~50% of games are pure
+self-play, ~30% put frozen past snapshots in some seats and ~20% put heuristic or random bots in
+some seats (``--league 0.5,0.3,0.2``; ``--league 1,0,0`` is pure self-play). Only "current" seats
+are trained on. Rollouts run in a spawn ``multiprocessing`` pool on CPU with a numpy copy of the
+weights (``train.rollout``); the learner (``train.ppo``) runs on the GPU when available. Reward
+is the shaped return ``mix * win_loss + (1 - mix) * margin`` with ``mix`` annealed linearly to 1.0;
+the periodic evaluation is always pure win_loss against 3 random, 3 heuristic (optionally 3
+``mcts:50``) bots and 3 copies of the oldest/latest pool snapshot, run on the worker pool.
 
-Outputs in ``runs/<name>/``: ``log.csv`` (one row per update), ``ckpt_<update>.pt`` (model +
+Outputs in ``runs/<name>/``: ``log.csv`` (one row per update), ``eval.csv`` (one row per
+evaluated opponent), ``pool/`` (league snapshots ``snap_<id>.npz``), ``ckpt_<update>.pt`` (model +
 optimizer + config) and ``ckpt_<update>.npz`` (numpy export for ``bots.net_forward``).
 """
 
@@ -35,6 +39,7 @@ import torch  # noqa: E402
 
 from train.export import export_npz  # noqa: E402
 from train.features import FEATURES_VERSION  # noqa: E402
+from train.league import GAME_TYPES, League, parse_league  # noqa: E402
 from train.model import BusNet  # noqa: E402
 from train.ppo import (  # noqa: E402
     PPOConfig,
@@ -60,8 +65,11 @@ COLUMNS = [
     "learn_s", "worker_busy", "entropy", "approx_kl", "clip_frac", "pg_loss", "value_loss",
     "explained_var", "mean_len", "illegal", "mix", "lr", "ent_coef",
     *[f"end_{t}" for t in END_TYPES],
-    "eval_games", "eval_win", "eval_lo", "eval_hi", "elapsed_s",
+    *[f"frac_{t}" for t in GAME_TYPES], *[f"win_{t}" for t in GAME_TYPES[1:]],
+    *[f"ret_{t}" for t in GAME_TYPES[1:]], "pool_size",
+    "eval_games", "eval_win", "eval_lo", "eval_hi", "eval_s", "elapsed_s",
 ]  # fmt: skip
+EVAL_COLUMNS = ["update", "opponent", "games", "win_rate", "lo", "hi", "mean_return"]
 
 
 def parse_players(text: str) -> tuple[int, ...]:
@@ -100,8 +108,16 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--mix-anneal-updates", type=int, default=300, help="0 = keep --mix")
     ap.add_argument("--ckpt-every", type=int, default=25)
     ap.add_argument("--eval-every", type=int, default=10, help="0 = off")
-    ap.add_argument("--eval-games", type=int, default=40)
-    ap.add_argument("--eval-greedy", action="store_true")
+    ap.add_argument("--eval-games", type=int, default=100)
+    ap.add_argument("--eval-greedy", action="store_true", help="greedy instead of sampled eval")
+    ap.add_argument("--eval-mcts", action="store_true", help="also evaluate vs 3 mcts:50 (slow)")
+    ap.add_argument(
+        "--league", default="0.5,0.3,0.2", help="game mix self,snapshots,bots (1,0,0 = self-play)"
+    )
+    ap.add_argument("--snapshot-every", type=int, default=10, help="updates; 0 = no snapshots")
+    ap.add_argument("--pool-size", type=int, default=10, help="snapshots kept (oldest evicted)")
+    ap.add_argument("--snapshot-sampling", choices=("uniform", "recency"), default="uniform")
+    ap.add_argument("--league-seed", type=int, default=0, help="extra seed for league sampling")
     return ap
 
 
@@ -131,35 +147,90 @@ class Runner:
             self.pool.join()
 
 
-def evaluate(
-    runner: Runner, weights: Any, games: int, players: tuple[int, ...], greedy: bool, seed: int,
-    envs: int,
-) -> tuple[int, float, float, float]:  # fmt: skip
-    """Win rate (pure win_loss, ego = net, 3 random opponents) with Wilson 95% CI."""
-    cfg = RolloutConfig(
-        players=players, mix=1.0, envs_per_worker=envs, greedy=greedy, collect=False
-    )
-    sizes = _chunks(games, max(runner.workers, 1))
-    tasks, start = [], 0
-    for i, sz in enumerate(sizes):
-        tasks.append((weights, sz, seed + i, cfg, list(range(start, start + sz)), start))
-        start += sz
-    wins = n = 0.0
-    for r in runner.map(tasks):
+def evaluate_all(
+    runner: Runner, weights: Any, league: League | None, args: argparse.Namespace, update: int
+) -> list[dict[str, Any]]:  # fmt: skip
+    """Pure win_loss evaluation of ``weights`` as ego (seat rotation) vs 3 copies of each opponent.
+
+    All opponents run as one batch of tasks on the worker pool. Rows: opponent, games, win_rate
+    (wl > 0), Wilson 95% interval, mean win_loss return.
+    """
+    specs: list[tuple[str, str]] = [("random", "random"), ("heuristic", "heuristic")]
+    if args.eval_mcts:
+        specs.append(("mcts:50", "mcts:50"))
+    ids: list[int] = []
+    if league is not None and len(league):
+        ids = sorted({league.ids[0], league.ids[-1]})
+        for i in ids:
+            tag = "oldest" if i == league.ids[0] else "latest"
+            specs.append((f"snap_{tag}:{i}", league.label(i)))
+            if len(ids) == 1:  # a single snapshot is both
+                specs[-1] = (f"snap_latest:{i}", league.label(i))
+    opp = league.opponents(ids) if league is not None and ids else {}
+    tasks: list[Any] = []
+    owner: list[int] = []
+    for k, (_, label) in enumerate(specs):
+        cfg = RolloutConfig(
+            players=args.players, mix=1.0, envs_per_worker=args.envs_per_worker,
+            greedy=args.eval_greedy, collect=False, eval_opponent=label,
+        )  # fmt: skip
+        sizes = _chunks(args.eval_games, max(runner.workers, 1))
+        start = 0
+        for i, sz in enumerate(sizes):
+            seed = args.seed + 10**6 + update * 1000 + k * 100 + i
+            tasks.append((weights, sz, seed, cfg, list(range(start, start + sz)), start, opp))
+            owner.append(k)
+            start += sz
+    wins = [0.0] * len(specs)
+    rets = [0.0] * len(specs)
+    ns = [0] * len(specs)
+    for k, r in zip(owner, runner.map(tasks), strict=True):
         for wl, _ in r["stats"]["ego_returns"]:
-            n += 1
-            wins += 1.0 if wl > 0 else 0.0
-    lo, hi = wilson_interval(wins, int(n))
-    return int(n), wins / max(n, 1), lo, hi
+            ns[k] += 1
+            wins[k] += 1.0 if wl > 0 else 0.0
+            rets[k] += wl
+    rows = []
+    for k, (name, _) in enumerate(specs):
+        lo, hi = wilson_interval(wins[k], ns[k])
+        rows.append({
+            "update": update, "opponent": name, "games": ns[k],
+            "win_rate": wins[k] / max(ns[k], 1), "lo": lo, "hi": hi,
+            "mean_return": rets[k] / max(ns[k], 1),
+        })  # fmt: skip
+    return rows
+
+
+def format_eval_table(rows: list[dict[str, Any]]) -> str:
+    """Compact pivot: one line per evaluated update, one column per opponent kind."""
+    kinds: list[str] = []
+    for r in rows:
+        kind = r["opponent"].split(":")[0] if r["opponent"].startswith("snap_") else r["opponent"]
+        if kind not in kinds:
+            kinds.append(kind)
+    lines = ["eval win rate [95% CI] (3 copies of the opponent, seats rotated):"]
+    lines.append(f"{'update':>7}" + "".join(f"{k:>24}" for k in kinds))
+    for u in sorted({r["update"] for r in rows}):
+        cells = {}
+        for r in rows:
+            if r["update"] == u:
+                kind = (
+                    r["opponent"].split(":")[0]
+                    if r["opponent"].startswith("snap_")
+                    else r["opponent"]
+                )
+                cells[kind] = f"{r['win_rate']:.2f} [{r['lo']:.2f},{r['hi']:.2f}]"
+        lines.append(f"{u:>7}" + "".join(f"{cells.get(k, '-'):>24}" for k in kinds))
+    return "\n".join(lines)
 
 
 def save_checkpoint(
     out: Path, update: int, model: BusNet, opt: torch.optim.Optimizer, args: argparse.Namespace,
-    mix: float, games: int,
+    mix: float, games: int, pool_ids: list[int],
 ) -> None:  # fmt: skip
     meta = {
         "update": update, "mix": mix, "games": games, "hidden": list(model.hidden),
         "features_version": FEATURES_VERSION, "players": list(args.players), "seed": args.seed,
+        "pool_ids": pool_ids,
     }  # fmt: skip
     torch.save(
         {
@@ -192,15 +263,25 @@ def main(argv: Sequence[str] | None = None) -> int:
     out = Path(args.out_dir) / args.name
     out.mkdir(parents=True, exist_ok=True)
     (out / "args.json").write_text(json.dumps(vars(args), indent=1, default=list))
+    lprobs = parse_league(args.league)
+    league: League | None = None
+    if lprobs[0] < 1.0:
+        league = League(lprobs, args.pool_size, args.snapshot_sampling, out / "pool")
     runner = Runner(args.workers)
+    eval_rows: list[dict[str, Any]] = []
     t0 = time.perf_counter()
     total_games = 0
     last_ckpt = 0
     print(f"device={device} workers={args.workers} hidden={hidden} out={out}", flush=True)
     try:
-        with open(out / "log.csv", "w", newline="") as fh:
+        with (
+            open(out / "log.csv", "w", newline="") as fh,
+            open(out / "eval.csv", "w", newline="") as efh,
+        ):
             writer = csv.DictWriter(fh, COLUMNS)
             writer.writeheader()
+            ewriter = csv.DictWriter(efh, EVAL_COLUMNS)
+            ewriter.writeheader()
             for update in range(1, args.updates + 1):
                 mix = mix_at(update - 1, args.mix, args.mix_anneal_updates)
                 lr = (
@@ -218,12 +299,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                 rcfg = RolloutConfig(
                     players=args.players, gamma=args.gamma, lam=args.lam, mix=mix,
                     envs_per_worker=args.envs_per_worker,
+                    league=league.spec() if league is not None else None,
                 )  # fmt: skip
                 weights = net_to_weights(model)
                 te = time.perf_counter()
                 sizes = _chunks(args.games_per_update, max(args.workers, 1))
-                base = args.seed * 1_000_003 + update * 1009
-                tasks = [(weights, sz, base + i, rcfg, None, 0) for i, sz in enumerate(sizes)]
+                base = args.seed * 1_000_003 + update * 1009 + args.league_seed * 7_919_011
+                opp = league.opponents() if league is not None else {}
+                tasks = [(weights, sz, base + i, rcfg, None, 0, opp) for i, sz in enumerate(sizes)]
                 results = runner.map(tasks)
                 env_s = time.perf_counter() - te
 
@@ -261,12 +344,46 @@ def main(argv: Sequence[str] | None = None) -> int:
                 }  # fmt: skip
                 for t in END_TYPES:
                     row[f"end_{t}"] = sum(r["stats"]["end"][t] for r in results) / max(games, 1)
-                if args.eval_every and update % args.eval_every == 0:
-                    n, w, lo, hi = evaluate(
-                        runner, weights, args.eval_games, args.players, args.eval_greedy,
-                        args.seed + 10**6 + update * 1000, args.envs_per_worker,
+                by_type: dict[str, list[float]] = {}
+                for r in results:
+                    for t, v in r["stats"]["by_type"].items():
+                        acc = by_type.setdefault(t, [0, 0, 0, 0.0])
+                        for j in range(4):
+                            acc[j] += v[j]
+                for t in GAME_TYPES:
+                    g_, seats_, wins_, ret_ = by_type.get(t, [0, 0, 0, 0.0])
+                    row[f"frac_{t}"] = g_ / max(games, 1)
+                    if t != "self" and seats_:
+                        row[f"win_{t}"] = wins_ / seats_
+                        row[f"ret_{t}"] = ret_ / seats_
+                row["pool_size"] = len(league) if league is not None else 0
+                new_w = None
+                snap_now = (
+                    league is not None and args.snapshot_every and update % args.snapshot_every == 0
+                )
+                do_eval = bool(args.eval_every and update % args.eval_every == 0)
+                if snap_now or do_eval:
+                    new_w = net_to_weights(model)  # post-update weights
+                if do_eval:
+                    te = time.perf_counter()
+                    erows = evaluate_all(runner, new_w, league, args, update)
+                    row["eval_s"] = time.perf_counter() - te
+                    first = erows[0]  # vs 3 random: the historical eval_* columns
+                    row.update(
+                        eval_games=first["games"], eval_win=first["win_rate"],
+                        eval_lo=first["lo"], eval_hi=first["hi"],
                     )  # fmt: skip
-                    row.update(eval_games=n, eval_win=w, eval_lo=lo, eval_hi=hi)
+                    for er in erows:
+                        ewriter.writerow(er)
+                    efh.flush()
+                    eval_rows += erows
+                    print(
+                        f"  eval u{update} ({row['eval_s']:.1f}s): "
+                        + " ".join(f"{e['opponent']}={e['win_rate']:.2f}" for e in erows),
+                        flush=True,
+                    )
+                if snap_now and league is not None and new_w is not None:
+                    league.add(update, new_w)
                 row["elapsed_s"] = time.perf_counter() - t0
                 writer.writerow({c: row.get(c, "") for c in COLUMNS})
                 fh.flush()
@@ -274,19 +391,31 @@ def main(argv: Sequence[str] | None = None) -> int:
                     f"u{update} games={total_games} dec/s={row['decisions_per_s']:.0f} "
                     f"env={env_s:.1f}s learn={learn_s:.1f}s ent={row['entropy']:.3f} "
                     f"kl={row['approx_kl']:.4f} vl={row['value_loss']:.4f} ev={ev:.2f} "
-                    f"mix={mix:.2f}"
+                    f"mix={mix:.2f} types="
+                    + "/".join(f"{row[f'frac_{t}']:.2f}" for t in GAME_TYPES)
                     + (f" eval={row['eval_win']:.2f}[{row['eval_lo']:.2f},{row['eval_hi']:.2f}]"
                        if "eval_win" in row else ""),
                     flush=True,
                 )  # fmt: skip
                 stop = bool(args.max_minutes) and (time.perf_counter() - t0) > args.max_minutes * 60
                 if update % args.ckpt_every == 0 or update == args.updates or stop:
-                    save_checkpoint(out, update, model, opt, args, mix, total_games)
+                    save_checkpoint(
+                        out,
+                        update,
+                        model,
+                        opt,
+                        args,
+                        mix,
+                        total_games,
+                        league.ids if league is not None else [],
+                    )
                     last_ckpt = update
                 if stop:
                     break
     finally:
         runner.close()
+    if eval_rows:
+        print(format_eval_table(eval_rows), flush=True)
     print(f"done: last checkpoint ckpt_{last_ckpt}", flush=True)
     return 0
 
