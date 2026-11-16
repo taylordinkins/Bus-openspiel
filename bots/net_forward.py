@@ -28,10 +28,11 @@ class StaleModelError(ValueError):
 
 
 def layout_hash() -> str:
-    """Hash of the observation block layout (names and shapes) and the action count."""
-    from train.features import obs_layout  # lazy: builds observers; no torch involved
+    """Hash of the observation layout (names, shapes), action count and FEATURES_VERSION."""
+    from train.features import FEATURES_VERSION, obs_layout  # lazy: no torch involved
 
-    text = json.dumps([[k, list(v)] for k, v in obs_layout().items()]) + f"|{NUM_DISTINCT_ACTIONS}"
+    text = json.dumps([[k, list(v)] for k, v in obs_layout().items()])
+    text += f"|{NUM_DISTINCT_ACTIONS}|v{FEATURES_VERSION}"
     return hashlib.sha256(text.encode()).hexdigest()[:16]
 
 

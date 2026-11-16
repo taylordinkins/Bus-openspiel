@@ -42,6 +42,9 @@ from bus.lines import legal_extensions, line_nodes
 from bus.observer import LETTERS, BusObserver
 from bus.rules import EMPTY, Core, board
 
+# Bump by hand when feature semantics change without a shape change (it is part of the layout
+# hash, so older exported models are rejected as stale).
+FEATURES_VERSION = 1
 MAX_SEATS = C.MAX_PLAYERS
 PLAYER_COUNTS = tuple(range(C.MIN_PLAYERS, C.MAX_PLAYERS + 1))
 _NTYPES = len(C.BUILDING_TYPES)
