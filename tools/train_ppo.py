@@ -113,6 +113,7 @@ COLUMNS = [
     "rating_latest", "elapsed_s", "rss_mb",
 ]  # fmt: skip
 EVAL_COLUMNS = ["update", "opponent", "players", "games", "win_rate", "lo", "hi", "mean_return"]
+EVAL_COLUMNS += ["mean_score", "mean_opp_score", "mean_win_score"]  # appended in unit 8c
 RATINGS_COLUMNS = ["update", "entrant", "kind", "rating", "games", "score_rate"]
 DEFAULT_PLAYER_WEIGHTS: dict[tuple[int, ...], tuple[float, ...]] = {(3, 4, 5): (0.3, 0.4, 0.3)}
 COMPOSITE_WEIGHTS = (0.8, 0.2)  # (vs 3 heuristic, vs the hall-of-fame reference net)
@@ -356,7 +357,7 @@ def evaluate_all(
     for ci, (k, n) in enumerate(cells):
         cfg = RolloutConfig(
             players=(n,), mix=1.0, envs_per_worker=args.envs_per_worker,
-            greedy=args.eval_greedy, collect=False, eval_opponent=specs[k][1],
+            greedy=args.eval_greedy, collect=False, eval_opponent=specs[k][1], record_scores=True,
         )  # fmt: skip
         sizes = _chunks(args.eval_games, max(runner.workers, 1))
         start = 0
@@ -370,7 +371,16 @@ def evaluate_all(
     wins = [0.0] * len(cells)
     rets = [0.0] * len(cells)
     ns = [0] * len(cells)
+    sc_ego = [0.0] * len(cells)  # engine final scores (points minus stones), not normalised
+    sc_opp = [0.0] * len(cells)
+    sc_win = [0.0] * len(cells)
     for ci, r in zip(owner, runner.map(tasks, abort), strict=True):
+        for labels_, scores_ in r["stats"]["scores"]:
+            ego = [x for x, lab in zip(scores_, labels_, strict=True) if lab == CURRENT_LABEL]
+            oth = [x for x, lab in zip(scores_, labels_, strict=True) if lab != CURRENT_LABEL]
+            sc_ego[ci] += sum(ego) / max(len(ego), 1)
+            sc_opp[ci] += sum(oth) / max(len(oth), 1)
+            sc_win[ci] += max(scores_)
         for wl, _ in r["stats"]["ego_returns"]:
             ns[ci] += 1
             wins[ci] += 1.0 if wl > 0 else 0.0
@@ -382,6 +392,9 @@ def evaluate_all(
             "update": update, "opponent": specs[k][0], "players": n, "games": ns[ci],
             "win_rate": wins[ci] / max(ns[ci], 1), "lo": lo, "hi": hi,
             "mean_return": rets[ci] / max(ns[ci], 1),
+            "mean_score": sc_ego[ci] / max(ns[ci], 1),
+            "mean_opp_score": sc_opp[ci] / max(ns[ci], 1),
+            "mean_win_score": sc_win[ci] / max(ns[ci], 1),
         })  # fmt: skip
     return rows
 
@@ -483,6 +496,19 @@ def format_eval_table(rows: list[dict[str, Any]]) -> str:
             if r["update"] == u and r["players"] == n
         }
         lines.append(f"{u:>7}{n:>3}" + "".join(f"{cells.get(k, '-'):>24}" for k in kinds))
+    lines.append("eval mean points, ego / opponents / winner (engine final scores):")
+    for u, n in sorted({(r["update"], r["players"]) for r in rows}):
+        cells = {
+            kind_of(r["opponent"]): f"{r['mean_score']:.1f}/{r['mean_opp_score']:.1f}"
+            f"/{r['mean_win_score']:.1f}"
+            for r in rows
+            if r["update"] == u
+            and r["players"] == n
+            and "mean_score" in r
+            and r["mean_score"] == r["mean_score"]  # skip NaN (rows from an older run)
+        }
+        if cells:
+            lines.append(f"{u:>7}{n:>3}" + "".join(f"{cells.get(k, '-'):>24}" for k in kinds))
     return "\n".join(lines)
 
 

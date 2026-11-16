@@ -186,15 +186,19 @@ def truncate_csv(path: Path, header: list[str], last_update: int) -> int:
         with open(path, newline="") as fh:
             reader = csv.reader(fh)
             got = next(reader, [])
-            if got != header:
+            # An older header that is a strict prefix of ``header`` (columns were only appended)
+            # is upgraded in place: old rows get blank cells for the new columns.
+            upgrade = got != header and 0 < len(got) < len(header) and header[: len(got)] == got
+            if got != header and not upgrade:
                 raise ResumeError(f"{path.name}: header differs from this version's columns")
+            pad = [""] * (len(header) - len(got)) if upgrade else []
             for r in reader:
                 try:
                     keep = int(r[0]) <= last_update
                 except (ValueError, IndexError):
                     keep = False  # a torn last line
                 if keep:
-                    rows.append(r)
+                    rows.append(r + pad)
                 else:
                     dropped += 1
 
@@ -216,6 +220,10 @@ def read_eval_rows(path: Path) -> list[dict[str, Any]]:
                 "players": int(r["players"]), "games": int(r["games"]),
                 "win_rate": float(r["win_rate"]), "lo": float(r["lo"]), "hi": float(r["hi"]),
                 "mean_return": float(r["mean_return"]),
+                **{
+                    k: float(r[k]) if r.get(k) not in (None, "") else float("nan")
+                    for k in ("mean_score", "mean_opp_score", "mean_win_score")
+                },
             })  # fmt: skip
     return out
 
