@@ -47,23 +47,29 @@ def line_ends(board: Board, line: Sequence[int]) -> tuple[int, int]:
     return nodes[0], nodes[-1]
 
 
-def legal_extensions(
-    board: Board, lines: Sequence[Sequence[int]], seat: int
-) -> frozenset[tuple[int, int]]:
-    """Legal ``(end, street)`` pairs for ``seat`` under R-036..R-039 and R-041."""
-    mine = lines[seat]
-    if not mine:
-        return frozenset()
+_Others = tuple[frozenset[int], dict[int, set[int]]]
+
+
+def _others(board: Board, lines: Sequence[Sequence[int]], seat: int) -> _Others:
+    """Streets used by other seats, and node -> their lines' last streets ending there (R-039)."""
     occupied: set[int] = set()
-    # node -> last streets of other seats' lines that end there (R-039)
     shared: dict[int, set[int]] = {}
     for other, line in enumerate(lines):
-        occupied.update(line)
         if other == seat or not line:
             continue
+        occupied.update(line)
         n0, n1 = line_ends(board, line)
         shared.setdefault(n0, set()).add(line[0])
         shared.setdefault(n1, set()).add(line[-1])
+    return frozenset(occupied), shared
+
+
+def _extensions_of(
+    board: Board, mine: Sequence[int], others: _Others
+) -> frozenset[tuple[int, int]]:
+    if not mine:
+        return frozenset()
+    occupied, shared = others
     own = set(mine)
     result: set[tuple[int, int]] = set()
     for end, node in enumerate(line_ends(board, mine)):
@@ -77,6 +83,13 @@ def legal_extensions(
         if extra:
             result.update((end, s) for s in cands if s in extra)
     return frozenset(result)
+
+
+def legal_extensions(
+    board: Board, lines: Sequence[Sequence[int]], seat: int
+) -> frozenset[tuple[int, int]]:
+    """Legal ``(end, street)`` pairs for ``seat`` under R-036..R-039 and R-041."""
+    return _extensions_of(board, lines[seat], _others(board, lines, seat))
 
 
 def extend(board: Board, line: Sequence[int], end: int, street: int) -> tuple[int, ...]:
@@ -94,22 +107,28 @@ def extend(board: Board, line: Sequence[int], end: int, street: int) -> tuple[in
 
 def _best_continuation(
     board: Board,
-    lines: tuple[tuple[int, ...], ...],
-    seat: int,
+    mine: tuple[int, ...],
+    others: _Others,
     depth: int,
     memo: dict[tuple[tuple[int, ...], int], int],
 ) -> int:
-    """Most further placements (at most ``depth``) from ``lines`` along legal continuations."""
+    """Most further placements (at most ``depth``) from ``mine`` along legal continuations.
+
+    Other seats' lines do not change during one seat's unit, so ``others`` is computed once.
+    """
     if depth <= 0:
         return 0
-    key = (lines[seat], depth)
+    key = (mine, depth)
     cached = memo.get(key)
     if cached is not None:
         return cached
     best = 0
-    for end, street in sorted(legal_extensions(board, lines, seat)):
-        nxt = (*lines[:seat], extend(board, lines[seat], end, street), *lines[seat + 1 :])
-        best = max(best, 1 + _best_continuation(board, nxt, seat, depth - 1, memo))
+    for end, street in sorted(_extensions_of(board, mine, others)):
+        best = max(
+            best,
+            1
+            + _best_continuation(board, extend(board, mine, end, street), others, depth - 1, memo),
+        )
         if best >= depth:
             break
     memo[key] = best
@@ -119,7 +138,7 @@ def _best_continuation(
 def max_placements(board: Board, lines: Sequence[Sequence[int]], seat: int, depth: int) -> int:
     """Largest number (at most ``depth``) of consecutive legal placements for ``seat`` (R-042)."""
     frozen = tuple(tuple(line) for line in lines)
-    return _best_continuation(board, frozen, seat, depth, {})
+    return _best_continuation(board, frozen[seat], _others(board, frozen, seat), depth, {})
 
 
 def maximal_extensions(
@@ -136,9 +155,10 @@ def maximal_extensions(
     frozen = tuple(tuple(line) for line in lines)
     memo: dict[tuple[tuple[int, ...], int], int] = {}
     scored: dict[tuple[int, int], int] = {}
-    for end, street in legal_extensions(board, frozen, seat):
-        nxt = (*frozen[:seat], extend(board, frozen[seat], end, street), *frozen[seat + 1 :])
-        scored[(end, street)] = 1 + _best_continuation(board, nxt, seat, reach - 1, memo)
+    others = _others(board, frozen, seat)
+    for end, street in _extensions_of(board, frozen[seat], others):
+        nxt = extend(board, frozen[seat], end, street)
+        scored[(end, street)] = 1 + _best_continuation(board, nxt, others, reach - 1, memo)
     if not scored:
         return frozenset()
     top = max(scored.values())

@@ -260,6 +260,11 @@ export interface components {
         /** CreateGameRequest */
         CreateGameRequest: {
             /**
+             * Bot Think Time S
+             * @description Per-move think-time cap in seconds for search bots (mcts seats); default 5.
+             */
+            bot_think_time_s?: number | null;
+            /**
              * Game
              * @default bus
              */
@@ -297,6 +302,11 @@ export interface components {
          * @description Replay file: everything needed to rebuild a game by replaying `history`.
          */
         GameExport: {
+            /**
+             * Bot Think Time S
+             * @description Per-move think-time cap in seconds for search bots (mcts seats); default 5.
+             */
+            bot_think_time_s?: number | null;
             /** Game */
             game: string;
             /** History */
@@ -342,6 +352,11 @@ export interface components {
              * @description Set when the bot worker failed; POST bots/retry to retry.
              */
             bot_error?: string | null;
+            /**
+             * Bot Think Time S
+             * @description Think-time cap in seconds for search bot seats.
+             */
+            bot_think_time_s?: number | null;
             /**
              * Bot Thinking
              * @description A bot seat is to move and has not failed (false in the error state).

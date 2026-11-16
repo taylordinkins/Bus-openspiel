@@ -30,6 +30,7 @@ from server.schemas import (
     ScenarioSummary,
 )
 from server.sessions import (
+    DEFAULT_THINK_TIME_S,
     CannotGoBack,
     IllegalAction,
     Session,
@@ -99,6 +100,7 @@ def create_app(
                     "seat_types": seats,
                     "bot_thinking": thinking,
                     "bot_error": error,
+                    "bot_think_time_s": s.bot_think_time_s,
                     "seat": seat,
                     "history_length": len(s.history) if at is None else at,
                     "history": s.history_entries(seat, at),
@@ -119,6 +121,7 @@ def create_app(
         seed: int | None,
         history: list[int],
         scenario: dict[str, Any] | None = None,
+        bot_think_time_s: float | None = None,
     ):
         # An explicit seed means deterministic play (tests/tools, salt ""); otherwise the seed is
         # random and a secret salt keeps bot/chance picks unpredictable. Neither is ever sent out.
@@ -142,7 +145,16 @@ def create_app(
                     )
                 adapter_params[k] = v
         try:
-            return store.create(game, adapter_params, seats, seed, history, scenario, salt)
+            return store.create(
+                game,
+                adapter_params,
+                seats,
+                seed,
+                history,
+                scenario,
+                salt,
+                DEFAULT_THINK_TIME_S if bot_think_time_s is None else bot_think_time_s,
+            )
         except IllegalAction as e:
             raise HTTPException(400, f"invalid history: {e}") from None
         except (SessionError, ValueError) as e:
@@ -150,12 +162,30 @@ def create_app(
 
     @api.post("/games", operation_id="create_game", responses={400: _ERR, 422: _ERR})
     def create_game(req: CreateGameRequest) -> GameView:
-        return render(make(req.game, req.params, list(req.seats), req.seed, [], req.scenario))
+        return render(
+            make(
+                req.game,
+                req.params,
+                list(req.seats),
+                req.seed,
+                [],
+                req.scenario,
+                req.bot_think_time_s,
+            )
+        )
 
     @api.post("/games/import", operation_id="import_game", responses={400: _ERR, 422: _ERR})
     def import_game(body: GameExport) -> GameView:
         return render(
-            make(body.game, body.params, list(body.seats), None, body.history, body.scenario)
+            make(
+                body.game,
+                body.params,
+                list(body.seats),
+                None,
+                body.history,
+                body.scenario,
+                body.bot_think_time_s,
+            )
         )
 
     def scenarios_of(game: str) -> list[dict[str, Any]]:
@@ -294,6 +324,8 @@ def create_app(
                 "seats": seats,
                 "history": list(s.history),
             }
+            if s.bot_think_time_s != DEFAULT_THINK_TIME_S:  # likewise omitted at the default
+                data["bot_think_time_s"] = s.bot_think_time_s
             if s.scenario is not None:  # omitted for plain games (keeps old exports unchanged)
                 data["scenario"] = s.scenario
             return GameExport.model_validate(data)

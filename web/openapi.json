@@ -56,6 +56,20 @@
       },
       "CreateGameRequest": {
         "properties": {
+          "bot_think_time_s": {
+            "anyOf": [
+              {
+                "maximum": 60.0,
+                "minimum": 0.1,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Per-move think-time cap in seconds for search bots (mcts seats); default 5.",
+            "title": "Bot Think Time S"
+          },
           "game": {
             "default": "bus",
             "title": "Game",
@@ -79,8 +93,8 @@
           },
           "seats": {
             "items": {
-              "description": "human or a bot seat type (random).",
-              "pattern": "^(human|random)$",
+              "description": "human, or a bot seat type: kind or kind:param (random).",
+              "pattern": "^(human|[a-z_]+(:[A-Za-z0-9_.-]+)?)$",
               "type": "string"
             },
             "title": "Seats",
@@ -135,6 +149,20 @@
       "GameExport": {
         "description": "Replay file: everything needed to rebuild a game by replaying `history`.",
         "properties": {
+          "bot_think_time_s": {
+            "anyOf": [
+              {
+                "maximum": 60.0,
+                "minimum": 0.1,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Per-move think-time cap in seconds for search bots (mcts seats); default 5.",
+            "title": "Bot Think Time S"
+          },
           "game": {
             "title": "Game",
             "type": "string"
@@ -164,8 +192,8 @@
           },
           "seats": {
             "items": {
-              "description": "human or a bot seat type (random).",
-              "pattern": "^(human|random)$",
+              "description": "human, or a bot seat type: kind or kind:param (random).",
+              "pattern": "^(human|[a-z_]+(:[A-Za-z0-9_.-]+)?)$",
               "type": "string"
             },
             "title": "Seats",
@@ -227,6 +255,18 @@
             ],
             "description": "Set when the bot worker failed; POST bots/retry to retry.",
             "title": "Bot Error"
+          },
+          "bot_think_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Think-time cap in seconds for search bot seats.",
+            "title": "Bot Think Time S"
           },
           "bot_thinking": {
             "description": "A bot seat is to move and has not failed (false in the error state).",
@@ -303,8 +343,8 @@
           },
           "seat_types": {
             "items": {
-              "description": "human or a bot seat type (random).",
-              "pattern": "^(human|random)$",
+              "description": "human, or a bot seat type: kind or kind:param (random).",
+              "pattern": "^(human|[a-z_]+(:[A-Za-z0-9_.-]+)?)$",
               "type": "string"
             },
             "title": "Seat Types",
@@ -312,8 +352,8 @@
           },
           "seats": {
             "items": {
-              "description": "human or a bot seat type (random).",
-              "pattern": "^(human|random)$",
+              "description": "human, or a bot seat type: kind or kind:param (random).",
+              "pattern": "^(human|[a-z_]+(:[A-Za-z0-9_.-]+)?)$",
               "type": "string"
             },
             "title": "Seats",

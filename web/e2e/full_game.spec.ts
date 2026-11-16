@@ -24,3 +24,12 @@ test("a 3-player game against random bots is finished by clicking the board", as
   expect(body).not.toMatch(/Player [0-9]/);
   expect(errors, "console errors").toEqual([]);
 });
+
+test("a game with a heuristic bot seat is finished by clicking the board", async ({ page }) => {
+  test.setTimeout(300_000);
+  await useSettings(page, "off", 0);
+  await newGame(page, 3, ["human", "heuristic", "random"], "5");
+  await expect(page.getByText(/P1 heuristic/)).toBeVisible();
+  await playToEnd(page);
+  await expect(results(page)).toBeVisible();
+});

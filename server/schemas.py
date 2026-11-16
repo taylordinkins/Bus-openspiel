@@ -4,16 +4,24 @@ from __future__ import annotations
 
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator
 
-from server.bots import SEAT_TYPE_PATTERN
+from server.bots import SEAT_TYPE_PATTERN, is_valid_seat_type
+
+
+def _check_seat_type(v: str) -> str:
+    if not is_valid_seat_type(v):
+        raise ValueError(f"unknown seat type {v!r}")
+    return v
+
 
 SeatType = Annotated[
     str,
     Field(
         pattern=SEAT_TYPE_PATTERN,
-        description=("human or a bot seat type (random)."),
+        description="human, or a bot seat type: kind or kind:param (random).",
     ),
+    AfterValidator(_check_seat_type),
 ]
 
 
@@ -41,6 +49,12 @@ class CreateGameRequest(BaseModel):
     scenario: dict[str, Any] | None = Field(
         default=None,
         description="Optional scenario JSON (docs/SCENARIOS.md); the game starts from it.",
+    )
+    bot_think_time_s: float | None = Field(
+        default=None,
+        ge=0.1,
+        le=60,
+        description="Per-move think-time cap in seconds for search bots (mcts seats); default 5.",
     )
 
 
@@ -94,6 +108,9 @@ class GameView(BaseModel):
     bot_error: str | None = Field(
         default=None, description="Set when the bot worker failed; POST bots/retry to retry."
     )
+    bot_think_time_s: float | None = Field(
+        default=None, description="Think-time cap in seconds for search bot seats."
+    )
     seat: int
     history_length: int
     history: list[HistoryEntry] = Field(description="Labelled action history, oldest first.")
@@ -129,6 +146,12 @@ class GameExport(BaseModel):
     history: list[int]
     scenario: dict[str, Any] | None = Field(
         default=None, description="Scenario the game started from, if any."
+    )
+    bot_think_time_s: float | None = Field(
+        default=None,
+        ge=0.1,
+        le=60,
+        description="Per-move think-time cap in seconds for search bots (mcts seats); default 5.",
     )
 
 
