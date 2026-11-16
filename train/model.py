@@ -1,11 +1,15 @@
 # pyright: basic, reportMissingImports=false
 """BusNet: policy/value MLP for PPO self-play (Phase 4 unit 2). Needs torch.
 
-Shape: shared MLP trunk (tanh, as in OpenSpiel's PPO and robust for PPO value learning), a policy
+Shape: MLP trunk (tanh, as in OpenSpiel's PPO and robust for PPO value learning), a policy
 head giving one logit per action id, and an N-player value head giving one value per ego-ordered
 seat (seat 0 = player to move, padded to ``n_seats`` = 5; the caller masks absent seats), tanh-
 bounded to [-1, 1] because shaped returns lie there. Orthogonal init after OpenSpiel's
 ``open_spiel/python/pytorch/ppo.py`` (copy-adapted: ``layer_init``, masked categorical).
+
+``separate_value=True`` (default from unit 8b, export format 2) gives the value head its own trunk
+of the same shape, so value-loss gradients (``vf_coef`` 1.0) cannot disturb the policy features;
+``False`` keeps the original shared trunk (export format 1 layout).
 """
 
 from __future__ import annotations
@@ -43,6 +47,7 @@ class BusNet(nn.Module):
         hidden: tuple[int, ...] = (512, 512),
         n_actions: int = NUM_DISTINCT_ACTIONS,
         n_seats: int = MAX_SEATS,
+        separate_value: bool = True,
     ) -> None:
         super().__init__()  # pyright: ignore[reportUnknownMemberType]
         self.obs_size, self.hidden, self.n_actions, self.n_seats = (
@@ -52,6 +57,14 @@ class BusNet(nn.Module):
         self.trunk = nn.ModuleList(
             layer_init(nn.Linear(a, b)) for a, b in zip(sizes[:-1], sizes[1:], strict=True)
         )
+        self.separate_value = separate_value
+        self.v_trunk = (
+            nn.ModuleList(
+                layer_init(nn.Linear(a, b)) for a, b in zip(sizes[:-1], sizes[1:], strict=True)
+            )
+            if separate_value
+            else nn.ModuleList()
+        )
         self.pi = layer_init(nn.Linear(sizes[-1], n_actions), std=0.01)
         self.v = layer_init(nn.Linear(sizes[-1], n_seats), std=1.0)
 
@@ -60,7 +73,11 @@ class BusNet(nn.Module):
         x = obs
         for layer in self.trunk:
             x = torch.tanh(layer(x))
-        return mask_logits(self.pi(x), mask), torch.tanh(self.v(x))
+        xv = obs if self.separate_value else x
+        if self.separate_value:
+            for layer in self.v_trunk:
+                xv = torch.tanh(layer(xv))
+        return mask_logits(self.pi(x), mask), torch.tanh(self.v(xv))
 
     def act(
         self,

@@ -24,7 +24,7 @@ RESUME_WHITELIST = frozenset({
     "max_minutes", "workers", "eval_every", "eval_games", "eval_mcts", "eval_greedy",
     "ckpt_every", "keep_every", "lr", "lr_decay", "ent_coef", "ent_coef_final", "players",
     "league", "snapshot_every", "pool_size", "updates", "device", "stop_after", "task_timeout",
-    "max_retries",
+    "max_retries", "games_per_update", "player_weights", "ratings_every", "ratings_games",
 })  # fmt: skip
 
 
@@ -153,7 +153,8 @@ def read_eval_rows(path: Path) -> list[dict[str, Any]]:
     with open(path, newline="") as fh:
         for r in csv.DictReader(fh):
             out.append({
-                "update": int(r["update"]), "opponent": r["opponent"], "games": int(r["games"]),
+                "update": int(r["update"]), "opponent": r["opponent"],
+                "players": int(r["players"]), "games": int(r["games"]),
                 "win_rate": float(r["win_rate"]), "lo": float(r["lo"]), "hi": float(r["hi"]),
                 "mean_return": float(r["mean_return"]),
             })  # fmt: skip

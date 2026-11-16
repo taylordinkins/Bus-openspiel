@@ -7,6 +7,7 @@ masked MSE value loss, entropy bonus), changed for a masked, multi-seat value he
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Any
 
@@ -38,6 +39,35 @@ def linear(start: float, end: float, step: int, total: int) -> float:
     return start + (end - start) * min(1.0, max(0.0, step / total))
 
 
+def cosine(start: float, end: float, step: int, total: int) -> float:
+    """Half-cosine from ``start`` to ``end`` over ``total`` steps (flat after)."""
+    if total <= 0:
+        return start
+    f = min(1.0, max(0.0, step / total))
+    return end + (start - end) * 0.5 * (1.0 + math.cos(math.pi * f))
+
+
+def lr_at(
+    step: int, lr: float, decay: bool, schedule: str, total: int, final_frac: float = 0.1
+) -> float:
+    """Learning rate for update ``step`` (0-based): constant, or ``linear``/``cosine`` down to
+    ``final_frac * lr`` over the fixed ``total``-update horizon."""
+    if not decay:
+        return lr
+    fn = cosine if schedule == "cosine" else linear
+    return fn(lr, lr * final_frac, step, total)
+
+
+def ent_at(
+    step: int, start: float, final: float | None, total: int, floor_at: float = 1.0
+) -> float:
+    """Entropy coefficient: ``start`` falling linearly to the constant floor ``final`` at
+    ``floor_at * total`` updates, then constant. ``final=None`` keeps ``start``."""
+    if final is None:
+        return start
+    return linear(start, final, step, int(total * floor_at))
+
+
 def mix_at(update: int, mix0: float, anneal_updates: int) -> float:
     """Reward mix for ``update`` (0-based): ``mix0`` rising linearly to 1.0 over the anneal.
 
@@ -58,12 +88,26 @@ def net_to_weights(model: BusNet) -> NetWeights:
     return NetWeights(
         tuple(lin(layer) for layer in model.trunk), lin(model.pi), lin(model.v), model.ACTIVATION,
         model.obs_size, model.n_actions, model.n_seats, {},
+        tuple(lin(layer) for layer in model.v_trunk),
     )  # fmt: skip
 
 
 def explained_variance(pred: np.ndarray[Any, Any], target: np.ndarray[Any, Any]) -> float:
     var = float(np.var(target))
     return float("nan") if var < 1e-12 else float(1.0 - np.var(target - pred) / var)
+
+
+def ev_by_quartile(
+    pred: np.ndarray[Any, Any], target: np.ndarray[Any, Any], prog: np.ndarray[Any, Any]
+) -> list[float]:
+    """Explained variance of the value head on samples in each quarter of game progress
+    (``prog`` in [0, 1): decision index within the seat's trajectory / its length); NaN if a
+    quarter has no samples or no target variance."""
+    out: list[float] = []
+    for q in range(4):
+        m = (prog >= q / 4) & (prog < (q + 1) / 4)
+        out.append(explained_variance(pred[m], target[m]) if m.any() else float("nan"))
+    return out
 
 
 def ppo_update(

@@ -36,7 +36,7 @@ import numpy as np
 from bots.net_forward import NetWeights
 from train.env import BusEnv, shaped_return
 from train.features import MAX_SEATS
-from train.league import LeagueSpec, game_type, sample_assignment
+from train.league import HOF_PREFIX, LeagueSpec, game_type, sample_assignment
 from train.shm import make_spill_dir
 
 END_TYPES = ("last_stone", "sites_full", "markers")
@@ -59,6 +59,8 @@ class RolloutConfig:
     collect: bool = True  # False: evaluation, no training samples
     league: LeagueSpec | None = None  # None: pure self-play
     eval_opponent: str = RANDOM  # label of the non-ego seats when ``egos`` is given
+    player_weights: tuple[float, ...] | None = None  # sampling weights over ``players``
+    record_scores: bool = False  # keep (labels, final scores) per game in ``stats["scores"]``
 
 
 def assign_seat_policies(
@@ -71,7 +73,7 @@ def assign_seat_policies(
 
 
 def _opponent_weights(label: str, opponents: Opponents) -> NetWeights:
-    """Weights for a ``snap:`` label; loads npz paths once per process and caches by label."""
+    """Weights for a ``snap:``/``hof:`` label; npz paths load once per process (cached by label)."""
     src = opponents[label]
     if isinstance(src, NetWeights):
         return src
@@ -122,10 +124,16 @@ class _Slot:
 
 def _sample(
     weights: NetWeights, obs: np.ndarray[Any, Any], mask: np.ndarray[Any, Any],
-    rng: np.random.Generator, greedy: bool,
+    rng: np.random.Generator, greedy: bool, need_values: bool = True,
 ) -> tuple[np.ndarray[Any, Any], np.ndarray[Any, Any], np.ndarray[Any, Any], int]:  # fmt: skip
-    """(actions, logp, ego values (B,), illegal count) for a batch."""
-    logits, values = weights.forward(obs, mask)
+    """(actions, logp, ego values (B,), illegal count) for a batch; values are zeros unless
+    ``need_values`` (frozen opponents never use them, and a separate value trunk costs a pass)."""
+    if need_values:
+        logits, values = weights.forward(obs, mask)
+        ego_v = values[:, 0].astype(np.float32)
+    else:
+        logits = weights.logits(obs, mask)
+        ego_v = np.zeros(len(obs), np.float32)
     z = logits - logits.max(axis=-1, keepdims=True)
     e = np.exp(z) * mask
     probs = e / e.sum(axis=-1, keepdims=True)
@@ -142,7 +150,7 @@ def _sample(
         for i in np.flatnonzero(bad):
             act[i] = np.flatnonzero(mask[i])[-1]
     logp = np.log(np.maximum(probs[rows, act], 1e-30))
-    return act, logp.astype(np.float32), values[:, 0].astype(np.float32), illegal
+    return act, logp.astype(np.float32), ego_v, illegal
 
 
 def _bot_action(label: str, env: BusEnv) -> int:
@@ -158,13 +166,16 @@ def _bot_action(label: str, env: BusEnv) -> int:
 def play_games(
     weights: NetWeights, n_games: int, seed: int, cfg: RolloutConfig,
     egos: list[int] | None = None, first_index: int = 0, opponents: Opponents | None = None,
+    seatings: list[list[str]] | None = None,
 ) -> dict[str, Any]:  # fmt: skip
     """Play ``n_games`` full games; return samples (if ``cfg.collect``) and statistics.
 
     Deterministic for a given (weights, n_games, seed, cfg). ``egos`` (evaluation) pins which seat
     uses the net and gives all other seats ``cfg.eval_opponent``; ``first_index`` offsets the game
-    index used for that rotation. ``opponents`` maps ``snap:<id>`` labels to weights or npz paths.
-    Samples: obs, mask, action, logp, value, adv, vtarget, vmask.
+    index used for that rotation. ``opponents`` maps ``snap:<id>`` / ``hof:<name>`` labels to
+    weights or npz paths. ``seatings`` (rating games) fixes the label of every seat of game i
+    (``n_games`` must equal its length). Samples: obs, mask, action, logp, value, adv, vtarget,
+    vmask, prog (own-decision index / count within the trajectory, for value EV by game stage).
     """
     t_start = time.perf_counter()
     opponents = opponents or {}
@@ -172,23 +183,34 @@ def play_games(
     rng = np.random.default_rng(seed)
     pool: dict[int, list[BusEnv]] = {}
     out_lists: dict[str, list[Any]] = {
-        k: [] for k in ("obs", "mask", "action", "logp", "value", "adv", "vtarget", "vmask")
+        k: [] for k in ("obs", "mask", "action", "logp", "value", "adv", "vtarget", "vmask", "prog")
     }
     stats: dict[str, Any] = {
         "games": 0, "decisions": 0, "forced": 0, "illegal": 0, "lengths": [], "ego_returns": [],
         "end": dict.fromkeys(END_TYPES, 0), "mean_return0": 0.0,
         # game type -> [games, current-seat results, wins, summed shaped return]
         "by_type": {},
+        # opponent label -> [games containing it, current seats in them, current wins]
+        "by_label": {},
+        "scores": [],
     }  # fmt: skip
     next_game = 0
+    pw = None
+    if cfg.player_weights is not None:
+        pw = np.asarray(cfg.player_weights, float)
+        pw = pw / pw.sum()
     slots: list[_Slot] = []
 
     def start_one() -> None:
         nonlocal next_game
         gi = next_game
         next_game += 1
-        n = int(rng.choice(cfg.players))
+        n = int(rng.choice(cfg.players, p=pw))
+        if seatings is not None:
+            n = len(seatings[gi])
         policies = assign_seat_policies(first_index + gi, n, rng, cfg.league)
+        if seatings is not None:
+            policies = list(seatings[gi])
         if egos is not None:
             ego = egos[gi] % n
             policies = [CURRENT if s == ego else cfg.eval_opponent for s in range(n)]
@@ -221,6 +243,18 @@ def play_games(
                 acc[1] += 1
                 acc[2] += 1 if wlr[p] > 0 else 0
                 acc[3] += rets[p]
+        cur_seats = [p for p in range(n) if sl.policies[p] == CURRENT]
+        if cur_seats:
+            cur_wins = sum(1 for p in cur_seats if wlr[p] > 0)
+            for lab in {x for x in sl.policies if x != CURRENT}:
+                bl = stats["by_label"].setdefault(lab, [0, 0, 0])
+                bl[0] += 1
+                bl[1] += len(cur_seats)
+                bl[2] += cur_wins
+        if cfg.record_scores:
+            from bus.rules import final_scores
+
+            stats["scores"].append((list(sl.policies), [float(x) for x in final_scores(wl)]))
         if cfg.collect:
             for seat in range(n):
                 if sl.policies[seat] != CURRENT:
@@ -246,6 +280,7 @@ def play_games(
                 out_lists["adv"].append(adv)
                 out_lists["vtarget"].append(np.tile(tv, (k, 1)))
                 out_lists["vmask"].append(np.tile(tm, (k, 1)))
+                out_lists["prog"].append(((np.arange(k) + 0.5) / k).astype(np.float32))
         pool.setdefault(n, []).append(env)
 
     while next_game < n_games or slots:
@@ -256,7 +291,7 @@ def play_games(
         groups: dict[str, list[int]] = {}
         for i, sl in enumerate(cur):
             label = sl.policies[sl.env.current_seat]
-            if label == CURRENT or label.startswith(SNAP_PREFIX):
+            if label == CURRENT or label.startswith((SNAP_PREFIX, HOF_PREFIX)):
                 groups.setdefault(label, []).append(i)
             elif label == RANDOM:
                 actions[i] = int(rng.choice(sl.env.legal_actions()))
@@ -266,7 +301,9 @@ def play_games(
             w = weights if label == CURRENT else _opponent_weights(label, opponents)
             obs = np.stack([cur[i].env.obs() for i in net_idx])
             mask = np.stack([cur[i].env.legal_mask() for i in net_idx])
-            act, logp, val, ill = _sample(w, obs, mask, rng, cfg.greedy)
+            act, logp, val, ill = _sample(
+                w, obs, mask, rng, cfg.greedy, need_values=cfg.collect and label == CURRENT
+            )
             stats["illegal"] += ill
             for r, i in enumerate(net_idx):
                 sl = cur[i]
@@ -296,13 +333,14 @@ def play_games(
     return res
 
 
-Task = tuple[NetWeights, int, int, RolloutConfig, list[int] | None, int, Opponents]
+Task = tuple[Any, ...]  # (weights, n_games, seed, cfg, egos, first_index, opponents[, seatings])
 
 
 def run_task(task: Task) -> dict[str, Any]:
     """Picklable pool entry point."""
-    weights, n_games, seed, cfg, egos, first_index, opponents = task
-    return play_games(weights, n_games, seed, cfg, egos, first_index, opponents)
+    weights, n_games, seed, cfg, egos, first_index, opponents = task[:7]
+    seatings = task[7] if len(task) > 7 else None
+    return play_games(weights, n_games, seed, cfg, egos, first_index, opponents, seatings)
 
 
 def run_task_spill(task: Task) -> dict[str, Any]:

@@ -54,12 +54,15 @@ from train.league import GAME_TYPES, League, parse_league  # noqa: E402
 from train.model import BusNet  # noqa: E402
 from train.ppo import (  # noqa: E402
     PPOConfig,
+    ent_at,
+    ev_by_quartile,
     explained_variance,
-    linear,
+    lr_at,
     mix_at,
     net_to_weights,
     ppo_update,
 )
+from train.ratings import elo_ratings  # noqa: E402
 from train.rollout import (  # noqa: E402
     END_TYPES,
     RolloutConfig,
@@ -90,19 +93,25 @@ from .tournament import wilson_interval  # noqa: E402
 # Evaluation seeds live above this bit; training seeds (seed * 1_000_003 + update * 1009 + ...)
 # stay far below it for any realistic seed and update count, so the two spaces never overlap.
 EVAL_SEED_BIT = 1 << 62
+CURRENT_LABEL = "current"  # the net being trained, in rating games
 SIGNAL_DEBOUNCE_S = 2.0  # signals closer together than this count as one
 SIGNAL_GRACE_S = 60.0  # after the first signal, an in-flight rollout is aborted after this long
 
 COLUMNS = [
     "update", "games", "decisions", "samples", "decisions_per_s", "games_per_s", "env_s",
     "learn_s", "worker_busy", "entropy", "approx_kl", "clip_frac", "pg_loss", "value_loss",
-    "explained_var", "mean_len", "illegal", "mix", "lr", "ent_coef",
+    "explained_var", "ev_q1", "ev_q2", "ev_q3", "ev_q4", "mean_len", "illegal", "mix", "lr",
+    "ent_coef",
     *[f"end_{t}" for t in END_TYPES],
     *[f"frac_{t}" for t in GAME_TYPES], *[f"win_{t}" for t in GAME_TYPES[1:]],
-    *[f"ret_{t}" for t in GAME_TYPES[1:]], "pool_size",
-    "eval_games", "eval_win", "eval_lo", "eval_hi", "eval_s", "elapsed_s", "rss_mb",
+    *[f"ret_{t}" for t in GAME_TYPES[1:]], "pool_size", "hof_size",
+    "eval_games", "eval_win", "eval_lo", "eval_hi", "eval_composite", "eval_s", "ratings_s",
+    "rating_latest", "elapsed_s", "rss_mb",
 ]  # fmt: skip
-EVAL_COLUMNS = ["update", "opponent", "games", "win_rate", "lo", "hi", "mean_return"]
+EVAL_COLUMNS = ["update", "opponent", "players", "games", "win_rate", "lo", "hi", "mean_return"]
+RATINGS_COLUMNS = ["update", "entrant", "kind", "rating", "games", "score_rate"]
+DEFAULT_PLAYER_WEIGHTS: dict[tuple[int, ...], tuple[float, ...]] = {(3, 4, 5): (0.3, 0.4, 0.3)}
+COMPOSITE_WEIGHTS = (0.8, 0.2)  # (vs 3 heuristic, vs the hall-of-fame reference net)
 
 
 def parse_players(text: str) -> tuple[int, ...]:
@@ -110,6 +119,17 @@ def parse_players(text: str) -> tuple[int, ...]:
     if not ps or any(p not in (3, 4, 5) for p in ps):
         raise argparse.ArgumentTypeError("players must be a list from 3,4,5")
     return ps
+
+
+def resolve_player_weights(players: tuple[int, ...], text: str | None) -> tuple[float, ...] | None:
+    """Sampling weights over ``players``: the text (``0.3,0.4,0.3``), the default 0.3/0.4/0.3 for
+    exactly 3,4,5, else None (uniform)."""
+    if text:
+        ws = tuple(float(x) for x in text.split(",") if x)
+        if len(ws) != len(players) or any(w < 0 for w in ws) or sum(ws) <= 0:
+            raise ValueError("--player-weights needs one non-negative weight per --players entry")
+        return ws
+    return DEFAULT_PLAYER_WEIGHTS.get(players)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -127,16 +147,30 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--device", default="auto", help="auto, cpu or cuda")
     ap.add_argument("--lr", type=float, default=3e-4)
     ap.add_argument("--lr-decay", action=argparse.BooleanOptionalAction, default=False)
+    ap.add_argument("--lr-schedule", choices=("linear", "cosine"), default="cosine")
+    ap.add_argument("--lr-final-frac", type=float, default=0.1, help="decay target, x --lr")
     ap.add_argument("--clip", type=float, default=0.2)
-    ap.add_argument("--vf-coef", type=float, default=0.5)
+    ap.add_argument("--vf-coef", type=float, default=1.0)
     ap.add_argument("--ent-coef", type=float, default=0.01)
-    ap.add_argument("--ent-coef-final", type=float, default=None)
+    ap.add_argument("--ent-coef-final", type=float, default=None, help="constant floor")
+    ap.add_argument(
+        "--ent-floor-at", type=float, default=0.5,
+        help="fraction of --updates at which the entropy coefficient reaches its floor",
+    )  # fmt: skip
     ap.add_argument("--max-grad-norm", type=float, default=0.5)
     ap.add_argument("--epochs", type=int, default=4)
     ap.add_argument("--minibatches", type=int, default=8)
     ap.add_argument("--target-kl", type=float, default=None)
     ap.add_argument("--gamma", type=float, default=1.0)
-    ap.add_argument("--lam", type=float, default=0.95)
+    ap.add_argument("--gae-lambda", "--lam", dest="lam", type=float, default=0.99)
+    ap.add_argument(
+        "--value-trunk", choices=("separate", "shared"), default="separate",
+        help="separate value network (export format 2) or the original shared trunk",
+    )  # fmt: skip
+    ap.add_argument(
+        "--player-weights", default=None,
+        help="sampling weights over --players (default 0.3,0.4,0.3 for 3,4,5; else uniform)",
+    )  # fmt: skip
     ap.add_argument("--mix", type=float, default=0.7, help="initial win_loss share of the reward")
     ap.add_argument("--mix-anneal-updates", type=int, default=300, help="0 = keep --mix")
     ap.add_argument("--ckpt-every", type=int, default=25)
@@ -148,11 +182,24 @@ def build_parser() -> argparse.ArgumentParser:
         help="also evaluate vs 3 mcts:50 (slow)",
     )  # fmt: skip
     ap.add_argument(
-        "--league", default="0.5,0.3,0.2", help="game mix self,snapshots,bots (1,0,0 = self-play)"
-    )
+        "--league", default="0.4,0.42,0.18",
+        help="game mix self,snapshots,bots (1,0,0 = self-play); bots = ~5/6 heuristic, 1/6 random",
+    )  # fmt: skip
     ap.add_argument("--snapshot-every", type=int, default=10, help="updates; 0 = no snapshots")
     ap.add_argument("--pool-size", type=int, default=10, help="snapshots kept (oldest evicted)")
     ap.add_argument("--snapshot-sampling", choices=("uniform", "recency"), default="uniform")
+    ap.add_argument("--hof-every", type=int, default=100, help="milestone to hall of fame; 0 = off")
+    ap.add_argument("--hof-cap", type=int, default=20, help="hall-of-fame size before thinning")
+    ap.add_argument("--hof-share", type=float, default=0.5, help="snapshot seats from the hof")
+    ap.add_argument(
+        "--hof-seed", default="ppo-smoke",
+        help="comma list of models/manifest.yaml nets added as permanent hall-of-fame entries",
+    )  # fmt: skip
+    ap.add_argument("--pfsp", action=argparse.BooleanOptionalAction, default=True)
+    ap.add_argument("--pfsp-floor", type=float, default=0.05)
+    ap.add_argument("--pfsp-ema", type=float, default=0.2, help="win-rate EMA step per update")
+    ap.add_argument("--ratings-every", type=int, default=50, help="Elo round-robin; 0 = off")
+    ap.add_argument("--ratings-games", type=int, default=300, help="games per rating round")
     ap.add_argument("--league-seed", type=int, default=0, help="extra seed for league sampling")
     ap.add_argument("--resume", default=None, metavar="RUN_DIR", help="continue a stopped run")
     ap.add_argument("--keep-every", type=int, default=250, help="milestone ckpt every N (0 = off)")
@@ -267,15 +314,19 @@ def evaluate_all(
     runner: Runner, weights: Any, league: League | None, args: argparse.Namespace, update: int,
     abort: Callable[[], bool] | None = None,
 ) -> list[dict[str, Any]]:  # fmt: skip
-    """Pure win_loss evaluation of ``weights`` as ego (seat rotation) vs 3 copies of each opponent.
+    """Pure win_loss evaluation of ``weights`` as ego (seat rotation) vs 3 copies of each opponent,
+    separately for every player count in ``args.players`` (``--eval-games`` games per opponent and
+    count).
 
-    All opponents run as one batch of tasks on the worker pool. Rows: opponent, games, win_rate
-    (wl > 0), Wilson 95% interval, mean win_loss return.
+    Opponents: random, heuristic, optionally mcts:50, the oldest/latest recent snapshot, and the
+    hall-of-fame reference (its oldest entry, ``ppo-smoke`` by default). All run as one batch of
+    tasks on the worker pool. Rows: opponent, players, games, win_rate (wl > 0), Wilson 95%
+    interval, mean win_loss return.
     """
     specs: list[tuple[str, str]] = [("random", "random"), ("heuristic", "heuristic")]
     if args.eval_mcts:
         specs.append(("mcts:50", "mcts:50"))
-    ids: list[int] = []
+    labels: list[str] = []
     if league is not None and len(league):
         ids = sorted({league.ids[0], league.ids[-1]})
         for i in ids:
@@ -283,60 +334,145 @@ def evaluate_all(
             specs.append((f"snap_{tag}:{i}", league.label(i)))
             if len(ids) == 1:  # a single snapshot is both
                 specs[-1] = (f"snap_latest:{i}", league.label(i))
-    opp = league.opponents(ids) if league is not None and ids else {}
+        labels += [league.label(i) for i in ids]
+    if league is not None and league.hof_names:
+        ref = league.hof_names[0]
+        specs.append((f"hof_ref:{ref}", league.hof_label(ref)))
+        labels.append(league.hof_label(ref))
+    opp = league.opponents(labels) if league is not None and labels else {}
+    counts = sorted(set(args.players))
+    cells = [(k, n) for k in range(len(specs)) for n in counts]
     tasks: list[Any] = []
     owner: list[int] = []
-    for k, (_, label) in enumerate(specs):
+    for ci, (k, n) in enumerate(cells):
         cfg = RolloutConfig(
-            players=args.players, mix=1.0, envs_per_worker=args.envs_per_worker,
-            greedy=args.eval_greedy, collect=False, eval_opponent=label,
+            players=(n,), mix=1.0, envs_per_worker=args.envs_per_worker,
+            greedy=args.eval_greedy, collect=False, eval_opponent=specs[k][1],
         )  # fmt: skip
         sizes = _chunks(args.eval_games, max(runner.workers, 1))
         start = 0
         for i, sz in enumerate(sizes):
-            seed = EVAL_SEED_BIT + ((args.seed * 100_003 + update) * 64 + k) * 4096 + i
+            seed = (
+                EVAL_SEED_BIT + ((args.seed * 100_003 + update) * 64 + k * 3 + (n - 3)) * 4096 + i
+            )
             tasks.append((weights, sz, seed, cfg, list(range(start, start + sz)), start, opp))
-            owner.append(k)
+            owner.append(ci)
             start += sz
-    wins = [0.0] * len(specs)
-    rets = [0.0] * len(specs)
-    ns = [0] * len(specs)
-    for k, r in zip(owner, runner.map(tasks, abort), strict=True):
+    wins = [0.0] * len(cells)
+    rets = [0.0] * len(cells)
+    ns = [0] * len(cells)
+    for ci, r in zip(owner, runner.map(tasks, abort), strict=True):
         for wl, _ in r["stats"]["ego_returns"]:
-            ns[k] += 1
-            wins[k] += 1.0 if wl > 0 else 0.0
-            rets[k] += wl
+            ns[ci] += 1
+            wins[ci] += 1.0 if wl > 0 else 0.0
+            rets[ci] += wl
     rows = []
-    for k, (name, _) in enumerate(specs):
-        lo, hi = wilson_interval(wins[k], ns[k])
+    for ci, (k, n) in enumerate(cells):
+        lo, hi = wilson_interval(wins[ci], ns[ci])
         rows.append({
-            "update": update, "opponent": name, "games": ns[k],
-            "win_rate": wins[k] / max(ns[k], 1), "lo": lo, "hi": hi,
-            "mean_return": rets[k] / max(ns[k], 1),
+            "update": update, "opponent": specs[k][0], "players": n, "games": ns[ci],
+            "win_rate": wins[ci] / max(ns[ci], 1), "lo": lo, "hi": hi,
+            "mean_return": rets[ci] / max(ns[ci], 1),
+        })  # fmt: skip
+    return rows
+
+
+def pooled(rows: list[dict[str, Any]], opponent: str) -> dict[str, Any] | None:
+    """Rows of ``opponent`` pooled over player counts (games-weighted win rate, Wilson interval)."""
+    rs = [r for r in rows if r["opponent"] == opponent]
+    if not rs:
+        return None
+    n = sum(r["games"] for r in rs)
+    w = sum(r["win_rate"] * r["games"] for r in rs)
+    lo, hi = wilson_interval(w, n)
+    return {"games": n, "win_rate": w / max(n, 1), "lo": lo, "hi": hi}
+
+
+def composite_score(rows: list[dict[str, Any]]) -> tuple[float, dict[str, float]]:
+    """Fixed best-model criterion computed from one evaluation (see docs/TRAINING.md).
+
+    ``0.8 * H + 0.2 * R`` where ``H`` is the mean over the evaluated player counts of the win rate
+    against 3 heuristic seats and ``R`` the same against 3 copies of the hall-of-fame reference
+    net; without a reference ``H`` alone is used. Each player count counts equally.
+    """
+
+    def mean_wr(match: Callable[[str], bool]) -> float | None:
+        v = [r["win_rate"] for r in rows if match(r["opponent"])]
+        return sum(v) / len(v) if v else None
+
+    h = mean_wr(lambda o: o == "heuristic")
+    ref = mean_wr(lambda o: o.startswith("hof_ref:"))
+    if h is None:
+        return -1.0, {}
+    detail = {"heuristic": h}
+    if ref is None:
+        return h, detail
+    detail["hof_ref"] = ref
+    return COMPOSITE_WEIGHTS[0] * h + COMPOSITE_WEIGHTS[1] * ref, detail
+
+
+def rating_round(
+    runner: Runner, weights: Any, league: League | None, args: argparse.Namespace, update: int,
+    abort: Callable[[], bool] | None = None,
+) -> list[dict[str, Any]]:  # fmt: skip
+    """Round-robin ratings: latest net, every hall-of-fame entry and the fixed bots.
+
+    ``--ratings-games`` games; each draws a player count from ``--players`` and distinct entrants
+    for the seats uniformly at random (repeats only if there are fewer entrants than seats). Final
+    placements become Bradley-Terry / Elo ratings (``train.ratings``), heuristic = 1000. Rows for
+    ``ratings.csv``.
+    """
+    hof = [league.hof_label(n) for n in league.hof_names] if league is not None else []
+    entrants = [CURRENT_LABEL, *hof, "heuristic", "random"]
+    rng = np.random.default_rng([args.seed, update, 77])
+    seatings: list[list[str]] = []
+    for _ in range(args.ratings_games):
+        n = int(rng.choice(list(args.players)))
+        pick = rng.choice(len(entrants), size=n, replace=len(entrants) < n)
+        seatings.append([entrants[int(j)] for j in pick])
+    opp = league.opponents(hof) if league is not None and hof else {}
+    cfg = RolloutConfig(
+        players=(4,), mix=1.0, envs_per_worker=args.envs_per_worker, collect=False,
+        greedy=args.eval_greedy, record_scores=True,
+    )  # fmt: skip
+    tasks: list[Any] = []
+    start = 0
+    for i, sz in enumerate(_chunks(len(seatings), max(runner.workers, 1))):
+        seed = EVAL_SEED_BIT + ((args.seed * 100_003 + update) * 64 + 63) * 4096 + i
+        tasks.append((weights, sz, seed, cfg, None, 0, opp, seatings[start : start + sz]))
+        start += sz
+    games = [g for r in runner.map(tasks, abort) for g in r["stats"]["scores"]]
+    res = elo_ratings(games, entrants, "heuristic")
+    rows = []
+    for e in entrants:
+        kind = "latest" if e == CURRENT_LABEL else "hof" if e in hof else "bot"
+        name = "latest" if e == CURRENT_LABEL else e
+        rows.append({
+            "update": update, "entrant": name, "kind": kind, "rating": res[e]["rating"],
+            "games": int(res[e]["games"]), "score_rate": res[e]["score_rate"],
         })  # fmt: skip
     return rows
 
 
 def format_eval_table(rows: list[dict[str, Any]]) -> str:
-    """Compact pivot: one line per evaluated update, one column per opponent kind."""
+    """Compact pivot: one line per evaluated (update, player count), one column per opponent."""
     kinds: list[str] = []
+
+    def kind_of(name: str) -> str:
+        return name.split(":")[0] if name.startswith(("snap_", "hof_ref")) else name
+
     for r in rows:
-        kind = r["opponent"].split(":")[0] if r["opponent"].startswith("snap_") else r["opponent"]
-        if kind not in kinds:
-            kinds.append(kind)
+        if kind_of(r["opponent"]) not in kinds:
+            kinds.append(kind_of(r["opponent"]))
     lines = ["eval win rate [95% CI] (3 copies of the opponent, seats rotated):"]
-    lines.append(f"{'update':>7}" + "".join(f"{k:>24}" for k in kinds))
-    for u in sorted({r["update"] for r in rows}):
-        cells = {}
-        for r in rows:
-            if r["update"] == u:
-                kind = (
-                    r["opponent"].split(":")[0]
-                    if r["opponent"].startswith("snap_")
-                    else r["opponent"]
-                )
-                cells[kind] = f"{r['win_rate']:.2f} [{r['lo']:.2f},{r['hi']:.2f}]"
-        lines.append(f"{u:>7}" + "".join(f"{cells.get(k, '-'):>24}" for k in kinds))
+    lines.append(f"{'update':>7}{'n':>3}" + "".join(f"{k:>24}" for k in kinds))
+    for u, n in sorted({(r["update"], r["players"]) for r in rows}):
+        cells = {
+            kind_of(r["opponent"]): f"{r['win_rate']:.2f} [{r['lo']:.2f},{r['hi']:.2f}]"
+            for r in rows
+            if r["update"] == u and r["players"] == n
+        }
+        lines.append(f"{u:>7}{n:>3}" + "".join(f"{cells.get(k, '-'):>24}" for k in kinds))
     return "\n".join(lines)
 
 
@@ -407,6 +543,7 @@ def save_checkpoint(
         "update": update, "mix": mix, "games": games, "hidden": list(model.hidden),
         "features_version": FEATURES_VERSION, "players": list(args.players), "seed": args.seed,
         "pool_ids": pool_ids, "layout_hash": layout_hash(), "obs_size": model.obs_size,
+        "value_trunk": "separate" if model.separate_value else "shared",
     }  # fmt: skip
     save_pt(
         out / f"ckpt_{update}.pt",
@@ -433,9 +570,31 @@ def save_best(
 
 
 def is_better(rec: dict[str, Any], best: dict[str, Any] | None) -> bool:
-    """Best-model criterion (unit 8a, simple): Wilson lower bound of the win rate against 3
-    heuristic seats, ties broken by the win rate; strictly better replaces the record."""
-    return best is None or (rec["lo"], rec["win_rate"]) > (best["lo"], best["win_rate"])
+    """Best-model criterion: strictly higher ``composite`` (``composite_score``). A record from
+    before unit 8b has none and always loses to a new one."""
+    return best is None or rec["composite"] > best.get("composite", -1.0)
+
+
+def append_rows(path: Path, header: list[str], rows: list[dict[str, Any]]) -> None:
+    new = not path.exists() or path.stat().st_size == 0
+    with open(path, "a", newline="") as fh:
+        w = csv.DictWriter(fh, header)
+        if new:
+            w.writeheader()
+        w.writerows(rows)
+        fh.flush()
+        os.fsync(fh.fileno())
+
+
+def seed_hall_of_fame(league: League, names: str) -> None:
+    """Add the manifest nets in ``names`` as permanent hall-of-fame entries (fresh runs only)."""
+    from bots.net import load_weights
+
+    for name in (x.strip() for x in names.split(",") if x.strip()):
+        try:
+            league.add_hof(name, load_weights(name), 0, permanent=True)
+        except Exception as e:  # unknown / stale model: the run can still train without it
+            print(f"WARNING: hall-of-fame seed {name!r} skipped: {e}", flush=True)
 
 
 def prepare(argv: list[str]) -> tuple[argparse.Namespace, Path, dict[str, Any] | None]:
@@ -471,6 +630,10 @@ def prepare(argv: list[str]) -> tuple[argparse.Namespace, Path, dict[str, Any] |
     problems = []
     if "hidden" in meta and list(meta["hidden"]) != hidden:
         problems.append(f"hidden {meta['hidden']} vs {hidden}")
+    if meta.get("value_trunk", "shared") != new_args.value_trunk:
+        problems.append(
+            f"value_trunk {meta.get('value_trunk', 'shared')} vs {new_args.value_trunk}"
+        )
     if "features_version" in meta and meta["features_version"] != FEATURES_VERSION:
         problems.append(f"features_version {meta['features_version']} vs {FEATURES_VERSION}")
     if "layout_hash" in meta and meta["layout_hash"] != layout_hash():
@@ -500,7 +663,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if dev_name == "auto":
         dev_name = "cuda" if torch.cuda.is_available() else "cpu"
     device = torch.device(dev_name)
-    model = BusNet(hidden=hidden).to(device)
+    model = BusNet(hidden=hidden, separate_value=args.value_trunk == "separate").to(device)
     opt = torch.optim.Adam(model.parameters(), lr=args.lr, eps=1e-5)
     pcfg = PPOConfig(
         lr=args.lr, lr_decay=args.lr_decay, clip=args.clip, vf_coef=args.vf_coef,
@@ -515,6 +678,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     elapsed_base = 0.0
     best: dict[str, Any] | None = None
     pool_ids: list[int] = []
+    league_state: dict[str, Any] | None = None
     if res is not None:
         ck = res["ckpt"]
         start_update = int(res["update"])
@@ -527,6 +691,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             total_games = int(st["total_games"])
             elapsed_base = float(st["elapsed_s"])
             best = st.get("best")
+            league_state = st.get("league")
         else:
             print(
                 "WARNING: checkpoint has no RNG state (pre-8a); resuming approximately", flush=True
@@ -553,10 +718,21 @@ def main(argv: Sequence[str] | None = None) -> int:
     lprobs = parse_league(args.league)
     league: League | None = None
     if lprobs[0] < 1.0:
-        league = League(lprobs, args.pool_size, args.snapshot_sampling, out / "pool")
+        league = League(
+            lprobs, args.pool_size, args.snapshot_sampling, out / "pool", hof_cap=args.hof_cap,
+            hof_share=args.hof_share, pfsp=args.pfsp, pfsp_floor=args.pfsp_floor,
+            ema_alpha=args.pfsp_ema,
+        )  # fmt: skip
         if res is not None:
-            league.restore(pool_ids, max_id=start_update)
+            if league_state is not None:
+                league.restore_state(league_state, max_id=start_update)
+            else:  # checkpoint from before the hall of fame existed
+                league.restore(pool_ids, max_id=start_update)
+        else:
+            seed_hall_of_fame(league, args.hof_seed)
+    player_weights = resolve_player_weights(args.players, args.player_weights)
     dropped = truncate_csv(out / "log.csv", COLUMNS, start_update)
+    truncate_csv(out / "ratings.csv", RATINGS_COLUMNS, start_update)
     edropped = truncate_csv(out / "eval.csv", EVAL_COLUMNS, start_update)
     eval_rows: list[dict[str, Any]] = read_eval_rows(out / "eval.csv") if res is not None else []
     if res is not None:
@@ -584,6 +760,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         state = {
             "gen": gen.get_state(), "rng": _rng_state(), "total_games": total_games,
             "elapsed_s": elapsed(), "best": best,
+            "league": league.state() if league is not None else None,
         }  # fmt: skip
         save_checkpoint(
             out, update, model, opt, args, mix_at(update - 1, args.mix, args.mix_anneal_updates),
@@ -603,22 +780,28 @@ def main(argv: Sequence[str] | None = None) -> int:
                     if sig.requested:
                         break
                     mix = mix_at(update - 1, args.mix, args.mix_anneal_updates)
-                    lr = (
-                        linear(args.lr, args.lr * 0.1, update - 1, args.updates)
-                        if args.lr_decay
-                        else args.lr
+                    lr = lr_at(
+                        update - 1,
+                        args.lr,
+                        args.lr_decay,
+                        args.lr_schedule,
+                        args.updates,
+                        args.lr_final_frac,
                     )
                     for g in opt.param_groups:
                         g["lr"] = lr
-                    ent_coef = (
-                        args.ent_coef
-                        if args.ent_coef_final is None
-                        else linear(args.ent_coef, args.ent_coef_final, update - 1, args.updates)
+                    ent_coef = ent_at(
+                        update - 1,
+                        args.ent_coef,
+                        args.ent_coef_final,
+                        args.updates,
+                        args.ent_floor_at,
                     )
                     rcfg = RolloutConfig(
                         players=args.players, gamma=args.gamma, lam=args.lam, mix=mix,
                         envs_per_worker=args.envs_per_worker,
                         league=league.spec() if league is not None else None,
+                        player_weights=player_weights,
                     )  # fmt: skip
                     weights = net_to_weights(model)
                     te = time.perf_counter()
@@ -641,6 +824,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     del parts
                     n_samples = len(cat["action"])
                     ev = explained_variance(cat["value"], cat["vtarget"][:, 0])
+                    ev_q = ev_by_quartile(cat["value"], cat["vtarget"][:, 0], cat["prog"])
                     data = {
                         k: torch.from_numpy(cat[k]).to(device)
                         for k in ("obs", "mask", "action", "logp", "adv", "vtarget", "vmask")
@@ -680,7 +864,18 @@ def main(argv: Sequence[str] | None = None) -> int:
                         if t != "self" and seats_:
                             row[f"win_{t}"] = wins_ / seats_
                             row[f"ret_{t}"] = ret_ / seats_
+                    for qi, qv in enumerate(ev_q):
+                        row[f"ev_q{qi + 1}"] = qv
+                    by_label: dict[str, list[float]] = {}
+                    for s in stats:
+                        for lab, v in s["by_label"].items():
+                            acc = by_label.setdefault(lab, [0.0, 0.0, 0.0])
+                            for j in range(3):
+                                acc[j] += v[j]
+                    if league is not None:
+                        league.update_results(by_label)
                     row["pool_size"] = len(league) if league is not None else 0
+                    row["hof_size"] = len(league.hof_names) if league is not None else 0
                     new_w = None
                     snap_now = bool(
                         league is not None
@@ -688,7 +883,11 @@ def main(argv: Sequence[str] | None = None) -> int:
                         and update % args.snapshot_every == 0
                     )
                     do_eval = bool(args.eval_every and update % args.eval_every == 0)
-                    if snap_now or do_eval:
+                    hof_now = bool(
+                        league is not None and args.hof_every and update % args.hof_every == 0
+                    )
+                    do_ratings = bool(args.ratings_every and update % args.ratings_every == 0)
+                    if snap_now or do_eval or hof_now or do_ratings:
                         new_w = net_to_weights(model)  # post-update weights
                     if do_eval:
                         te = time.perf_counter()
@@ -719,16 +918,47 @@ def main(argv: Sequence[str] | None = None) -> int:
                                 + " ".join(f"{e['opponent']}={e['win_rate']:.2f}" for e in erows),
                                 flush=True,
                             )
-                            heur = next((e for e in erows if e["opponent"] == "heuristic"), None)
-                            if heur is not None and is_better(heur, best):
-                                best = {
-                                    "update": update, "lo": heur["lo"],
-                                    "win_rate": heur["win_rate"], "games": heur["games"],
-                                    "criterion": "wilson lower bound vs 3 heuristic",
+                            comp, detail = composite_score(erows)
+                            row["eval_composite"] = comp
+                            heur = pooled(erows, "heuristic")
+                            if heur is not None:
+                                rec = {
+                                    "update": update, "composite": comp, **detail,
+                                    "lo": heur["lo"], "win_rate": heur["win_rate"],
+                                    "games": heur["games"],
+                                    "criterion": "0.8 * mean win rate vs 3 heuristic + "
+                                    "0.2 * mean win rate vs hall-of-fame reference, "
+                                    "means over player counts",
                                 }  # fmt: skip
-                                save_best(out, update, model, args, best)
+                                if is_better(rec, best):
+                                    best = rec
+                                    save_best(out, update, model, args, best)
+                    if do_ratings and new_w is not None:
+                        tr = time.perf_counter()
+                        try:
+                            rrows = rating_round(runner, new_w, league, args, update, sig.overdue)
+                        except AbortRollout:
+                            rrows = []
+                            print(f"  ratings u{update} skipped (stop requested)", flush=True)
+                        except WorkerFailure as e:
+                            rrows = []
+                            exit_code = 1
+                            print(f"  ratings u{update} skipped: {e}", flush=True)
+                        if rrows:
+                            row["ratings_s"] = time.perf_counter() - tr
+                            row["rating_latest"] = rrows[0]["rating"]
+                            append_rows(out / "ratings.csv", RATINGS_COLUMNS, rrows)
+                            print(
+                                f"  ratings u{update} ({row['ratings_s']:.1f}s): "
+                                + " ".join(f"{r['entrant']}={r['rating']:.0f}" for r in rrows),
+                                flush=True,
+                            )
                     if snap_now and league is not None and new_w is not None:
                         league.add(update, new_w)
+                    if hof_now and league is not None and new_w is not None:
+                        thinned = league.add_hof(f"m{update}", new_w, update)
+                        if thinned:
+                            print(f"  hall of fame: thinned {thinned}", flush=True)
                     row["elapsed_s"] = elapsed()
                     row["rss_mb"] = rss_mb()
                     writer.writerow({c: row.get(c, "") for c in COLUMNS})
