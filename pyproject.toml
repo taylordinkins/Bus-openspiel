@@ -19,6 +19,9 @@ dev = [
     "types-pyyaml>=6.0.12",
     "httpx>=0.28.1",
 ]
+train = [
+    "torch==2.9.1",
+]
 
 [tool.uv]
 # Not packaged for distribution; tests import the package from the repo root.
