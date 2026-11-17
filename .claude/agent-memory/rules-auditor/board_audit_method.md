@@ -15,4 +15,6 @@ metadata:
 
 **Baseline (2026-11-14, Phase 0 unit 5):** all 70 streets, 47 site tiers/owners, 2 stations, 4 roundabouts and 36 node coords matched the map. The only nit was the 28–35 bend `via` (1387,1337) vs the drawn corner at about (1376,1336). If board.yaml changes later, diff it against this rather than redoing the whole audit.
 
+**Phase 2 close (2026-11-15):** board.yaml unchanged since baseline (last commit 9df4b5c). Seat stripes sampled at x=180, y 1570/1588/1607/1625/1645 = #FE0000/#007F00/#FE6500/#0065FE/#FEFEFE, matching D21 tokens; Buses grid crop (`-x 720 -y 1460 -W 370 -H 310`) confirms 5 cols x 4 rows, `bus_grid` row-major so index (bus-2)*5+seat = D19. `web/src/games/bus/fixtures/geometry.json` == `_geometry()`; re-diff it if board.yaml changes.
+
 Related: [[audit-patterns]].
