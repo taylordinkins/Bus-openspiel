@@ -156,3 +156,25 @@ pool (`--pool-size`, oldest evicted every `--snapshot-every` updates).
   (MM iteration, prior of half a win each way per pair) and reported as `400 * log10(strength)`
   with heuristic = 1000. Columns: update, entrant, kind, rating, games (seats), score_rate.
   Ratings are per round, not accumulated, and noisy at 300 games.
+
+## Exploiter test
+
+Measures how exploitable a trained net (here `ppo-long`) is: warm-start a learner from it and
+train only against frozen copies of it. `--init-from` loads the model weights of a trainer `.pt`
+(fresh run only; fresh optimizer, update 0; exit code 2 on a hidden-size, value-trunk,
+features-version or observation-layout mismatch; not combinable with `--resume`, and ignored when
+a run resumes). `--opp-seats all` makes every non-self game give the opponents all n-1 seats, so
+the learner holds exactly one randomly placed seat (default `random` keeps the 1..n-1 sampling;
+run-defining, so it cannot change on resume). `runs/long` used the default `--hidden 512,512` and
+`--value-trunk separate`, so no extra flags are needed.
+
+```
+uv run python -m tools.train_ppo --name exploit_long --players 3,4,5 --init-from runs/long/best_1320.pt \
+  --league 0,1,0 --opp-seats all --hof-seed ppo-long --snapshot-every 0 --hof-every 0 --no-pfsp \
+  --mix 1.0 --mix-anneal-updates 0 --lr 1e-4 --ent-coef 0.002 --updates 600 --max-minutes 90 \
+  --ratings-every 0 --eval-every 10 --eval-games 200
+```
+
+With an empty snapshot pool and the single permanent hall-of-fame seed, every training game is one
+learner against n-1 `ppo-long` seats, and `eval.csv` carries `hof_ref:ppo-long` at each player
+count; its win rate rising well above the fair share (1/n) means the net is exploitable.

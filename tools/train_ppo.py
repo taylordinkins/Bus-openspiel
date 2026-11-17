@@ -50,7 +50,7 @@ import train.rollout as rollout_mod  # noqa: E402
 from bots.net_forward import layout_hash  # noqa: E402
 from train.atomic import atomic_write_json  # noqa: E402
 from train.export import export_npz  # noqa: E402
-from train.features import FEATURES_VERSION  # noqa: E402
+from train.features import FEATURES_VERSION, OBS_SIZE  # noqa: E402
 from train.league import GAME_TYPES, League, parse_league  # noqa: E402
 from train.model import BusNet  # noqa: E402
 from train.ppo import (  # noqa: E402
@@ -79,6 +79,7 @@ from train.runstate import (  # noqa: E402
     beats,
     explicit_options,
     find_latest_checkpoint,
+    load_pt,
     merge_resume_args,
     now_iso,
     read_eval_rows,
@@ -206,6 +207,18 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--ratings-every", type=int, default=50, help="Elo round-robin; 0 = off")
     ap.add_argument("--ratings-games", type=int, default=300, help="games per rating round")
     ap.add_argument("--league-seed", type=int, default=0, help="extra seed for league sampling")
+    ap.add_argument(
+        "--opp-seats",
+        choices=["random", "all"],
+        default="random",
+        help="non-self games: opponents take 1..n-1 random seats (random) or all n-1 (all)",
+    )
+    ap.add_argument(
+        "--init-from",
+        default=None,
+        metavar="CKPT.pt",
+        help="fresh run only: warm-start the model weights from a trainer .pt checkpoint",
+    )
     ap.add_argument("--resume", default=None, metavar="RUN_DIR", help="continue a stopped run")
     ap.add_argument("--keep-every", type=int, default=250, help="milestone ckpt every N (0 = off)")
     ap.add_argument("--best-keep", type=int, default=5, help="top-K best checkpoints kept")
@@ -648,6 +661,46 @@ def seed_hall_of_fame(league: League, names: str) -> None:
             print(f"WARNING: hall-of-fame seed {name!r} skipped: {e}", flush=True)
 
 
+def checkpoint_problems(meta: dict[str, Any], args: argparse.Namespace, resume: bool) -> list[str]:
+    """Why a checkpoint's ``meta`` does not fit the run settings in ``args`` (empty = fits)."""
+    hidden = [int(x) for x in args.hidden.split(",") if x]
+    problems = []
+    if "hidden" in meta and list(meta["hidden"]) != hidden:
+        problems.append(f"hidden {meta['hidden']} vs {hidden}")
+    # best_*.pt files carry no value_trunk; for --init-from the strict state_dict load catches it
+    if (resume or "value_trunk" in meta) and (
+        meta.get("value_trunk", "shared") != args.value_trunk
+    ):
+        problems.append(f"value_trunk {meta.get('value_trunk', 'shared')} vs {args.value_trunk}")
+    if "features_version" in meta and meta["features_version"] != FEATURES_VERSION:
+        problems.append(f"features_version {meta['features_version']} vs {FEATURES_VERSION}")
+    if "layout_hash" in meta and meta["layout_hash"] != layout_hash():
+        problems.append("observation layout hash differs (obs size/layout changed)")
+    if "obs_size" in meta and meta["obs_size"] != OBS_SIZE:
+        problems.append(f"obs_size {meta['obs_size']} vs {OBS_SIZE}")
+    if resume and "seed" in meta and meta["seed"] != args.seed:
+        problems.append(f"seed {meta['seed']} vs {args.seed}")
+    return problems
+
+
+def load_init_from(model: BusNet, args: argparse.Namespace) -> None:
+    """Load model weights (only) from the trainer ``.pt`` at ``args.init_from``."""
+    path = Path(args.init_from)
+    try:
+        ck = load_pt(path)
+        sd = ck["model"]
+    except Exception as e:
+        raise ResumeError(f"--init-from {path}: cannot read a trainer checkpoint ({e})") from e
+    problems = checkpoint_problems(ck.get("meta", {}), args, resume=False)
+    if not problems:
+        try:
+            model.load_state_dict(sd)
+        except RuntimeError as e:
+            problems.append(f"weights do not fit the model (hidden / value-trunk?): {e}")
+    if problems:
+        raise ResumeError(f"--init-from {path} is incompatible: " + "; ".join(problems))
+
+
 def prepare(argv: list[str]) -> tuple[argparse.Namespace, Path, dict[str, Any] | None]:
     """Parse arguments; for ``--resume`` merge the saved ``args.json`` and load the checkpoint.
 
@@ -655,6 +708,8 @@ def prepare(argv: list[str]) -> tuple[argparse.Namespace, Path, dict[str, Any] |
     """
     ap = build_parser()
     args = ap.parse_args(argv)
+    if args.resume and args.init_from:
+        raise ResumeError("--init-from cannot be combined with --resume")
     if not args.resume:
         out = Path(args.out_dir) / args.name
         if out.exists() and (
@@ -676,21 +731,7 @@ def prepare(argv: list[str]) -> tuple[argparse.Namespace, Path, dict[str, Any] |
     if found is None:
         raise ResumeError(f"no loadable checkpoint in {run}")
     update, ck = found
-    meta = ck.get("meta", {})
-    hidden = [int(x) for x in new_args.hidden.split(",") if x]
-    problems = []
-    if "hidden" in meta and list(meta["hidden"]) != hidden:
-        problems.append(f"hidden {meta['hidden']} vs {hidden}")
-    if meta.get("value_trunk", "shared") != new_args.value_trunk:
-        problems.append(
-            f"value_trunk {meta.get('value_trunk', 'shared')} vs {new_args.value_trunk}"
-        )
-    if "features_version" in meta and meta["features_version"] != FEATURES_VERSION:
-        problems.append(f"features_version {meta['features_version']} vs {FEATURES_VERSION}")
-    if "layout_hash" in meta and meta["layout_hash"] != layout_hash():
-        problems.append("observation layout hash differs (obs size/layout changed)")
-    if "seed" in meta and meta["seed"] != new_args.seed:
-        problems.append(f"seed {meta['seed']} vs {new_args.seed}")
+    problems = checkpoint_problems(ck.get("meta", {}), new_args, resume=True)
     if problems:
         raise ResumeError(
             "checkpoint is incompatible with this code/config: " + "; ".join(problems)
@@ -723,6 +764,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         target_kl=args.target_kl,
     )  # fmt: skip
     gen = torch.Generator().manual_seed(args.seed)
+    if res is None and args.init_from:
+        try:
+            load_init_from(model, args)
+        except ResumeError as e:
+            print(f"error: {e}", file=sys.stderr)
+            return 2
+        print(f"warm-started weights from {args.init_from}", flush=True)
     out.mkdir(parents=True, exist_ok=True)
     start_update = 0
     total_games = 0
@@ -779,7 +827,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         league = League(
             lprobs, args.pool_size, args.snapshot_sampling, out / "pool", hof_cap=args.hof_cap,
             hof_share=args.hof_share, pfsp=args.pfsp, pfsp_floor=args.pfsp_floor,
-            ema_alpha=args.pfsp_ema,
+            ema_alpha=args.pfsp_ema, opp_seats=args.opp_seats,
         )  # fmt: skip
         if res is not None:
             if league_state is not None:

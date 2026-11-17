@@ -261,7 +261,7 @@ def merge_resume_args(
     merged = dict(base)
     changes: dict[str, dict[str, Any]] = {}
     for k, v in explicit.items():
-        if k in ("resume", "allow_horizon_change"):
+        if k in ("resume", "allow_horizon_change", "init_from"):  # init_from: fresh runs only
             continue
         if _norm(v) == _norm(base.get(k)):
             continue
