@@ -16,7 +16,7 @@ from bots.net import NetBot, check_players, load_weights
 from bots.registry import is_valid_seat_type, make_bot, seat_type_error
 from train.features import encode
 
-NAME = "ppo-smoke"
+NAME = "ppo-long"
 SEAT = f"mcts_net:3-{NAME}"
 
 
@@ -128,15 +128,15 @@ def test_fallback_on_exception_and_illegal(monkeypatch: pytest.MonkeyPatch) -> N
     [
         "mcts_net",
         "mcts_net:50",
-        "mcts_net:ppo-smoke",
-        "mcts_net:-ppo-smoke",
+        "mcts_net:ppo-long",
+        "mcts_net:-ppo-long",
         "mcts_net:50-",
         "mcts_net:50-missing",
         "mcts_net:50-..",
-        "mcts_net:50-ppo-smoke.npz",
+        "mcts_net:50-ppo-long.npz",
         "mcts_net:50-/etc/passwd",
-        "mcts_net:0-ppo-smoke",
-        "mcts_net:20001-ppo-smoke",
+        "mcts_net:0-ppo-long",
+        "mcts_net:20001-ppo-long",
     ],
 )
 def test_bad_seat_types_rejected(seat: str) -> None:
@@ -164,7 +164,7 @@ def test_does_not_import_torch() -> None:
         "import sys, random, pyspiel, bus.game\n"
         "import bots.mcts_net\n"
         "from bots.registry import make_bot\n"
-        "b = make_bot('mcts_net:3-ppo-smoke')\n"
+        "b = make_bot('mcts_net:3-ppo-long')\n"
         "s = pyspiel.load_game('python_bus', {'players': 4}).new_initial_state()\n"
         "r = random.Random(0)\n"
         "for _ in range(40): s.apply_action(r.choice(s.legal_actions()))\n"

@@ -4,12 +4,20 @@
 resolved only through it; paths are never accepted. `file` is relative to this directory and
 `features_version` must match `train.features.FEATURES_VERSION`.
 
+## ppo-long
+
+The long-run PPO model (replaces the smoke model as the playable seat).
+
+- Source: `runs/long/best.npz` (= `best_1320.npz`, update 1320, composite 0.793 by the run's
+  best-model criterion), trained with `tools/train_ppo.py` using league/PFSP self-play, a separate
+  value trunk (export format 2), hidden 512,512, mixed 3/4/5 players; arguments in
+  `runs/long/args.json`. The run was stopped around update 1360 of 1700.
+- Strength (in-run eval, sampled play): about 0.98 vs 3 random; vs 3 heuristic about 0.97 / 0.85 /
+  0.80 at 3 / 4 / 5 players (update 1360); about chance against its own earlier snapshots.
+- `mcts_net:<sims>-ppo-long` seats work but play almost the same moves as the plain net (see
+  `runs/eval_search/`), at about 160 ms per move for 50 sims.
+
 ## ppo-smoke
 
-A 20-minute smoke model, to be replaced after the long run (Phase 4 unit 8).
-
-- Source: `runs/smoke_gate/ckpt_426.npz` (update 426), trained with `tools/train_ppo.py`; the run
-  arguments are in `runs/smoke_gate/args.json`: players 4, hidden 512,512, lr 3e-4, 128 games per
-  update, 8 workers, mix 0.7 annealed over 300 updates, league 0.5/0.3/0.2, seed 0, max 20 minutes.
-- Strength: beat 3 heuristic seats 0.93 [0.86, 0.97] over 100 games at 4 players.
-- Trained at 4 players only; 3 and 5 players are legal but untuned.
+The 20-minute smoke model (`runs/smoke_gate/ckpt_426.npz`). Superseded by ppo-long but still listed in the manifest, because the training league uses it as its permanent hall-of-fame reference
+(`--hof-seed ppo-smoke`) and tests load it directly.

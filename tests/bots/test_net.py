@@ -16,7 +16,7 @@ from bots.net import ModelInfo, NetBot, check_players, load_weights, resolve_mod
 from bots.net_forward import StaleModelError
 from bots.registry import is_valid_seat_type, make_bot, seat_type_error
 
-NAME = "ppo-smoke"
+NAME = "ppo-long"
 
 
 def _play(players: int, seats: list[str], seed: int) -> list[int]:
@@ -30,14 +30,14 @@ def _play(players: int, seats: list[str], seed: int) -> list[int]:
     return list(state.history())
 
 
-def test_manifest_lists_smoke_model() -> None:
+def test_manifest_lists_long_model() -> None:
     info = resolve_model(NAME)
-    assert info.path.is_file() and info.label == "Trained net (smoke)"
+    assert info.path.is_file() and info.label == "Trained net"
     assert {3, 4, 5} <= set(info.players)
 
 
 @pytest.mark.parametrize(
-    "name", ["nope", "", "../ppo-smoke", "ppo-smoke.npz", "a/b", "/etc/passwd", "ppo smoke", "a\\b"]
+    "name", ["nope", "", "../ppo-long", "ppo-long.npz", "a/b", "/etc/passwd", "ppo smoke", "a\\b"]
 )
 def test_resolver_rejects_unknown_and_path_like(name: str) -> None:
     with pytest.raises(ValueError):
@@ -161,7 +161,7 @@ def test_net_bot_does_not_import_torch() -> None:
         "import sys, random, pyspiel, bus.game\n"
         "import bots.net as m\n"
         "from bots.registry import make_bot\n"
-        "b = make_bot('net:ppo-smoke')\n"
+        "b = make_bot('net:ppo-long')\n"
         "s = pyspiel.load_game('python_bus', {'players': 4}).new_initial_state()\n"
         "r = random.Random(0)\n"
         "while s.is_chance_node(): s.apply_action(s.chance_outcomes()[0][0])\n"
