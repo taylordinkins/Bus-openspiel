@@ -12,6 +12,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from bots.base import Bot
+from bots.gumbel import parse_gumbel_param
 from bots.heuristic import HeuristicBot
 from bots.mcts import parse_mcts_param
 from bots.mcts_net import parse_mcts_net_param
@@ -77,6 +78,14 @@ def _mcts_net_factory(param: str | None) -> Bot:
 
 
 register("mcts_net", _mcts_net_factory)
+
+
+def _gumbel_factory(param: str | None) -> Bot:
+    return parse_gumbel_param(param)
+
+
+# Tool-only (registry, tournament, eval_search); the lobby's model list does not offer it (Q-AZ7).
+register("gumbel", _gumbel_factory)
 
 
 def parse_seat_type(s: str) -> tuple[str, str | None]:

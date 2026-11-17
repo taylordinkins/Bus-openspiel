@@ -127,9 +127,9 @@ def parse_net_param(param: str | None) -> NetBot:
 
 
 def check_players(seat_type: str, players: int) -> None:
-    """ValueError if a `net:<name>` seat type does not support `players`; no-op otherwise."""
+    """ValueError if a net-backed seat type does not support `players`; no-op otherwise."""
     kind, _, name = seat_type.partition(":")
     if kind == "net":
         resolve_model(name, players)
-    elif kind == "mcts_net":
+    elif kind in ("mcts_net", "gumbel"):
         resolve_model(name.partition("-")[2], players)

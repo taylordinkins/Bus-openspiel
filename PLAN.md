@@ -277,13 +277,13 @@ Opus spot audits only for units touching line-expansion validity, resolution ord
 - ~~Q-A~~ resolved 2026-11-14: 5-player Lines +1 is added before the power ≤ 0 check (R-033).
 - ~~Q-B~~ resolved 2026-11-14: Lines markers must be resolved maximally; only (end, street) choices that keep the maximum remaining placements reachable are legal (R-040, R-042).
 - ~~O-1/O-2/O-3 (spec)~~ resolved 2026-11-14: building supply unlimited per type; multi-street Lines evaluated one street at a time; markers exhausted in mandatory passes → skipped (user confirmed, see RULES_SPEC.md).
-- Q-AZ1 (Phase 4 unit 8f, open): Gumbel AZ warm start from `ppo-long` (recommended), from `runs/dense/best_410` (value needs conversion) or fresh? Keep the PPO value head or reset it?
-- Q-AZ2 (unit 8f, open): AZ value quantity: keep mix 0.5 win_loss + 0.5 relative margin (as 8e) or pure win_loss; target z only (recommended first) or (z + root search value)/2?
-- Q-AZ3 (unit 8f, open): compute budget: 15-minute search-only check (8g) then one 90-minute run (8i)? Default worker count (6 or 8 of 12 logical cores, given the WSL OOM at 11)?
-- Q-AZ4 (unit 8f, open): C++ port: defer as recommended (`docs/GUMBEL_AZ.md` §6.3) and replace unit 9's PPO-era trigger with the AZ one (AZ beats `ppo-long` on held-out opponents and is still rising while data-bound after 8j)?
-- Q-AZ5 (unit 8f, open): pure self-play for AZ (recommended first) or a share of frozen `ppo-long`/hall-of-fame seats?
-- Q-AZ6 (unit 8f, open): first run mixed 3/4/5p (0.3/0.4/0.3) or 4p only for a faster signal?
-- Q-AZ7 (unit 8f, open): expose the search player in the lobby as `gumbel:<sims>-<model>` (D24 grammar) or keep it tool-only until it proves itself?
+- Q-AZ1 (Phase 4 unit 8f): Gumbel AZ warm start from `ppo-long` (recommended), from `runs/dense/best_410` (value needs conversion) or fresh? Keep the PPO value head or reset it? → resolved 2026-11-17 (user): warm start from `ppo-long`, keep its value head with a short value-only warm-up.
+- Q-AZ2 (unit 8f): AZ value quantity: keep mix 0.5 win_loss + 0.5 relative margin (as 8e) or pure win_loss; target z only (recommended first) or (z + root search value)/2? → resolved 2026-11-17 (user): 0.5 win_loss + 0.5 relative margin, final-outcome target z only at first; (z + search value)/2 later if needed.
+- Q-AZ3 (unit 8f): compute budget: 15-minute search-only check (8g) then one 90-minute run (8i)? Default worker count (6 or 8 of 12 logical cores, given the WSL OOM at 11)? → resolved 2026-11-17 (user): yes, 15-minute check (8g) then one 90-minute run (8i); default 6 workers.
+- Q-AZ4 (unit 8f): C++ port: defer as recommended (`docs/GUMBEL_AZ.md` §6.3) and replace unit 9's PPO-era trigger with the AZ one (AZ beats `ppo-long` on held-out opponents and is still rising while data-bound after 8j)? → resolved 2026-11-17 (user): defer the port; replace unit 9's trigger with the AZ one.
+- Q-AZ5 (unit 8f): pure self-play for AZ (recommended first) or a share of frozen `ppo-long`/hall-of-fame seats? → resolved 2026-11-17 (user): mostly self-play with ~20% of tables seating frozen `ppo-long`/older checkpoints as an anti-cycling guard.
+- Q-AZ6 (unit 8f): first run mixed 3/4/5p (0.3/0.4/0.3) or 4p only for a faster signal? → resolved 2026-11-17 (user): 4p only for the first run; mixed 3/4/5p once it works.
+- Q-AZ7 (unit 8f): expose the search player in the lobby as `gumbel:<sims>-<model>` (D24 grammar) or keep it tool-only until it proves itself? → resolved 2026-11-17 (user): tool-only (registry/tournament) for now; lobby once a trained model is worth playing.
 
 ### Backlog
 Should-fix and minor findings, tagged with the phase that found them. `/close-phase` appends here.

@@ -16,6 +16,9 @@ Agents (nets are loaded from a file path, not from the model manifest):
   head instead of rollouts, no Dirichlet noise, most-visited child played). ``c`` defaults to
   ``bots.mcts_net.UCT_C``; ``t`` (default 1) rescales the prior as ``p ** (1 / t)``; ``fpu`` is the
   value assumed for an unvisited child (default 0, OpenSpiel's behaviour).
+- ``gumbel:<SIMS>[,c=<c_scale>][,v=<c_visit>][,m=<considered>]``: the ``bots.gumbel`` search
+  (Gumbel top-m + sequential halving, completed-Q, per-seat values, g = 0) guided by the ``--net``
+  model; defaults are ``bots.gumbel.GumbelConfig`` (c 0.1, v 50, m 16).
 
 Baseline tables (the ``n - 1`` non-candidate seats; ``--baseline-net`` defaults to ``--net``):
 ``ppo_greedy``, ``ppo_sample``, ``heuristic`` and ``mixed`` (sampled net and heuristic seats
@@ -59,6 +62,7 @@ import numpy as np  # noqa: E402
 import pyspiel  # noqa: E402
 from open_spiel.python.algorithms import mcts  # noqa: E402
 
+from bots.gumbel import GumbelBot, GumbelConfig  # noqa: E402
 from bots.heuristic import HeuristicBot  # noqa: E402
 from bots.mcts import MAX_SIMS, _TimedMCTSBot  # noqa: E402
 from bots.mcts_net import UCT_C, NetEvaluator  # noqa: E402
@@ -81,12 +85,13 @@ SUMMARY_COLUMNS = [
 
 @dataclass(frozen=True)
 class AgentSpec:
-    kind: str  # "net" | "heuristic" | "mcts"
+    kind: str  # "net" | "heuristic" | "mcts" | "gumbel"
     sample: bool = False
     sims: int = 0
     uct_c: float = UCT_C
     prior_temp: float = 1.0
     fpu: float = 0.0
+    gumbel: GumbelConfig | None = None
 
 
 def parse_agent(text: str) -> AgentSpec:
@@ -116,6 +121,18 @@ def parse_agent(text: str) -> AgentSpec:
         if spec.prior_temp <= 0 or spec.uct_c < 0:
             raise ValueError(f"mcts needs t > 0 and c >= 0: {text!r}")
         return spec
+    if text.startswith("gumbel:"):
+        sims_s, *opts = text[7:].split(",")
+        if not sims_s.isdigit() or not 1 <= int(sims_s) <= MAX_SIMS:
+            raise ValueError(f"gumbel simulations must be 1..{MAX_SIMS}: {text!r}")
+        gkw: dict[str, Any] = {}
+        gnames = {"c": "c_scale", "v": "c_visit", "m": "m"}
+        for o in opts:
+            k, eq, v = o.partition("=")
+            if not eq or k not in gnames:
+                raise ValueError(f"bad gumbel option {o!r} (use c=, v=, m=)")
+            gkw[gnames[k]] = int(v) if k == "m" else float(v)
+        return AgentSpec("gumbel", sims=int(sims_s), gumbel=GumbelConfig(**gkw))
     raise ValueError(f"unknown agent {text!r}")
 
 
@@ -210,6 +227,8 @@ def build_agent(text: str, net_path: str) -> Any:
         return HeuristicBot()
     if spec.kind == "net":
         return PathNetBot(_weights(net_path), spec.sample)
+    if spec.kind == "gumbel":
+        return GumbelBot(_weights(net_path), spec.sims, spec.gumbel)
     return PathNetMCTSBot(_weights(net_path), spec)
 
 
@@ -290,7 +309,7 @@ def run_job(job: dict[str, Any]) -> dict[str, Any]:
 
 def job_cost(j: dict[str, Any]) -> float:
     spec = parse_agent(j["candidate"])
-    return spec.sims * j["players"] if spec.kind == "mcts" else j["players"]
+    return spec.sims * j["players"] if spec.kind in ("mcts", "gumbel") else j["players"]
 
 
 def run_jobs(
