@@ -46,7 +46,8 @@ for this whitelist: `--max-minutes --workers --eval-every --eval-games --eval-mc
 --eval-greedy --ckpt-every --keep-every --lr --lr-decay/--no-lr-decay --ent-coef
 --ent-coef-final --players --player-weights --league --snapshot-every --pool-size
 --device --stop-after --task-timeout --max-retries --games-per-update --ratings-every
---ratings-games`. Anything else (`--hidden`, `--seed`, `--name`, `--out-dir`, `--value-trunk`, ...) that differs from the run is rejected with an error (exit code 2); so
+--ratings-games --aux-coef` (`--aux-coef` only between positive values; 0 <-> >0 adds or removes
+model heads and is rejected, as is any `--reward` change). Anything else (`--hidden`, `--seed`, `--name`, `--out-dir`, `--value-trunk`, ...) that differs from the run is rejected with an error (exit code 2); so
 is a checkpoint whose `features_version`, observation layout hash or hidden sizes do not match the
 code. Changing `--lr`, `--lr-decay` or `--ent-coef*` changes the schedules from the resume point
 on by design. `--updates` is the horizon of the cosine/linear LR and the entropy schedule, so
@@ -178,3 +179,44 @@ uv run python -m tools.train_ppo --name exploit_long --players 3,4,5 --init-from
 With an empty snapshot pool and the single permanent hall-of-fame seed, every training game is one
 learner against n-1 `ppo-long` seats, and `eval.csv` carries `hof_ref:ppo-long` at each player
 count; its win rate rising well above the fair share (1/n) means the net is exploitable.
+
+## Dense reward and aux heads (unit 8e)
+
+`ppo-long` plateaued with critic EV ~0.25-0.30 on the single terminal return. Two opt-in changes
+give the learner more signal; defaults are unchanged (`--reward terminal --aux-coef 0` is
+bit-identical to before).
+
+- `--reward dense` (run-defining; rejected on resume if changed; old runs resume as `terminal`).
+  The margin part of the shaped return is paid out as potential differences. Per seat,
+  `Phi = (own score - mean opponent score) / 10`, score = points - stones (the R-068 formula, used
+  only as a training signal). At each of a seat's own decisions the rollout records `Phi` of all
+  seats; reward `r_t = (1-mix) (Phi(s_{t+1}) - Phi(s_t))` where `s_{t+1}` is the state at the
+  seat's next decision (so opponents' moves between decisions count), and the last reward adds
+  `mix * win_loss` and closes on the terminal state. The sum telescopes exactly to
+  `mix * win_loss + (1-mix) * (unclipped margin)`. Shaping is relative on purpose: passenger
+  deliveries are the points, and taking a time stone costs the taker 1 to deny others points, so
+  own-score-only shaping would wrongly penalise the stone.
+- Value targets in dense mode are return-to-go per ego entry,
+  `mix * wl_j + (1-mix) * (Phi_j(T) - Phi_j(t))`, clipped to [-1, 1] (tanh head); the clipped
+  fraction is `vclip` in `log.csv`. Entry 0 equals the lambda=1 GAE return.
+- `mix` now weights win/loss against the dense margin. Use `--mix 0.5 --mix-anneal-updates 0`
+  (constant): annealing mix to 1.0 would switch the dense shaping off (user decision 2026-11-17).
+- Use `--gae-lambda 0.95` with dense rewards (the default stays 0.99; gamma stays 1.0).
+- `--aux-coef C` (> 0 builds training-only heads on the value trunk output: final score / 20 per
+  ego seat (MSE), rank per ego seat (CE over the present rank classes, ties share the best rank),
+  winner (masked softmax CE against a uniform distribution over the R-069/R-070 winner set)). The
+  loss `C * (score + rank + win)` is added in `ppo_update`; terms are logged as `aux_score`,
+  `aux_rank`, `aux_win`. Rollout workers never evaluate the heads; targets travel in the samples.
+  `.pt` checkpoints include the heads; the npz export and `bots.net_forward` ignore them.
+  `--init-from` a checkpoint without heads leaves the heads freshly initialised (all other keys
+  still strict).
+- Diagnostic: `stones_cur` / `stones_oth` in `log.csv` = mean `CLOCK_PAUSE` (time stone) takes per
+  current / other seat per game.
+
+Recommended dense run (exploiter-style warm start from the long run):
+
+```
+uv run python -m tools.train_ppo --name dense --init-from runs/long/best_1320.pt \
+    --reward dense --gae-lambda 0.95 --mix 0.5 --mix-anneal-updates 0 --aux-coef 0.5 \
+    --players 3,4,5 --updates 600 --workers 11 --lr 1e-4 --lr-decay
+```
