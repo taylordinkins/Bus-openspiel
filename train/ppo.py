@@ -15,7 +15,7 @@ import numpy as np
 import torch
 
 from bots.net_forward import NetWeights
-from train.model import BusNet
+from train.model import MASK_FILL, BusNet
 
 
 @dataclass(frozen=True)
@@ -31,6 +31,7 @@ class PPOConfig:
     minibatches: int = 8
     normalize_adv: bool = True
     target_kl: float | None = None  # stop epochs early when exceeded (None = off)
+    aux_coef: float = 0.0  # weight of the auxiliary heads' loss (needs ``BusNet(aux=True)``)
 
 
 def linear(start: float, end: float, step: int, total: int) -> float:
@@ -110,20 +111,47 @@ def ev_by_quartile(
     return out
 
 
+def aux_losses(
+    model: BusNet, data: dict[str, torch.Tensor], idx: torch.Tensor
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """(score MSE, rank CE, winner CE) of the aux heads for minibatch ``idx``; call right after
+    the forward pass. Targets are ego-ordered and padded to ``n_seats`` (see rollout)."""
+    pred_s, rank_logits, win_logits = model.aux_outputs()
+    vm = data["vmask"][idx]
+    denom = vm.sum().clamp(min=1.0)
+    score_l = (((pred_s - data["ascore"][idx]) ** 2) * vm).sum() / denom
+    s = model.n_seats
+    present = vm.sum(-1, keepdim=True)  # seats in the game = number of rank classes
+    cls_ok = torch.arange(s, device=vm.device)[None, :] < present  # (B, S) classes
+    rl = torch.where(cls_ok[:, None, :], rank_logits, torch.full_like(rank_logits, MASK_FILL))
+    tgt = data["arank"][idx].clamp(min=0)
+    ce = torch.logsumexp(rl, dim=-1) - rl.gather(-1, tgt[..., None])[..., 0]
+    rank_l = (ce * vm).sum() / denom
+    wl = torch.where(vm > 0, win_logits, torch.full_like(win_logits, MASK_FILL))
+    win_l = -(data["awin"][idx] * torch.log_softmax(wl, dim=-1)).sum(-1).mean()
+    return score_l, rank_l, win_l
+
+
 def ppo_update(
     model: BusNet, opt: torch.optim.Optimizer, data: dict[str, torch.Tensor], cfg: PPOConfig,
     ent_coef: float, gen: torch.Generator,
 ) -> dict[str, float]:  # fmt: skip
     """Several epochs of minibatch PPO over ``data`` (all tensors already on the model device).
 
-    data: obs, mask, action, logp, adv, vtarget, vmask. Returns mean diagnostics.
+    data: obs, mask, action, logp, adv, vtarget, vmask (+ ascore, arank, awin with aux heads).
+    Returns mean diagnostics.
     """
     n = data["obs"].shape[0]
     adv_all = data["adv"]
     if cfg.normalize_adv:
         adv_all = (adv_all - adv_all.mean()) / (adv_all.std() + 1e-8)
     mb = max(1, n // cfg.minibatches)
-    acc = dict.fromkeys(("entropy", "approx_kl", "clip_frac", "pg_loss", "value_loss"), 0.0)
+    acc: dict[str, float] = dict.fromkeys(
+        ("entropy", "approx_kl", "clip_frac", "pg_loss", "value_loss"), 0.0
+    )
+    use_aux = cfg.aux_coef > 0 and model.has_aux
+    if use_aux:
+        acc.update(dict.fromkeys(("aux_score", "aux_rank", "aux_win"), 0.0))
     count = 0
     stop = False
     for _ in range(cfg.epochs):
@@ -141,6 +169,9 @@ def ppo_update(
             vl = (((values - data["vtarget"][idx]) ** 2) * vm).sum() / vm.sum().clamp(min=1.0)
             ent_m = ent.mean()
             loss = pg + cfg.vf_coef * vl - ent_coef * ent_m
+            if use_aux:
+                a_s, a_r, a_w = aux_losses(model, data, idx)
+                loss = loss + cfg.aux_coef * (a_s + a_r + a_w)
             opt.zero_grad(set_to_none=True)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.max_grad_norm)
@@ -152,6 +183,10 @@ def ppo_update(
                 acc["clip_frac"] += ((ratio - 1).abs() > cfg.clip).float().mean().item()
                 acc["pg_loss"] += pg.item()
                 acc["value_loss"] += vl.item()
+                if use_aux:
+                    acc["aux_score"] += a_s.item()
+                    acc["aux_rank"] += a_r.item()
+                    acc["aux_win"] += a_w.item()
                 count += 1
             if cfg.target_kl is not None and kl > 1.5 * cfg.target_kl:
                 stop = True

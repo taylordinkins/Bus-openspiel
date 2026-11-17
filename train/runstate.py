@@ -26,6 +26,7 @@ RESUME_WHITELIST = frozenset({
     "ckpt_every", "keep_every", "lr", "lr_decay", "ent_coef", "ent_coef_final", "players",
     "league", "snapshot_every", "pool_size", "device", "stop_after", "task_timeout",
     "max_retries", "games_per_update", "player_weights", "ratings_every", "ratings_games",
+    "aux_coef",  # a positive value may change; 0 <-> >0 is rejected in tools.train_ppo.prepare
 })  # fmt: skip
 
 

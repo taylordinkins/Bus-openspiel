@@ -48,6 +48,7 @@ class BusNet(nn.Module):
         n_actions: int = NUM_DISTINCT_ACTIONS,
         n_seats: int = MAX_SEATS,
         separate_value: bool = True,
+        aux: bool = False,
     ) -> None:
         super().__init__()  # pyright: ignore[reportUnknownMemberType]
         self.obs_size, self.hidden, self.n_actions, self.n_seats = (
@@ -67,6 +68,13 @@ class BusNet(nn.Module):
         )
         self.pi = layer_init(nn.Linear(sizes[-1], n_actions), std=0.01)
         self.v = layer_init(nn.Linear(sizes[-1], n_seats), std=1.0)
+        # Training-only auxiliary heads on the value trunk output (unit 8e); never exported.
+        self.has_aux = aux
+        self._vfeat: torch.Tensor | None = None
+        if aux:
+            self.aux_score = layer_init(nn.Linear(sizes[-1], n_seats), std=1.0)
+            self.aux_rank = layer_init(nn.Linear(sizes[-1], n_seats * n_seats), std=1.0)
+            self.aux_win = layer_init(nn.Linear(sizes[-1], n_seats), std=1.0)
 
     def forward(self, obs: torch.Tensor, mask: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """(masked logits (B, n_actions), values (B, n_seats) in [-1, 1])."""
@@ -77,7 +85,19 @@ class BusNet(nn.Module):
         if self.separate_value:
             for layer in self.v_trunk:
                 xv = torch.tanh(layer(xv))
+        if self.has_aux:
+            self._vfeat = xv  # read by ``aux_outputs`` right after this call
         return mask_logits(self.pi(x), mask), torch.tanh(self.v(xv))
+
+    def aux_outputs(self) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """(score (B, S), rank logits (B, S, S), winner logits (B, S)) of the last ``forward``."""
+        assert self.has_aux and self._vfeat is not None
+        f = self._vfeat
+        return (
+            self.aux_score(f),
+            self.aux_rank(f).view(-1, self.n_seats, self.n_seats),
+            self.aux_win(f),
+        )
 
     def act(
         self,

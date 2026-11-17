@@ -17,7 +17,7 @@ import pyspiel
 from bus import constants as C
 from bus.actions import NUM_DISTINCT_ACTIONS
 from bus.game import BusState
-from bus.rules import PHASE_END, returns_for
+from bus.rules import PHASE_END, final_scores, returns_for
 from train.features import OBS_SIZE, encode
 
 DEFAULT_MIX = 0.7
@@ -32,6 +32,17 @@ def shaped_return(state: BusState, seat: int, mix: float = DEFAULT_MIX) -> float
     if mix >= 1.0:
         return wl
     return mix * wl + (1.0 - mix) * returns_for(state.core, "margin")[seat]
+
+
+def potentials(core: Any) -> np.ndarray[Any, Any]:
+    """Per-seat potential (own score - mean opponent score) / 10, score = points - stones.
+
+    Same formula as the unclipped R-072 margin (``bus.rules.final_scores``), valid mid-game.
+    Training signal only (unit 8e dense reward).
+    """
+    sc = np.asarray(final_scores(core), np.float64)
+    n = len(sc)
+    return ((sc - (sc.sum() - sc) / (n - 1)) / 10.0).astype(np.float32)
 
 
 class BusEnv:
