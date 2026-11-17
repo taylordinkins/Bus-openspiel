@@ -15,8 +15,10 @@ from typing import Any
 
 import pyspiel
 
+from bots.net import check_players
+from bots.registry import seat_type_error
 from server.adapters.base import JSON, GameAdapter
-from server.bots import bot_rng, get_bot, is_valid_seat_type
+from server.bots import bot_rng, get_bot
 
 log = logging.getLogger(__name__)
 
@@ -90,8 +92,14 @@ class Session:
                 f"{len(self.seats)} seats given, game has {self.game.num_players()} players"
             )
         for t in self.seats:
-            if not is_valid_seat_type(t):
-                raise SessionError(f"unknown seat type {t!r}")
+            err = seat_type_error(t)
+            if err is None:
+                try:
+                    check_players(t, len(self.seats))
+                except ValueError as e:
+                    err = str(e)
+            if err is not None:
+                raise SessionError(err)
         self.history: list[int] = []
         self.actors: list[int] = []  # parallel to history: seat that acted, or CHANCE
         self.state: pyspiel.State = self._initial()

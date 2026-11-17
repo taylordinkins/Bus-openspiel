@@ -19,6 +19,9 @@ dev = [
     "types-pyyaml>=6.0.12",
     "httpx>=0.28.1",
 ]
+train = [
+    "torch==2.9.1",
+]
 
 [tool.uv]
 # Not packaged for distribution; tests import the package from the repo root.
@@ -43,7 +46,7 @@ extend-exclude = ["third_party"]
 select = ["E", "F", "I", "B", "UP", "SIM"]
 
 [tool.pyright]
-include = ["bots", "bus", "server", "tools", "tests/support"]
+include = ["bots", "bus", "server", "tools", "train", "tests/support", "tests/train"]
 stubPath = "typings"
 pythonVersion = "3.12"
 typeCheckingMode = "strict"

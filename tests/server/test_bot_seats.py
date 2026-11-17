@@ -132,3 +132,67 @@ def test_real_mcts_respects_tiny_time_limit() -> None:
     g = _create(c, ["mcts:20000", "random", "random"], bot_think_time_s=0.1)
     assert g["bot_error"] is None
     assert time.monotonic() - t < 60  # unbounded 20000-sim moves would take far longer
+
+
+def test_net_seat_listed_and_plays_a_full_game() -> None:
+    c = TestClient(create_app(inline_bots=True))
+    models = c.get("/api/bot-models").json()
+    assert [m["seat_type"] for m in models] == ["net:ppo-long", "net:ppo-smoke"]
+    assert models[0]["label"] == "Trained net" and 4 in models[0]["players"]
+    seats = ["net:ppo-long", "random", "heuristic", "random"]
+    g = _create(c, seats)
+    assert g["is_terminal"] and g["bot_error"] is None and g["seat_types"] == seats
+
+
+def test_net_seat_bot_moves_after_human_move() -> None:
+    c = TestClient(create_app(inline_bots=True))
+    g = _create(c, ["human", "net:ppo-long", "random"])
+    # The human plays until a net/random seat has acted; the bots then move without bot_error.
+    for _ in range(6):
+        if g["current_player"] != 0:
+            break
+        first = g["legal_actions"][0]
+        a = first["id"] if isinstance(first, dict) else first
+        r = c.post(f"/api/games/{g['id']}/actions", json={"action": a})
+        assert r.status_code == 200, r.text
+        g = r.json()
+    assert g["bot_error"] is None
+    assert {h["actor"] for h in g["history"]} >= {0, 1}
+
+
+@pytest.mark.parametrize(
+    "seat", ["net:missing", "net:../ppo-long", "net:ppo-long.npz", "net", "net:/etc/passwd"]
+)
+def test_bad_net_seats_rejected(seat: str) -> None:
+    c = TestClient(create_app(inline_bots=True))
+    r = c.post("/api/games", json={"game": "bus", "seats": [seat, "random", "random"]})
+    assert r.status_code == 422, r.text
+
+
+def test_net_seat_wrong_player_count_rejected() -> None:
+    c = TestClient(create_app(inline_bots=True))
+    r = c.post("/api/games", json={"game": "bus", "seats": ["net:ppo-long", "random"]})
+    assert 400 <= r.status_code < 500, r.text
+
+
+def test_net_mcts_seat_listed_and_plays_a_full_game() -> None:
+    c = TestClient(create_app(inline_bots=True))
+    model = c.get("/api/bot-models").json()[0]
+    assert [o["seat_type"] for o in model["search"]] == [
+        "mcts_net:50-ppo-long",
+        "mcts_net:200-ppo-long",
+        "mcts_net:1000-ppo-long",
+    ]
+    seats = ["mcts_net:3-ppo-long", "random", "net:ppo-long", "heuristic"]
+    g = _create(c, seats, bot_think_time_s=2)
+    assert g["is_terminal"] and g["bot_error"] is None and g["seat_types"] == seats
+
+
+@pytest.mark.parametrize("seat", ["mcts_net:5-missing", "mcts_net:5-../x", "mcts_net:ppo-long"])
+def test_net_mcts_bad_seat_rejected(seat: str) -> None:
+    c = TestClient(create_app(inline_bots=True))
+    r = c.post(
+        "/api/games",
+        json={"game": "bus", "params": {"num_players": 3}, "seats": [seat, "random", "random"]},
+    )
+    assert r.status_code in (400, 422)

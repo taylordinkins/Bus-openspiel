@@ -1,0 +1,17 @@
+# Allow-list of trained nets playable as `net:<name>` seats. Only names listed here resolve;
+# `file` is relative to this directory. `features_version` must equal train.features.FEATURES_VERSION.
+models:
+  - name: ppo-long
+    file: ppo-long.npz
+    label: Trained net
+    description: Long-run PPO self-play model (league training, mixed 3/4/5 players).
+    players: [3, 4, 5]
+    features_version: 1
+  # Kept only because training seeds its permanent hall-of-fame entry through the manifest
+  # (`--hof-seed ppo-smoke`, also used by `--resume runs/long`). Prefer ppo-long for play.
+  - name: ppo-smoke
+    file: ppo-smoke.npz
+    label: Trained net (smoke, weak)
+    description: 20-minute PPO smoke model, trained at 4 players only. Superseded by ppo-long.
+    players: [3, 4, 5]
+    features_version: 1

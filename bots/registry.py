@@ -14,6 +14,8 @@ from dataclasses import dataclass
 from bots.base import Bot
 from bots.heuristic import HeuristicBot
 from bots.mcts import parse_mcts_param
+from bots.mcts_net import parse_mcts_net_param
+from bots.net import parse_net_param
 from bots.random_bot import RandomBot
 
 HUMAN = "human"
@@ -63,6 +65,20 @@ def _mcts_factory(param: str | None) -> Bot:
 register("mcts", _mcts_factory)
 
 
+def _net_factory(param: str | None) -> Bot:
+    return parse_net_param(param)
+
+
+register("net", _net_factory)
+
+
+def _mcts_net_factory(param: str | None) -> Bot:
+    return parse_mcts_net_param(param)
+
+
+register("mcts_net", _mcts_net_factory)
+
+
 def parse_seat_type(s: str) -> tuple[str, str | None]:
     """Split into (kind, param); ValueError if malformed. Does not check the kind exists."""
     if not _SEAT_RE.fullmatch(s) and s != HUMAN:
@@ -87,6 +103,20 @@ def is_valid_seat_type(seat_type: str) -> bool:
     except ValueError:
         return False
     return True
+
+
+def seat_type_error(seat_type: str) -> str | None:
+    """Why `seat_type` is not valid (None if it is); keeps model errors readable."""
+    if seat_type == HUMAN or seat_type in BOTS:
+        return None
+    try:
+        kind, param = parse_seat_type(seat_type)
+        if kind not in KINDS:
+            return f"unknown seat type {seat_type!r}"
+        KINDS[kind].factory(param)
+    except ValueError as e:
+        return f"invalid seat type {seat_type!r}: {e}"
+    return None
 
 
 def make_bot(seat_type: str) -> Bot:

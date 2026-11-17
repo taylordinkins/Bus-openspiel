@@ -53,7 +53,8 @@ describe("parseStartDoc", () => {
 describe("Lobby scenarios", () => {
   it("does not fetch the named list until Scenario is chosen", () => {
     render(<Lobby onCreated={vi.fn()} />);
-    expect(GET).not.toHaveBeenCalled();
+    // Only the trained-net list is fetched up front (unit 6); scenarios wait for Scenario mode.
+    expect(GET.mock.calls.map((c) => c[0])).not.toContain("/api/scenarios");
     expect(screen.getByLabelText("Players")).toBeInTheDocument();
   });
 

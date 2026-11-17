@@ -33,3 +33,11 @@ test("a game with a heuristic bot seat is finished by clicking the board", async
   await playToEnd(page);
   await expect(results(page)).toBeVisible();
 });
+
+test("a game with a trained-net seat is finished by clicking the board", async ({ page }) => {
+  test.setTimeout(300_000);
+  await useSettings(page, "off", 0);
+  await newGame(page, 3, ["human", "net:ppo-smoke", "random"], "5");
+  await playToEnd(page);
+  await expect(results(page)).toBeVisible();
+});

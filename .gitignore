@@ -29,3 +29,6 @@ runs/
 
 # Copyrighted rulebook: local only, never committed (PLAN.md D8)
 third_party/
+
+# ad-hoc training run logs
+runs_*.out

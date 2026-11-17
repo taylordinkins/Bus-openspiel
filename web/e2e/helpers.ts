@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page } from "@playwright/test";
 
-export type Seat = "human" | "random" | "heuristic";
+export type Seat = "human" | "random" | "heuristic" | `net:${string}`;
 export type Anim = "normal" | "fast" | "off";
 
 /** Stored settings (UI_DESIGN 6.8), applied before the app reads them. */
