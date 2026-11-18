@@ -74,6 +74,7 @@ class RolloutConfig:
     player_weights: tuple[float, ...] | None = None  # sampling weights over ``players``
     record_scores: bool = False  # keep (labels, final scores) per game in ``stats["scores"]``
     reward: str = "terminal"  # "terminal" or "dense" (potential-based margin, unit 8e)
+    ego_greedy: bool = False  # greedy "current" seats only, other nets still sample (AZ eval)
 
 
 def assign_seat_policies(
@@ -394,7 +395,12 @@ def play_games(
             obs = np.stack([cur[i].env.obs() for i in net_idx])
             mask = np.stack([cur[i].env.legal_mask() for i in net_idx])
             act, logp, val, ill = _sample(
-                w, obs, mask, rng, cfg.greedy, need_values=cfg.collect and label == CURRENT
+                w,
+                obs,
+                mask,
+                rng,
+                cfg.greedy or (cfg.ego_greedy and label == CURRENT),
+                need_values=cfg.collect and label == CURRENT,
             )
             stats["illegal"] += ill
             for r, i in enumerate(net_idx):

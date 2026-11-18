@@ -269,7 +269,13 @@ class Runner:
     raises ``WorkerFailure``.
     """
 
-    def __init__(self, workers: int, timeout: float = 0.0, max_retries: int = 3) -> None:
+    def __init__(
+        self, workers: int, timeout: float = 0.0, max_retries: int = 3,
+        task_fn: Callable[[Any], dict[str, Any]] = run_task,
+        spill_fn: Callable[[Any], dict[str, Any]] = run_task_spill,
+    ) -> None:  # fmt: skip
+        self.task_fn = task_fn  # inline (0 workers); module-level so the pool can pickle it
+        self.spill_fn = spill_fn  # pool workers: samples spilled to tmpfs (see run_task_spill)
         self.workers = workers
         self.timeout = timeout
         self.max_retries = max_retries
@@ -297,8 +303,8 @@ class Runner:
 
     def _map_once(self, tasks: list[Any], abort: Callable[[], bool] | None) -> list[dict[str, Any]]:
         if self.ex is None:
-            return [run_task(t) for t in tasks]
-        futs = [self.ex.submit(run_task_spill, t) for t in tasks]
+            return [self.task_fn(t) for t in tasks]
+        futs = [self.ex.submit(self.spill_fn, t) for t in tasks]
         deadline = time.monotonic() + self.timeout if self.timeout > 0 else None
         pending = set(futs)
         while pending:

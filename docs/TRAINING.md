@@ -220,3 +220,55 @@ uv run python -m tools.train_ppo --name dense --init-from runs/long/best_1320.pt
     --reward dense --gae-lambda 0.95 --mix 0.5 --mix-anneal-updates 0 --aux-coef 0.5 \
     --players 3,4,5 --updates 600 --workers 11 --lr 1e-4 --lr-decay
 ```
+
+## Gumbel AlphaZero trainer (unit 8h)
+
+`tools/train_az.py` (CLI; the trainer is `train/az_trainer.py`, actors `train/az_selfplay.py`,
+replay `train/az_replay.py`, learner `train/az_learn.py`). Design: `docs/GUMBEL_AZ.md`; user
+decisions Q-AZ1..Q-AZ7 in PLAN.md §9.
+
+- Synchronous generations: `--workers` (default 6) numpy-only actor processes play
+  `--games-per-gen` games with the current weights under Gumbel search (`bots.gumbel`,
+  `--sims` 32, `--c-scale` 0.3, `--c-visit` 50, `--m` 16, `--gumbel-scale` 1), `--concurrent`
+  games in flight per task and one batched (sparse first-layer) forward per search wave. Samples
+  return through `/dev/shm` spill files. The CLI module imports no torch, so spawned actors stay
+  at ~150 MB RSS each (the learner process with CUDA is ~1.6 GB).
+- Targets: completed-Q improved policy at the root (policy CE); per-seat final
+  R = `--mix` win_loss + (1 − `--mix`) relative margin (stones counted), ego order, present seats
+  only (value MSE); `--value-target zq` uses (z + root search value) / 2 (off by default); aux
+  heads at `--aux-coef` 0.25 (training only, not exported); AdamW with `--weight-decay` 1e-4.
+  The first `--warmup-gens` (2) generations train the value side only (policy loss off).
+- Learner: FIFO replay of `--replay-size` (500k) samples, `ceil(--reuse * new / --batch)` steps
+  per generation (reuse 4, batch 1024), lr cosine `--lr` 3e-4 → `--lr-final` 1e-4 over
+  `--generations`. `--min-replay` holds training until the buffer has that many samples.
+- Tables: `--frozen-share` (0.2) of games seat a frozen net in 1..n−1 random seats: the
+  `--frozen-nets` manifest names (`ppo-long`) plus the learner's own snapshot every
+  `--snapshot-every` (10) generations (last `--snapshot-keep` 4 kept in `pool/`). Frozen seats play
+  their raw policy sampled; only learner seats yield samples. 4p only by default (`--players`).
+- Evaluation every `--eval-every` (10) generations, generation 0 first (before training): raw
+  policy, greedy (`--no-eval-greedy` to sample), no search, one seat vs 3 sampled copies of each
+  `--eval-nets` entry (`ppo-long`, exploiter `runs/exploit_long/best.npz`) and vs 3 heuristic,
+  seats rotated, `--eval-games` (200) per cell, shared wins credited 1/k, Wilson 95% intervals and
+  mean score margin in `eval.csv`. `best.*` tracks the best win rate vs the first eval net.
+- `log.csv` per generation: losses, value EV (own seat, overall and by game quartile, on the
+  fresh samples before training), policy CE to the targets, target entropy, KL(π′‖prior),
+  `search_differs` (share of moves where search overrode the prior's argmax: the R2 diagnostic),
+  learner win credit in self-play and frozen tables, sims/s, games/h, RSS (parent and max actor),
+  replay MB, timings.
+- Stop/resume: `--max-minutes`, `--stop-after`, SIGINT/SIGTERM finish the generation, checkpoint
+  and exit 0 (a second signal aborts). `--resume <run dir>` restores model, optimizer, generation,
+  snapshot pool and best record; the replay is not saved and refills from the resume point (noted
+  in `resume_log.json`). Overrides allowed on resume: `--max-minutes --workers --eval-every
+  --eval-games --ckpt-every --keep-every --stop-after --task-timeout --max-retries --device
+  --generations --games-per-gen --concurrent --lr --lr-final --reuse`.
+- Exports (`ckpt_<gen>.npz`, `best.npz`) are the usual format-2 npz, usable as `net:`, `gumbel:`
+  and `mcts_net:` seats once copied into `models/` and the manifest.
+
+Recommended 8i run (90 minutes, warm start from `ppo-long`, 4p, n = 32, c_scale 0.3, the 8g
+confirmation's choice):
+
+```
+uv run --group train python -m tools.train_az --name az1 --init-from runs/long/best_1320.pt \
+    --players 4 --sims 32 --c-scale 0.3 --workers 6 --games-per-gen 256 --eval-every 10 \
+    --eval-games 200 --max-minutes 90
+```
