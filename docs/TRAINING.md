@@ -245,6 +245,11 @@ decisions Q-AZ1..Q-AZ7 in PLAN.md §9.
   `--frozen-nets` manifest names (`ppo-long`) plus the learner's own snapshot every
   `--snapshot-every` (10) generations (last `--snapshot-keep` 4 kept in `pool/`). Frozen seats play
   their raw policy sampled; only learner seats yield samples. 4p only by default (`--players`).
+  `--heuristic-share` (default 0) of games, disjoint from the frozen ones, seat `bots.registry`
+  heuristic bots in 1..n−1 random seats (learner in the rest; no search, no samples for the
+  heuristic seats). One uniform draw per table picks heuristic / frozen / self, so the shares are
+  shares of all tables (their sum must be ≤ 1). Both shares are run-defining: changing either on
+  `--resume` is rejected.
 - Evaluation every `--eval-every` (10) generations, generation 0 first (before training): raw
   policy, greedy (`--no-eval-greedy` to sample), no search, one seat vs 3 sampled copies of each
   `--eval-nets` entry (`ppo-long`, exploiter `runs/exploit_long/best.npz`) and vs 3 heuristic,
@@ -253,7 +258,8 @@ decisions Q-AZ1..Q-AZ7 in PLAN.md §9.
 - `log.csv` per generation: losses, value EV (own seat, overall and by game quartile, on the
   fresh samples before training), policy CE to the targets, target entropy, KL(π′‖prior),
   `search_differs` (share of moves where search overrode the prior's argmax: the R2 diagnostic),
-  learner win credit in self-play and frozen tables, sims/s, games/h, RSS (parent and max actor),
+  per table kind (self / frozen / heuristic) the share of games (`tables_*`) and the learner
+  seats' mean win credit (`win_*`, 1/k for a k-way shared win), sims/s, games/h, RSS (parent and max actor),
   replay MB, timings.
 - Stop/resume: `--max-minutes`, `--stop-after`, SIGINT/SIGTERM finish the generation, checkpoint
   and exit 0 (a second signal aborts). `--resume <run dir>` restores model, optimizer, generation,
@@ -271,4 +277,15 @@ confirmation's choice):
 uv run --group train python -m tools.train_az --name az1 --init-from runs/long/best_1320.pt \
     --players 4 --sims 32 --c-scale 0.3 --workers 6 --games-per-gen 256 --eval-every 10 \
     --eval-games 200 --max-minutes 90
+```
+
+Attempt 2 (after `runs/az1` was stopped at g18 for losing ground vs 3 heuristic, PLAN 8i):
+heuristic tables, zq value targets, a lower constant lr and a heavier value loss:
+
+```
+uv run --group train python -m tools.train_az --name az2 --init-from runs/long/best_1320.pt \
+    --players 4 --sims 64 --c-scale 0.1 --warmup-gens 10 --replay-size 300000 --workers 6 \
+    --games-per-gen 128 --eval-every 4 --eval-games 200 --max-minutes 90 \
+    --heuristic-share 0.15 --frozen-share 0.2 --value-target zq --lr 1e-4 --lr-final 1e-4 \
+    --vf-coef 2.0
 ```

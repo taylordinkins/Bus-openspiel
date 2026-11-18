@@ -15,7 +15,14 @@ from bots.net import load_weights
 from bus import rules
 from bus.actions import NUM_DISTINCT_ACTIONS
 from train.az_replay import Replay
-from train.az_selfplay import ActorConfig, play_selfplay, win_credit
+from train.az_selfplay import (
+    CURRENT,
+    HEURISTIC,
+    ActorConfig,
+    play_selfplay,
+    table_labels,
+    win_credit,
+)
 from train.features import OBS_SIZE
 
 NET = "ppo-long"
@@ -106,6 +113,56 @@ def test_frozen_seats_make_no_samples() -> None:
     seats = st["tables"]["frozen"][0]
     assert "self" not in st["tables"] and 1 <= seats <= 2 * 2  # 1..n-1 learner seats per game
     assert len(r["samples"]["z"]) == st["decisions"]
+
+
+@pytest.mark.parametrize(("fs", "hs"), [(0.2, 0.15), (0.0, 0.3), (0.5, 0.5), (0.3, 0.0)])
+def test_table_shares_respected(fs: float, hs: float) -> None:
+    rng = np.random.default_rng(3)
+    cfg = _cfg(frozen_share=fs, heuristic_share=hs)
+    counts = {"self": 0, "frozen": 0, "heuristic": 0}
+    n_tab = 20_000
+    for _ in range(n_tab):
+        labels = table_labels(rng, 4, cfg, ["hof:a", "snap:b"])
+        others = {x for x in labels if x != CURRENT}
+        assert len(others) <= 1 and 1 <= labels.count(CURRENT) <= 4  # never mixed, learner seated
+        kind = "self" if not others else "heuristic" if HEURISTIC in others else "frozen"
+        if kind != "self":
+            assert labels.count(CURRENT) <= 3
+        counts[kind] += 1
+    for kind, share in (("frozen", fs), ("heuristic", hs), ("self", 1 - fs - hs)):
+        assert counts[kind] / n_tab == pytest.approx(share, abs=0.015), kind
+    # no frozen labels: no frozen tables, the heuristic share is unchanged
+    got = sum(HEURISTIC in table_labels(rng, 4, cfg, []) for _ in range(n_tab))
+    assert got / n_tab == pytest.approx(hs, abs=0.015)
+
+
+def test_heuristic_seats_make_no_samples_and_deterministic() -> None:
+    w = load_weights(NET)
+    cfg = _cfg(frozen_share=0.0, heuristic_share=1.0, concurrent=3)
+    r = play_selfplay(w, 3, 8, cfg)
+    st = r["stats"]
+    assert set(st["tables"]) == {"heuristic"} and st["tables"]["heuristic"][3] == 3
+    seats = st["tables"]["heuristic"][0]
+    assert 3 <= seats <= 3 * 2  # 1..n-1 learner seats per game
+    assert len(r["samples"]["z"]) == st["decisions"] > 0
+    again = play_selfplay(w, 3, 8, cfg)
+    for k, v in r["samples"].items():
+        np.testing.assert_array_equal(v, again["samples"][k], err_msg=k)
+    assert again["stats"]["tables"] == st["tables"]
+
+
+def test_mixed_tables_batched_search() -> None:
+    # self, frozen and heuristic tables in flight together in one batched search
+    w = load_weights(NET)
+    r = play_selfplay(w, 6, 2, _cfg(frozen_share=0.35, heuristic_share=0.35, concurrent=6),
+                      {"hof:x": w})  # fmt: skip
+    st = r["stats"]
+    assert st["games"] == 6 and sum(t[3] for t in st["tables"].values()) == 6
+    assert set(st["tables"]) == {"self", "frozen", "heuristic"}  # all three kinds (seed 2)
+    assert len(r["samples"]["z"]) == st["decisions"]
+    assert st["tables"]["self"][0] == 3 * st["tables"]["self"][3]
+    for kind in ("frozen", "heuristic"):
+        assert st["tables"][kind][3] <= st["tables"][kind][0] <= 2 * st["tables"][kind][3]
 
 
 # ---------------------------------------------------------------- replay
@@ -280,3 +337,24 @@ def test_resume_equals_straight_run_and_export_parity(tmp_path: Path) -> None:
     nl, nv = w.forward(obs, mask)
     np.testing.assert_allclose(nl[mask], tl.numpy()[mask], atol=1e-4)
     np.testing.assert_allclose(nv, tv.numpy(), atol=1e-5)
+
+
+def test_heuristic_share_run_defining_on_resume(tmp_path: Path) -> None:
+    pytest.importorskip("torch")
+    from tools.train_az import main
+
+    base = _args(tmp_path, "h", "--heuristic-share", "0.5", "--frozen-share", "0.25",
+                 "--stop-after", "1", "--eval-every", "0")  # fmt: skip
+    assert main(base) == 0
+    rows = _read(tmp_path / "h" / "log.csv")
+    assert len(rows) == 1
+    fr = [float(rows[0][f"tables_{k}"]) for k in ("self", "frozen", "heuristic")]
+    assert sum(fr) == pytest.approx(1.0) and all(0 <= x <= 1 for x in fr)
+    run = str(tmp_path / "h")
+    assert main(["--resume", run, "--stop-after", "1", "--heuristic-share", "0.2"]) == 2
+    assert main(["--resume", run, "--stop-after", "1"]) == 0
+    import json
+
+    assert json.loads((tmp_path / "h" / "args.json").read_text())["heuristic_share"] == 0.5
+    assert len(_read(tmp_path / "h" / "log.csv")) == 2
+    assert main(_args(tmp_path, "bad", "--heuristic-share", "0.9", "--frozen-share", "0.2")) == 2

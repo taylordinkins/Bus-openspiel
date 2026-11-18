@@ -6,10 +6,14 @@ Learner seats ("current") choose every non-forced move with a ``bots.gumbel.Gumb
 current weights (Gumbel noise scale 1, so the root's Gumbel-top-k is the exploration); one
 batched forward per wave serves the pending leaf of every open search in the task. Frozen seats
 (``hof:<name>`` / ``snap:<gen>`` labels, weights or npz paths in ``opponents``) play their raw
-policy sampled at temperature 1, batched per label, and produce no samples.
+policy sampled at temperature 1, batched per label, and produce no samples. Heuristic seats
+(``bots.registry`` "heuristic", label ``heuristic``) choose on the real state (they only read it;
+ties broken by a per-task ``random.Random``), need no search and produce no samples.
 
-Tables: with probability ``frozen_share`` a game seats frozen nets in 1..n-1 random seats (one
-label drawn uniformly from ``opponents`` per game); otherwise all seats are the learner.
+Tables (disjoint): with probability ``heuristic_share`` a game seats heuristic bots in 1..n-1
+random seats; with probability ``frozen_share`` (needs ``opponents``) it seats frozen nets in
+1..n-1 random seats (one label drawn uniformly from ``opponents`` per game); otherwise all seats
+are the learner. One uniform draw decides the kind, so the two shares are shares of all tables.
 
 Samples (one per learner decision with >= 2 legal actions), sparse:
 - ``obs_off`` / ``obs_idx`` (int16) / ``obs_code`` (uint8, uint16 if needed) / ``obs_tab``
@@ -32,6 +36,7 @@ KL(pi' || prior)), and per-table results for the learner seats with shared wins 
 from __future__ import annotations
 
 import os
+import random
 import shutil
 import time
 from dataclasses import dataclass
@@ -55,6 +60,8 @@ from train.rollout import aux_targets
 from train.shm import make_spill_dir
 
 CURRENT = "current"
+HEURISTIC = "heuristic"
+TABLE_KINDS = ("self", "frozen", "heuristic")
 Array = np.ndarray[Any, Any]
 SAMPLE_KEYS = (
     "obs_off", "obs_idx", "obs_code", "obs_tab", "act_off", "act_id", "pi", "z", "vmask", "q",
@@ -71,6 +78,7 @@ class ActorConfig:
     search: GumbelConfig = GumbelConfig(c_scale=0.3, gumbel_scale=1.0)
     concurrent: int = 32  # games in flight per task
     frozen_share: float = 0.2  # share of tables with frozen seats (needs ``opponents``)
+    heuristic_share: float = 0.0  # share of tables with heuristic seats (disjoint from frozen)
 
 
 def win_credit(wl: float, n: int) -> float:
@@ -81,6 +89,27 @@ def win_credit(wl: float, n: int) -> float:
     if wl < -1e-9:
         return 0.0
     return (wl * (n - 1) + 1.0) / n
+
+
+def table_labels(
+    rng: np.random.Generator, n: int, cfg: ActorConfig, frozen: list[str]
+) -> list[str]:
+    """Seat labels of a new n-seat table: all ``CURRENT``, or 1..n-1 random seats taken by the
+    heuristic (probability ``heuristic_share``) or by one frozen label drawn from ``frozen``
+    (probability ``frozen_share``, only if ``frozen`` is non-empty)."""
+    labels = [CURRENT] * n
+    lab = None
+    if frozen or cfg.heuristic_share > 0:  # no draw otherwise (keeps older streams unchanged)
+        u = rng.random()
+        if u < cfg.heuristic_share:
+            lab = HEURISTIC
+        elif frozen and u < cfg.heuristic_share + cfg.frozen_share:
+            lab = frozen[int(rng.integers(len(frozen)))]
+    if lab is not None:
+        k = int(rng.integers(1, n))
+        for s in rng.choice(n, size=k, replace=False):
+            labels[int(s)] = lab
+    return labels
 
 
 def _weights(label: str, opponents: dict[str, Any]) -> NetWeights:
@@ -112,13 +141,15 @@ def _rss_mb() -> float:
 
 
 class _Game:
-    __slots__ = ("core", "legal", "labels", "search", "steps", "n", "frozen")
+    __slots__ = ("core", "legal", "labels", "search", "steps", "n", "kind", "state")
 
     def __init__(self, core: Any, labels: list[str]) -> None:
         self.core, self.legal = skip_forced(core)
         self.labels = labels
         self.n = core.players
-        self.frozen = any(lab != CURRENT for lab in labels)
+        others = {lab for lab in labels if lab != CURRENT}
+        self.kind = "self" if not others else "heuristic" if HEURISTIC in others else "frozen"
+        self.state: Any = None  # BusState wrapper for heuristic seats (created on first use)
         self.search: GumbelSearch | None = None
         # per seat: list of (obs, actions, pi, q_abs)
         self.steps: list[list[tuple[Array, Array, Array, Array]]] = [[] for _ in range(self.n)]
@@ -133,7 +164,12 @@ def play_selfplay(
     opponents = opponents or {}
     for k in [k for k in _OPP_CACHE if k not in opponents]:  # evicted snapshots
         del _OPP_CACHE[k]
+    if cfg.frozen_share + cfg.heuristic_share > 1.0 + 1e-9:
+        raise ValueError("frozen_share + heuristic_share must be <= 1")
     rng = np.random.default_rng(seed)
+    py_rng = random.Random(seed * 2 + 1)  # heuristic tie-breaks; leaves ``rng``'s stream alone
+    heuristic: Any = None
+    games: dict[int, Any] = {}
     fwd = sparse_forward(weights)
     pw = None
     if cfg.player_weights is not None:
@@ -145,7 +181,7 @@ def play_selfplay(
     stats: dict[str, Any] = {
         "games": 0, "decisions": 0, "sims": 0, "forwards": 0, "evals": 0, "differs": 0,
         "entropy": 0.0, "kl": 0.0, "lengths": [],
-        # table kind ("self" / "frozen") -> [learner seats, win credit, summed R]
+        # table kind (TABLE_KINDS) -> [learner seats, win credit, summed R, games]
         "tables": {}, "seconds": 0.0,
     }  # fmt: skip
     started = 0
@@ -155,12 +191,7 @@ def play_selfplay(
         nonlocal started
         started += 1
         n = int(rng.choice(cfg.players, p=pw))
-        labels = [CURRENT] * n
-        if labels_all and rng.random() < cfg.frozen_share:
-            lab = labels_all[int(rng.integers(len(labels_all)))]
-            k = int(rng.integers(1, n))
-            for s in rng.choice(n, size=k, replace=False):
-                labels[int(s)] = lab
+        labels = table_labels(rng, n, cfg, labels_all)
         live.append(_Game(rules.initial_core(n), labels))
 
     def finish(g: _Game) -> None:
@@ -170,8 +201,8 @@ def play_selfplay(
         r_abs = terminal_values(core, cfg.search.mix)
         wl = rules.returns_for(core, "win_loss")
         stats["games"] += 1
-        kind = "frozen" if g.frozen else "self"
-        tab = stats["tables"].setdefault(kind, [0, 0.0, 0.0])
+        tab = stats["tables"].setdefault(g.kind, [0, 0.0, 0.0, 0])
+        tab[3] += 1
         for seat in range(n):
             if g.labels[seat] != CURRENT:
                 continue
@@ -216,7 +247,7 @@ def play_selfplay(
         # frozen seats: one sampled move each, batched per label
         groups: dict[str, list[_Game]] = {}
         for g in live:
-            if g.legal and g.labels[g.core.current] != CURRENT:
+            if g.legal and g.labels[g.core.current] not in (CURRENT, HEURISTIC):
                 groups.setdefault(g.labels[g.core.current], []).append(g)
         for lab, gs in groups.items():
             obs = np.stack([encode(g.core) for g in gs]).astype(np.float32)
@@ -229,6 +260,24 @@ def play_selfplay(
                 p = np.exp(lg - lg.max())
                 a = g.legal[int(rng.choice(len(g.legal), p=p / p.sum()))]
                 g.core, g.legal = skip_forced(rules.apply(g.core, int(a)))
+        # heuristic seats: play until a learner seat (or the end) is to move
+        for g in live:
+            while g.legal and g.labels[g.core.current] == HEURISTIC:
+                if heuristic is None:
+                    from bots.registry import make_bot  # lazy: only tasks with such tables
+
+                    heuristic = make_bot(HEURISTIC)
+                if g.state is None:
+                    if g.n not in games:
+                        import pyspiel
+
+                        import bus.game  # noqa: F401  (registers python_bus)
+
+                        games[g.n] = pyspiel.load_game("python_bus", {"players": g.n})
+                    g.state = games[g.n].new_initial_state()
+                g.state.core = g.core
+                a = int(heuristic.choose(g.state, py_rng))
+                g.core, g.legal = skip_forced(rules.apply(g.core, a))
         # learner seats: one search wave
         pending: list[GumbelSearch] = []
         for g in live:

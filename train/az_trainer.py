@@ -20,7 +20,9 @@ only (policy loss off).
 
 Tables: ``--frozen-share`` of games seat a frozen net (``--frozen-nets`` manifest names and, every
 ``--snapshot-every`` generations, the learner's own snapshot; the last ``--snapshot-keep`` kept)
-in 1..n-1 random seats; the rest is pure self-play. Only learner seats produce samples.
+in 1..n-1 random seats; ``--heuristic-share`` of games (disjoint from the frozen ones) seat
+``bots.registry`` heuristic bots in 1..n-1 random seats; the rest is pure self-play. Only learner
+seats produce samples. Both shares are run-defining (a change on resume is rejected).
 
 Evaluation (``--eval-every`` generations, generation 0 first, before any training): the raw
 policy (greedy unless ``--no-eval-greedy``; no search) as one seat vs 3 sampled copies of each
@@ -30,7 +32,9 @@ entry.
 
 Outputs in ``runs/<name>/``: ``log.csv`` (one row per generation: losses, value EV overall and by
 game quartile on the fresh samples before training, policy-target entropy, KL(pi' || prior),
-share of moves where search overrode the prior's argmax, sims/s, games/h, RSS), ``eval.csv``,
+share of moves where search overrode the prior's argmax, sims/s, games/h, RSS, and per table
+kind self / frozen / heuristic the share of games and the learner seats' mean win credit,
+1/k for a k-way shared win), ``eval.csv``,
 ``ckpt_<gen>.pt/.npz``, ``latest.json``, ``best.*``, ``pool/snap_<gen>.npz``, ``args.json``,
 ``resume_log.json``. ``--resume <run dir>`` continues from the latest checkpoint (model,
 optimizer, generation, frozen pool; the replay is not saved and refills from the resume point).
@@ -74,7 +78,13 @@ from tools.train_ppo import (  # noqa: E402
 from train.atomic import atomic_write_json  # noqa: E402
 from train.az_learn import LearnConfig, diagnostics, train_steps  # noqa: E402
 from train.az_replay import Replay  # noqa: E402
-from train.az_selfplay import ActorConfig, run_az_task, run_az_task_spill, win_credit  # noqa: E402
+from train.az_selfplay import (  # noqa: E402
+    TABLE_KINDS,
+    ActorConfig,
+    run_az_task,
+    run_az_task_spill,
+    win_credit,
+)
 from train.export import export_npz  # noqa: E402
 from train.features import FEATURES_VERSION  # noqa: E402
 from train.model import BusNet  # noqa: E402
@@ -102,7 +112,8 @@ COLUMNS = [
     "loss_aux", "ev", "ev_q1", "ev_q2", "ev_q3", "ev_q4", "policy_ce", "target_entropy",
     "kl_prior", "search_differs", "win_self", "win_frozen", "frozen_seats", "sims_per_s",
     "games_per_h", "decisions_per_s", "rss_mb", "worker_rss_mb", "replay_mb", "gen_s",
-    "learn_s", "eval_s", "elapsed_s",
+    "learn_s", "eval_s", "elapsed_s", "tables_self", "tables_frozen", "tables_heuristic",
+    "win_heuristic", "heuristic_seats",
 ]  # fmt: skip
 EVAL_COLUMNS = ["gen", "opponent", "players", "games", "win_rate", "lo", "hi", "mean_margin"]
 RESUME_WHITELIST = frozenset({
@@ -139,6 +150,10 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--mix", type=float, default=0.5, help="win_loss share of R")
     # tables
     ap.add_argument("--frozen-share", type=float, default=0.2, help="share of tables w/ frozen")
+    ap.add_argument(
+        "--heuristic-share", type=float, default=0.0,
+        help="share of tables w/ heuristic seats (disjoint from --frozen-share)",
+    )  # fmt: skip
     ap.add_argument("--frozen-nets", default="ppo-long", help="manifest names (comma list)")
     ap.add_argument("--snapshot-every", type=int, default=10, help="gens; 0 = no own snapshots")
     ap.add_argument("--snapshot-keep", type=int, default=4)
@@ -184,6 +199,7 @@ def actor_config(args: argparse.Namespace) -> ActorConfig:
             mix=args.mix,
         ),  # fmt: skip
         concurrent=args.concurrent, frozen_share=args.frozen_share,
+        heuristic_share=args.heuristic_share,
     )  # fmt: skip
 
 
@@ -278,6 +294,11 @@ def save_checkpoint(
 def prepare(argv: list[str]) -> tuple[argparse.Namespace, Path, dict[str, Any] | None]:
     ap = build_parser()
     args = ap.parse_args(argv)
+    for k in ("frozen_share", "heuristic_share"):
+        if not 0.0 <= getattr(args, k) <= 1.0:
+            raise ResumeError(f"--{k.replace('_', '-')} must be in [0, 1]")
+    if args.frozen_share + args.heuristic_share > 1.0:
+        raise ResumeError("--frozen-share + --heuristic-share must be <= 1")
     if args.resume and args.init_from:
         raise ResumeError("--init-from cannot be combined with --resume")
     if not args.resume:
@@ -465,7 +486,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             play_s = max(gen_s - learn_s - eval_s, 1e-9)
 
             def tab(kind: str, i: int, st: list[dict[str, Any]] = st) -> float:
-                return float(sum(s["tables"].get(kind, [0, 0.0, 0.0])[i] for s in st))
+                return float(sum(s["tables"].get(kind, [0, 0.0, 0.0, 0])[i] for s in st))
+
+            n_games = sum(s["games"] for s in st)
 
             row = {
                 "gen": completed, "games": sum(s["games"] for s in st), "samples": n_new,
@@ -484,6 +507,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "worker_rss_mb": max(s.get("rss_mb", 0.0) for s in st),
                 "replay_mb": replay.nbytes() / 2**20, "gen_s": gen_s, "learn_s": learn_s,
                 "eval_s": eval_s, "elapsed_s": elapsed(),
+                **{f"tables_{k}": tab(k, 3) / max(n_games, 1) for k in TABLE_KINDS},
+                "win_heuristic": tab("heuristic", 1) / max(tab("heuristic", 0), 1),
+                "heuristic_seats": int(tab("heuristic", 0)),
             }  # fmt: skip
             append_rows(out / "log.csv", COLUMNS, [row])
             print(
@@ -492,7 +518,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                 f"v={row['loss_v']:.4f} ev={row['ev']:.3f} q1={row['ev_q1']:.3f} "
                 f"H={row['target_entropy']:.3f} differs={row['search_differs']:.3f} "
                 f"{row['sims_per_s']:.0f} sims/s {row['games_per_h']:.0f} games/h "
-                f"rss={row['rss_mb']:.0f}+{row['worker_rss_mb']:.0f}MB {gen_s:.0f}s", flush=True,
+                f"rss={row['rss_mb']:.0f}+{row['worker_rss_mb']:.0f}MB {gen_s:.0f}s "
+                f"tables s/f/h={row['tables_self']:.2f}/{row['tables_frozen']:.2f}/"
+                f"{row['tables_heuristic']:.2f} win s/f/h={row['win_self']:.3f}/"
+                f"{row['win_frozen']:.3f}/{row['win_heuristic']:.3f}", flush=True,
             )  # fmt: skip
             if args.ckpt_every > 0 and completed % args.ckpt_every == 0:
                 checkpoint(completed)
