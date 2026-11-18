@@ -18,8 +18,9 @@ Protocol:
    continuation policy in all seats (``net``: the net sampled at τ = 1; ``heuristic``: the
    heuristic bot with seeded tie-breaks).
 3. **Outcomes** per seat: R = 0.5 win_loss + 0.5 margin (``bots.gumbel.terminal_values``, the AZ
-   value target) and win_loss (R-071; shared wins split, so the 1/k win credit is an affine map of
-   it and has the same EVs).
+   value target), the variants R_leader and R_rank with the leader-relative and rank terms in
+   place of the mean-opponent margin (``bots.gumbel.relative_term``), and win_loss (R-071; shared
+   wins split, so the 1/k win credit is an affine map of it and has the same EVs).
 4. **Estimator** (one-way ANOVA with K replicates): within = mean_s of the unbiased (K - 1)
    variance; between = Var_s(K-means) - within / K; EV_max = between / (between + within).
    Bootstrap 95% CIs resample sampling games (clusters), so positions from one game stay together.
@@ -58,7 +59,8 @@ from bus.actions import NUM_DISTINCT_ACTIONS  # noqa: E402
 from train.features import MAX_SEATS, encode  # noqa: E402
 
 Array = np.ndarray[Any, Any]
-QUANTITIES = ("R", "wl")
+QUANTITIES = ("R", "R_leader", "R_rank", "wl")
+TARGET_OF = {"R": "mean", "R_leader": "leader", "R_rank": "rank"}  # quantity -> relative term
 DEFAULT_NETS = "ppo-long=models/ppo-long.npz,az2=runs/az2/best.npz,az1=runs/az1/best.npz"
 
 # ------------------------------------------------------------------ estimators
@@ -217,7 +219,8 @@ def sample_task(task: tuple[Any, ...]) -> list[dict[str, Any]]:
 
 
 def continue_task(task: tuple[Any, ...]) -> list[dict[str, Any]]:
-    """K continuations of each position; per-seat R and win_loss (absolute seats, padded NaN)."""
+    """K continuations of each position; per-seat R variants and win_loss (absolute seats, padded
+    NaN)."""
     seed, items, k, policy, net_path, mix = task
     cores, rngs, owner = [], [], []
     for pid, core in items:
@@ -228,13 +231,13 @@ def continue_task(task: tuple[Any, ...]) -> list[dict[str, Any]]:
     games = play(cores, rngs, policy, net_path)
     res: dict[int, dict[str, Any]] = {}
     for pid, _core in items:
-        r = np.full((MAX_SEATS, k), np.nan)
-        res[pid] = {"pid": pid, "R": r, "wl": r.copy(), "_j": 0}
+        res[pid] = {"pid": pid, "_j": 0, **{q: np.full((MAX_SEATS, k), np.nan) for q in QUANTITIES}}
     for pid, g in zip(owner, games, strict=True):
         d = res[pid]
         n = int(g.core.players)
         j = d["_j"]
-        d["R"][:n, j] = terminal_values(g.core, mix)
+        for q, target in TARGET_OF.items():
+            d[q][:n, j] = terminal_values(g.core, mix, target)
         d["wl"][:n, j] = rules.returns_for(g.core, "win_loss")
         d["_j"] = j + 1
     for d in res.values():
@@ -372,8 +375,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "decision": np.asarray([d["decision"] for d in pos]),
         "length": np.asarray([d["length"] for d in pos]),
         "players": np.asarray([int(d["core"].players) for d in pos]),
-        "R": np.stack([cont[i]["R"] for i in range(len(pos))]),
-        "wl": np.stack([cont[i]["wl"] for i in range(len(pos))]),
+        **{q: np.stack([cont[i][q] for i in range(len(pos))]) for q in QUANTITIES},
     }
     cores = [d["core"] for d in pos]
     preds = {name: net_values(path, cores, data["mover"]) for name, path in nets.items()}

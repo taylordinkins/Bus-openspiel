@@ -16,9 +16,11 @@ Agents (nets are loaded from a file path, not from the model manifest):
   head instead of rollouts, no Dirichlet noise, most-visited child played). ``c`` defaults to
   ``bots.mcts_net.UCT_C``; ``t`` (default 1) rescales the prior as ``p ** (1 / t)``; ``fpu`` is the
   value assumed for an unvisited child (default 0, OpenSpiel's behaviour).
-- ``gumbel:<SIMS>[,c=<c_scale>][,v=<c_visit>][,m=<considered>]``: the ``bots.gumbel`` search
-  (Gumbel top-m + sequential halving, completed-Q, per-seat values, g = 0) guided by the ``--net``
-  model; defaults are ``bots.gumbel.GumbelConfig`` (c 0.1, v 50, m 16).
+- ``gumbel:<SIMS>[,c=<c_scale>][,v=<c_visit>][,m=<considered>][,t=<opp temp>][,e=<opp mix>]
+  [,scope=opponents|nonroot]``: the ``bots.gumbel`` search (Gumbel top-m + sequential halving,
+  completed-Q, per-seat values, g = 0) guided by the ``--net`` model; defaults are
+  ``bots.gumbel.GumbelConfig`` (c 0.1, v 50, m 16, t 1, e 0, scope opponents). ``t`` / ``e``
+  set the opponent model at non-root nodes (prior temperature, uniform share).
 
 Baseline tables (the ``n - 1`` non-candidate seats; ``--baseline-net`` defaults to ``--net``):
 ``ppo_greedy``, ``ppo_sample``, ``heuristic`` and ``mixed`` (sampled net and heuristic seats
@@ -126,12 +128,15 @@ def parse_agent(text: str) -> AgentSpec:
         if not sims_s.isdigit() or not 1 <= int(sims_s) <= MAX_SIMS:
             raise ValueError(f"gumbel simulations must be 1..{MAX_SIMS}: {text!r}")
         gkw: dict[str, Any] = {}
-        gnames = {"c": "c_scale", "v": "c_visit", "m": "m"}
+        gnames = {
+            "c": "c_scale", "v": "c_visit", "m": "m", "t": "opp_temp", "e": "opp_mix",
+            "scope": "opp_scope",
+        }  # fmt: skip
         for o in opts:
             k, eq, v = o.partition("=")
             if not eq or k not in gnames:
-                raise ValueError(f"bad gumbel option {o!r} (use c=, v=, m=)")
-            gkw[gnames[k]] = int(v) if k == "m" else float(v)
+                raise ValueError(f"bad gumbel option {o!r} (use c=, v=, m=, t=, e=, scope=)")
+            gkw[gnames[k]] = int(v) if k == "m" else v if k == "scope" else float(v)
         return AgentSpec("gumbel", sims=int(sims_s), gumbel=GumbelConfig(**gkw))
     raise ValueError(f"unknown agent {text!r}")
 

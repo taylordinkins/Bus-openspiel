@@ -16,7 +16,13 @@ players:
   reads its own entry (max^n with mean backups). The net's 5-wide ego value head (index 0 = seat to
   move) is rotated to absolute seats on expansion. Terminal nodes use the training quantity
   R = `mix` · win_loss (R-071) + (1 − `mix`) · margin (R-072, relative, stones counted), never
-  `state.returns()`.
+  `state.returns()`. `target` swaps the margin for another relative term (`relative_term`:
+  leader-relative or rank); the default is the R-072 margin.
+- **Opponent model (optional, off by default):** with `opp_temp` ≠ 1 or `opp_mix` > 0, nodes
+  whose mover is not the root's (`opp_scope="opponents"`) or all non-root nodes (`"nonroot"`)
+  use the prior (1 − `opp_mix`) · softmax(logits / `opp_temp`) + `opp_mix` / k instead of the
+  net's (`opponent_prior`); the interior rule then spreads opponent visits over plausible replies
+  instead of the near-one-hot argmax. Design and literature: `docs/GUMBEL_AZ.md` §10.2.
 - **Forced moves** (single legal action) are applied while expanding an edge, so one simulation is
   one evaluated decision node or one terminal; forced edges cost nothing.
 - Tree nodes hold the immutable engine `Core` (`bus.rules.apply` returns a new one); no pyspiel
@@ -29,8 +35,9 @@ net's output), so `run_searches` can batch one forward over many open searches; 
 The seat grammar is `gumbel:<SIMS>-<model>` like `mcts_net` (model names resolve only through
 `models/manifest.yaml`). The search constants are not part of the seat type: they default to
 `GumbelConfig` and can be overridden for experiments with `BUS_GUMBEL_C_SCALE`,
-`BUS_GUMBEL_C_VISIT` and `BUS_GUMBEL_M` (tool use only, as `BUS_MCTS_NET_C`). Tool-only for now:
-the server's lobby model list does not offer it (Q-AZ7).
+`BUS_GUMBEL_C_VISIT`, `BUS_GUMBEL_M`, `BUS_GUMBEL_OPP_TEMP`, `BUS_GUMBEL_OPP_MIX`,
+`BUS_GUMBEL_OPP_SCOPE` and `BUS_GUMBEL_TARGET` (tool use only, as `BUS_MCTS_NET_C`).
+Tool-only for now: the server's lobby model list does not offer it (Q-AZ7).
 """
 
 # pyright: basic
@@ -66,6 +73,10 @@ DEFAULT_M = 16
 C_VISIT = 50.0  # mctx qtransform_completed_by_mix_value defaults
 C_SCALE = 0.1
 VALUE_MIX = 0.5  # R = 0.5 win_loss + 0.5 margin (user decision 2026-11-17, Q-AZ2)
+# Relative term of R (see ``relative_term``): "mean" = R-072 margin (default, unchanged), "leader"
+# = own score minus the best opponent score, "rank" = pairwise placement.
+VALUE_TARGETS = ("mean", "leader", "rank")
+OPP_SCOPES = ("opponents", "nonroot")
 
 
 @dataclass(frozen=True)
@@ -74,22 +85,43 @@ class GumbelConfig:
     c_visit: float = C_VISIT
     c_scale: float = C_SCALE
     gumbel_scale: float = 0.0  # 0 = deterministic (play/eval), 1 = AZ self-play
-    mix: float = VALUE_MIX  # terminal value R = mix * win_loss + (1 - mix) * margin
+    mix: float = VALUE_MIX  # terminal value R = mix * win_loss + (1 - mix) * relative term
+    target: str = "mean"  # relative term of R at terminal nodes (VALUE_TARGETS)
+    # Opponent model at non-root nodes (``opponent_prior``); 1.0 / 0.0 = the net prior unchanged.
+    opp_temp: float = 1.0  # prior temperature: logits / opp_temp
+    opp_mix: float = 0.0  # share of uniform over legal actions mixed into the prior
+    opp_scope: str = "opponents"  # "opponents": movers other than the root's; "nonroot": all
 
     def __post_init__(self) -> None:
         if self.m < 1 or self.c_visit < 0 or self.c_scale < 0 or self.gumbel_scale < 0:
             raise ValueError("gumbel needs m >= 1 and non-negative c_visit, c_scale, scale")
         if not 0.0 <= self.mix <= 1.0:
             raise ValueError("gumbel value mix must be in [0, 1]")
+        if self.target not in VALUE_TARGETS:
+            raise ValueError(f"gumbel value target must be one of {VALUE_TARGETS}")
+        if self.opp_temp <= 0 or not 0.0 <= self.opp_mix <= 1.0:
+            raise ValueError("gumbel needs opp_temp > 0 and opp_mix in [0, 1]")
+        if self.opp_scope not in OPP_SCOPES:
+            raise ValueError(f"gumbel opp_scope must be one of {OPP_SCOPES}")
+
+    @property
+    def models_opponents(self) -> bool:
+        """True if non-root priors are changed (otherwise the search is the unit 8g one)."""
+        return self.opp_temp != 1.0 or self.opp_mix > 0.0
 
     @classmethod
     def from_env(cls) -> GumbelConfig:
-        """Defaults, overridden by BUS_GUMBEL_C_SCALE / _C_VISIT / _M (experiment knobs)."""
+        """Defaults, overridden by BUS_GUMBEL_C_SCALE / _C_VISIT / _M / _OPP_TEMP / _OPP_MIX /
+        _OPP_SCOPE / _TARGET (experiment knobs)."""
         env = os.environ
         return cls(
             m=int(env.get("BUS_GUMBEL_M", DEFAULT_M)),
             c_visit=float(env.get("BUS_GUMBEL_C_VISIT", C_VISIT)),
             c_scale=float(env.get("BUS_GUMBEL_C_SCALE", C_SCALE)),
+            target=env.get("BUS_GUMBEL_TARGET", "mean"),
+            opp_temp=float(env.get("BUS_GUMBEL_OPP_TEMP", 1.0)),
+            opp_mix=float(env.get("BUS_GUMBEL_OPP_MIX", 0.0)),
+            opp_scope=env.get("BUS_GUMBEL_OPP_SCOPE", "opponents"),
         )
 
 
@@ -127,12 +159,43 @@ def skip_forced(core: Any) -> tuple[Any, list[int]]:
     return core, []
 
 
-def terminal_values(core: Any, mix: float = VALUE_MIX) -> Array:
-    """Per-seat R = mix * win_loss + (1 - mix) * margin at a finished game (R-071, R-072)."""
+def relative_term(core: Any, target: str = "mean") -> Array:
+    """Per-seat relative score term of R at a finished game, in [-1, 1] (training signal only).
+
+    Final scores s are R-068's (points - stones). All three variants are relative, never
+    own-score-only, so a time stone (-1 to its taker) is valued against the other seats:
+
+    - ``mean``: R-072 margin, (s_p - mean of the other seats' s) / 10, clipped to [-1, 1].
+    - ``leader``: (s_p - max of the other seats' s) / 10, clipped like R-072. For the leader it
+      is the lead over the runner-up; for everyone else the gap to the leader. Seats tied for the
+      top score get 0.
+    - ``rank``: pairwise placement by final score, 2 * (beaten + ties / 2) / (n - 1) - 1: +1 for
+      a strict first, -1 for a strict last, 0 for an all-way tie. Score ties count half (the
+      R-069/R-070 tiebreaks are left to the win_loss part of R).
+    """
+    if target == "mean":
+        return np.asarray(rules.returns_for(core, "margin"), float)
+    n = core.players
+    if core.phase != rules.PHASE_END:
+        return np.zeros(n)
+    s = np.asarray(rules.final_scores(core), float)
+    if target == "leader":
+        best_other = np.array([max(s[q] for q in range(n) if q != p) for p in range(n)])
+        return np.clip((s - best_other) / 10.0, -1.0, 1.0)
+    if target == "rank":
+        beaten = (s[:, None] > s[None, :]).sum(axis=1)
+        ties = (s[:, None] == s[None, :]).sum(axis=1) - 1
+        return 2.0 * (beaten + 0.5 * ties) / (n - 1) - 1.0
+    raise ValueError(f"unknown value target {target!r}")
+
+
+def terminal_values(core: Any, mix: float = VALUE_MIX, target: str = "mean") -> Array:
+    """Per-seat R = mix * win_loss + (1 - mix) * relative term at a finished game (R-071, and
+    R-072 for the default ``target="mean"``; see ``relative_term``)."""
     wl = np.asarray(rules.returns_for(core, "win_loss"), float)
     if mix >= 1.0:
         return wl
-    return mix * wl + (1.0 - mix) * np.asarray(rules.returns_for(core, "margin"), float)
+    return mix * wl + (1.0 - mix) * relative_term(core, target)
 
 
 class Node:
@@ -141,7 +204,9 @@ class Node:
         "children", "terminal",
     )  # fmt: skip
 
-    def __init__(self, core: Any, actions: Sequence[int], n: int, mix: float) -> None:
+    def __init__(
+        self, core: Any, actions: Sequence[int], n: int, mix: float, target: str = "mean"
+    ) -> None:
         self.core = core
         self.terminal = core.phase == rules.PHASE_END
         self.mover = -1 if self.terminal else int(core.current)
@@ -151,20 +216,45 @@ class Node:
         self.prior = np.full(k, 1.0 / max(k, 1))
         self.tot = 0  # sum of N
         self.nmax = 0  # max of N
-        self.value = terminal_values(core, mix) if self.terminal else np.zeros(n)
+        self.value = terminal_values(core, mix, target) if self.terminal else np.zeros(n)
         self.N = np.zeros(k, np.int64)
         self.W = np.zeros((k, n))  # summed backed-up value vectors, absolute seats
         self.children: list[Node | None] = [None] * k
 
-    def set_eval(self, logits_full: Array, v_ego: Array) -> None:
-        """Store the net prior over this node's actions and its value in absolute seat order."""
+    def set_eval(
+        self, logits_full: Array, v_ego: Array, temp: float = 1.0, eps: float = 0.0
+    ) -> None:
+        """Store the net prior over this node's actions and its value in absolute seat order.
+
+        ``temp`` / ``eps`` replace the prior by the opponent model ``opponent_prior`` (the
+        defaults leave the net prior untouched, bit for bit).
+        """
         n = len(self.value)
         lg = np.asarray(logits_full, float)[self.actions]
+        if temp != 1.0 or eps > 0.0:
+            lg = opponent_prior(lg, temp, eps)
         self.logits = lg - lg.max()
         e = np.exp(self.logits)
         self.prior = e / e.sum()
         # ego index k is seat (mover + k) % n
         self.value = np.asarray([v_ego[(s - self.mover) % n] for s in range(n)], float)
+
+
+def opponent_prior(logits: Array, temp: float, eps: float) -> Array:
+    """Log-probabilities of the opponent model (1 - eps) softmax(logits / temp) + eps / k.
+
+    Used as the prior of non-root nodes when ``GumbelConfig.models_opponents``: the interior rule
+    argmax [π'(a) - N(a) / (1 + ΣN)] spreads a node's visits in proportion to π', so the prior
+    there is the search's model of how that seat plays. A temperature above 1 or a uniform share
+    keeps plausible but non-argmax replies in the tree.
+    """
+    z = logits / temp
+    z = z - z.max()
+    p = np.exp(z)
+    p /= p.sum()
+    if eps > 0.0:
+        p = (1.0 - eps) * p + eps / len(p)
+    return np.log(np.maximum(p, 1e-300))
 
 
 def _softmax(x: Array) -> Array:
@@ -241,7 +331,7 @@ class GumbelSearch:
             raise ValueError("gumbel search needs at least one simulation")
         self.n = int(self.root_core.players)
         legal = rules.legal_actions(self.root_core)
-        self.root = Node(self.root_core, legal, self.n, self.cfg.mix)
+        self.root = Node(self.root_core, legal, self.n, self.cfg.mix, self.cfg.target)
         self._leaf = self.root
         k = len(legal)
         if self.cfg.gumbel_scale > 0:
@@ -279,7 +369,7 @@ class GumbelSearch:
                 child = node.children[a]
                 if child is None:
                     core, legal = skip_forced(rules.apply(node.core, int(node.actions[a])))
-                    child = Node(core, legal, self.n, self.cfg.mix)
+                    child = Node(core, legal, self.n, self.cfg.mix, self.cfg.target)
                     node.children[a] = child
                     if child.terminal:
                         self._backup(path, child.value)
@@ -297,7 +387,15 @@ class GumbelSearch:
         leaf = self._leaf
         if leaf is None:
             raise RuntimeError("give() without a pending evaluation")
-        leaf.set_eval(logits_full, v_ego)
+        cfg = self.cfg
+        if (
+            leaf is not self.root
+            and cfg.models_opponents
+            and (cfg.opp_scope == "nonroot" or leaf.mover != self.root.mover)
+        ):
+            leaf.set_eval(logits_full, v_ego, cfg.opp_temp, cfg.opp_mix)
+        else:
+            leaf.set_eval(logits_full, v_ego)
         self._leaf = None
         if leaf is not self.root:
             self._backup(self._path, leaf.value)

@@ -13,10 +13,14 @@ then runs ``ceil(--reuse * new samples / --batch)`` minibatch steps on a FIFO re
 ``--replay-size`` samples. Generation 0 plays with the initial (warm-started) weights.
 
 Targets: the completed-Q improved policy at the root (policy), the final per-seat
-R = ``--mix`` win_loss + (1 - ``--mix``) relative margin (value, ego order like the PPO head;
-``--value-target zq`` averages in the root search value), and optional aux heads (``--aux-coef``,
-training only, never exported). The first ``--warmup-gens`` generations train the value side
-only (policy loss off).
+R = ``--mix`` win_loss + (1 - ``--mix``) relative term (value, ego order like the PPO head;
+``--value-quantity`` picks the mean-opponent margin (default, R-072), the leader-relative margin
+or the rank term; ``--value-target zq`` averages in the root search value), and optional aux
+heads (``--aux-coef``, training only, never exported). The first ``--warmup-gens`` generations
+train the value side only (policy loss off).
+
+Search opponent model: ``--opp-temp`` / ``--opp-mix`` / ``--opp-scope`` flatten the prior at
+non-root opponent nodes (``bots.gumbel.opponent_prior``; defaults leave the search unchanged).
 
 Tables: ``--frozen-share`` of games seat a frozen net (``--frozen-nets`` manifest names and, every
 ``--snapshot-every`` generations, the learner's own snapshot; the last ``--snapshot-keep`` kept)
@@ -148,6 +152,14 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--c-visit", type=float, default=50.0)
     ap.add_argument("--gumbel-scale", type=float, default=1.0)
     ap.add_argument("--mix", type=float, default=0.5, help="win_loss share of R")
+    ap.add_argument(
+        "--value-quantity", choices=("mean", "leader", "rank"), default="mean",
+        help="relative term of R: mean-opponent margin (R-072), leader-relative margin or rank "
+        "(bots.gumbel.relative_term); used for z and for terminal search values",
+    )  # fmt: skip
+    ap.add_argument("--opp-temp", type=float, default=1.0, help="opponent-node prior temperature")
+    ap.add_argument("--opp-mix", type=float, default=0.0, help="uniform share in opponent priors")
+    ap.add_argument("--opp-scope", choices=("opponents", "nonroot"), default="opponents")
     # tables
     ap.add_argument("--frozen-share", type=float, default=0.2, help="share of tables w/ frozen")
     ap.add_argument(
@@ -196,7 +208,8 @@ def actor_config(args: argparse.Namespace) -> ActorConfig:
         sims=args.sims,
         search=GumbelConfig(
             m=args.m, c_visit=args.c_visit, c_scale=args.c_scale, gumbel_scale=args.gumbel_scale,
-            mix=args.mix,
+            mix=args.mix, target=args.value_quantity, opp_temp=args.opp_temp,
+            opp_mix=args.opp_mix, opp_scope=args.opp_scope,
         ),  # fmt: skip
         concurrent=args.concurrent, frozen_share=args.frozen_share,
         heuristic_share=args.heuristic_share,

@@ -21,7 +21,8 @@ Samples (one per learner decision with >= 2 legal actions), sparse:
   values (lossless; observations have only a few dozen distinct values);
 - ``act_off`` / ``act_id`` (int16) / ``pi`` (float32): root legal actions and the completed-Q
   improved policy over them (the policy target, sums to 1);
-- ``z`` (5,): final per-seat R = mix * win_loss + (1 - mix) * margin (R-071, R-072), ego order
+- ``z`` (5,): final per-seat R = mix * win_loss + (1 - mix) * relative term (R-071; R-072 margin
+  by default, ``GumbelConfig.target``), ego order
   (index 0 = the acting seat), padded with 0; ``vmask`` (5,): present seats;
 - ``q`` (5,): the root search value vector in the same ego order (for the optional zq target);
 - ``ascore`` / ``arank`` / ``awin``: training-only aux targets (``train.rollout.aux_targets``);
@@ -198,7 +199,7 @@ def play_selfplay(
         nonlocal obs_n, act_n
         core = g.core
         n = g.n
-        r_abs = terminal_values(core, cfg.search.mix)
+        r_abs = terminal_values(core, cfg.search.mix, cfg.search.target)
         wl = rules.returns_for(core, "win_loss")
         stats["games"] += 1
         tab = stats["tables"].setdefault(g.kind, [0, 0.0, 0.0, 0])
