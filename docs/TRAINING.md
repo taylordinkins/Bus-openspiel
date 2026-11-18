@@ -315,3 +315,22 @@ uv run --group train python -m tools.value_sup --labels runs/value_labels/train/
     --holdout runs/value_labels/heldout/positions.npz --features v2,v3 --targets R,R_leader \
     --out runs/value_sup/a1
 ```
+
+## Playing against the bots from the command line (`tools/agent_play.py`)
+
+One decision per command, so an LLM agent (or a person) can play a full game against bot seats.
+The game lives in a JSON file (config, action history, notes); every call rebuilds the state by
+replaying the history, and bots are only queried for new moves (seeded from `--seed` and the
+history length). Forced moves (one legal action) are applied automatically for every seat.
+
+```bash
+uv run python -m tools.agent_play new --players 4 --agent 0 --bots ppo-long --seed 7 --out /tmp/g.json
+uv run python -m tools.agent_play show --game /tmp/g.json
+uv run python -m tools.agent_play act 150 --game /tmp/g.json --note "why I chose it"
+uv run python -m tools.agent_play notes --game /tmp/g.json
+```
+
+`--bots` takes a registry seat type (`heuristic`, `net:ppo-long`) or a bare model name
+(`ppo-long` means `net:ppo-long`), either one for all bot seats or a comma list per bot seat.
+`--agent` may list several seats. At game end the output shows the result and a replay file
+`<game>.replay.json` is written, loadable by `tools.replay` and the web import.
