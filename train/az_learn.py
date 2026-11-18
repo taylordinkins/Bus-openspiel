@@ -102,7 +102,7 @@ def diagnostics(
 
     Called on a generation's samples before the learner sees them, so they are held out.
     """
-    rep = Replay(capacity=1 << 62)
+    rep = Replay(capacity=1 << 62, obs_size=model.obs_size)
     for p in parts:
         rep.add(p)
     n = rep.size

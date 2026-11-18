@@ -142,7 +142,7 @@ def save_weights(w: NetWeights, path: Path, extra: dict[str, Any] | None = None)
         "hidden": [int(x[0].shape[1]) for x in w.layers], "n_layers": len(w.layers),
         "n_v_layers": len(w.v_layers),
         "obs_size": w.obs_size, "n_actions": w.n_actions, "n_seats": w.n_seats,
-        "layout_hash": layout_hash(),
+        "layout_hash": layout_hash(w.features_version),
     }  # fmt: skip
     atomic_write(path, lambda f: np.savez(f, meta=np.array(json.dumps(info)), **arrays))
 

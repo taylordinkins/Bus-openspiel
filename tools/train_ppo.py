@@ -50,7 +50,7 @@ import train.rollout as rollout_mod  # noqa: E402
 from bots.net_forward import layout_hash  # noqa: E402
 from train.atomic import atomic_write_json  # noqa: E402
 from train.export import export_npz  # noqa: E402
-from train.features import FEATURES_VERSION, OBS_SIZE  # noqa: E402
+from train.features import FEATURES_VERSION, OBS_SIZE, obs_size  # noqa: E402
 from train.league import GAME_TYPES, League, parse_league  # noqa: E402
 from train.model import BusNet  # noqa: E402
 from train.ppo import (  # noqa: E402
@@ -688,12 +688,19 @@ def checkpoint_problems(meta: dict[str, Any], args: argparse.Namespace, resume: 
         meta.get("value_trunk", "shared") != args.value_trunk
     ):
         problems.append(f"value_trunk {meta.get('value_trunk', 'shared')} vs {args.value_trunk}")
-    if "features_version" in meta and meta["features_version"] != FEATURES_VERSION:
-        problems.append(f"features_version {meta['features_version']} vs {FEATURES_VERSION}")
-    if "layout_hash" in meta and meta["layout_hash"] != layout_hash():
+    # AZ runs choose the observation with --features (v2 | v3); PPO runs use the default
+    fv = FEATURES_VERSION
+    if getattr(args, "features", None) is not None:
+        from train.features import FEATURES_V2, FEATURES_V3
+
+        fv = {"v2": FEATURES_V2, "v3": FEATURES_V3}[args.features]
+    size = OBS_SIZE if fv == FEATURES_VERSION else obs_size(fv)
+    if "features_version" in meta and meta["features_version"] != fv:
+        problems.append(f"features_version {meta['features_version']} vs {fv}")
+    if "layout_hash" in meta and meta["layout_hash"] != layout_hash(fv):
         problems.append("observation layout hash differs (obs size/layout changed)")
-    if "obs_size" in meta and meta["obs_size"] != OBS_SIZE:
-        problems.append(f"obs_size {meta['obs_size']} vs {OBS_SIZE}")
+    if "obs_size" in meta and meta["obs_size"] != size:
+        problems.append(f"obs_size {meta['obs_size']} vs {size}")
     if resume and "seed" in meta and meta["seed"] != args.seed:
         problems.append(f"seed {meta['seed']} vs {args.seed}")
     return problems

@@ -86,10 +86,13 @@ def net_to_weights(model: BusNet) -> NetWeights:
         w = layer.weight.detach().cpu().numpy().T.astype(np.float32).copy()
         return w, layer.bias.detach().cpu().numpy().astype(np.float32).copy()
 
+    from train.features import FEATURES_VERSION, version_for_obs_size
+
     return NetWeights(
         tuple(lin(layer) for layer in model.trunk), lin(model.pi), lin(model.v), model.ACTIVATION,
         model.obs_size, model.n_actions, model.n_seats, {},
         tuple(lin(layer) for layer in model.v_trunk),
+        version_for_obs_size(model.obs_size) or FEATURES_VERSION,
     )  # fmt: skip
 
 

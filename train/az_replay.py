@@ -16,7 +16,7 @@ from typing import Any
 import numpy as np
 
 from bus.actions import NUM_DISTINCT_ACTIONS
-from train.features import OBS_SIZE
+from train.features import OBS_SIZE  # default (v2); v3 runs pass obs_size
 
 Array = np.ndarray[Any, Any]
 ROW_KEYS = ("z", "vmask", "q", "ascore", "arank", "awin", "prog", "players")
@@ -34,8 +34,9 @@ class Chunk:
 
 
 class Replay:
-    def __init__(self, capacity: int) -> None:
+    def __init__(self, capacity: int, obs_size: int = OBS_SIZE) -> None:
         self.capacity = capacity
+        self.obs_size = obs_size
         self.chunks: list[Chunk] = []
         self.size = 0
         self.added = 0  # samples ever added
@@ -67,7 +68,7 @@ class Replay:
         """Dense minibatch of the samples at ``idx`` (order kept)."""
         idx = np.asarray(idx, np.int64)
         b = len(idx)
-        obs = np.zeros((b, OBS_SIZE), np.float32)
+        obs = np.zeros((b, self.obs_size), np.float32)
         mask = np.zeros((b, NUM_DISTINCT_ACTIONS), np.bool_)
         pi = np.zeros((b, NUM_DISTINCT_ACTIONS), np.float32)
         rows: dict[str, list[Array]] = {k: [] for k in ROW_KEYS}

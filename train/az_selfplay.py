@@ -56,7 +56,7 @@ from bots.gumbel import (
 from bots.net_forward import NetWeights
 from bus import rules
 from bus.actions import NUM_DISTINCT_ACTIONS
-from train.features import MAX_SEATS, encode
+from train.features import MAX_SEATS
 from train.rollout import aux_targets
 from train.shm import make_spill_dir
 
@@ -172,6 +172,7 @@ def play_selfplay(
     heuristic: Any = None
     games: dict[int, Any] = {}
     fwd = sparse_forward(weights)
+    enc = weights.encoder  # the learner's observation version (frozen seats use their own)
     pw = None
     if cfg.player_weights is not None:
         pw = np.asarray(cfg.player_weights, float)
@@ -251,11 +252,12 @@ def play_selfplay(
             if g.legal and g.labels[g.core.current] not in (CURRENT, HEURISTIC):
                 groups.setdefault(g.labels[g.core.current], []).append(g)
         for lab, gs in groups.items():
-            obs = np.stack([encode(g.core) for g in gs]).astype(np.float32)
+            ow = _weights(lab, opponents)
+            obs = np.stack([ow.encode(g.core) for g in gs]).astype(np.float32)
             mask = np.zeros((len(gs), NUM_DISTINCT_ACTIONS), np.bool_)
             for r, g in enumerate(gs):
                 mask[r, g.legal] = True
-            logits = _weights(lab, opponents).logits(obs, mask)
+            logits = ow.logits(obs, mask)
             for r, g in enumerate(gs):
                 lg = logits[r, g.legal].astype(np.float64)
                 p = np.exp(lg - lg.max())
@@ -298,12 +300,12 @@ def play_selfplay(
                 logpi = np.log(np.maximum(pi, 1e-30))
                 stats["entropy"] += float(-(pi * logpi).sum())
                 stats["kl"] += float((pi * (logpi - np.log(np.maximum(prior, 1e-30)))).sum())
-                o = encode(g.core)
+                o = enc(g.core)
                 g.steps[g.core.current].append((o, res.actions, pi, res.value))
                 g.core, g.legal = skip_forced(rules.apply(g.core, res.action))
                 g.search = None
         if pending:
-            evaluate_batch(fwd, pending)
+            evaluate_batch(fwd, pending, enc)
             stats["forwards"] += 1
             stats["evals"] += len(pending)
         done = [g for g in live if not g.legal]

@@ -56,8 +56,6 @@ class NetEvaluator(mcts.Evaluator):
         self._cache: dict = {}
 
     def _forward(self, state):
-        from train.features import encode
-
         core = state.core
         hit = self._cache.get(core)
         if hit is not None:
@@ -65,7 +63,7 @@ class NetEvaluator(mcts.Evaluator):
         legal = state.legal_actions()
         mask = np.zeros(self.weights.n_actions, np.bool_)
         mask[legal] = True
-        probs, v_ego = self.weights.policy(encode(core), mask)
+        probs, v_ego = self.weights.policy(self.weights.encode(core), mask)
         n = state.num_players()
         cur = state.current_player()
         value = np.zeros(n)

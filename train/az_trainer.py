@@ -90,8 +90,8 @@ from train.az_selfplay import (  # noqa: E402
     win_credit,
 )
 from train.export import export_npz  # noqa: E402
-from train.features import FEATURES_VERSION  # noqa: E402
-from train.model import BusNet  # noqa: E402
+from train.features import FEATURES_V2, FEATURES_V3, obs_size  # noqa: E402
+from train.model import BusNet, widen_model  # noqa: E402
 from train.ppo import cosine, net_to_weights  # noqa: E402
 from train.rollout import RolloutConfig, load_spilled  # noqa: E402
 from train.runstate import (  # noqa: E402
@@ -100,6 +100,7 @@ from train.runstate import (  # noqa: E402
     apply_retention,
     explicit_options,
     find_latest_checkpoint,
+    load_pt,
     merge_resume_args,
     now_iso,
     remove_stray_tmp,
@@ -142,6 +143,11 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--hidden", default="512,512")
     ap.add_argument("--value-trunk", choices=("separate", "shared"), default="separate")
+    ap.add_argument(
+        "--features", choices=("v2", "v3"), default="v2",
+        help="observation (train.features); v3 from a v2 --init-from is a function-preserving "
+        "warm start (train.model.widen_model)",
+    )  # fmt: skip
     ap.add_argument("--device", default="auto", help="auto, cpu or cuda")
     ap.add_argument("--init-from", default=None, metavar="CKPT.pt", help="warm start (fresh run)")
     ap.add_argument("--resume", default=None, metavar="RUN_DIR")
@@ -285,13 +291,41 @@ def evaluate(
     return rows
 
 
+def features_version(args: argparse.Namespace) -> int:
+    return {"v2": FEATURES_V2, "v3": FEATURES_V3}[getattr(args, "features", None) or "v2"]
+
+
+def init_model(model: BusNet, args: argparse.Namespace) -> str:
+    """``--init-from`` into ``model``; a v2 checkpoint into a v3 run is widened (zero columns for
+    the new inputs, so the start net equals the checkpoint). Returns a log note."""
+    fv = features_version(args)
+    try:
+        meta = load_pt(Path(args.init_from)).get("meta", {})
+    except Exception:  # unreadable: load_init_from reports it
+        meta = {}
+    src = int(meta.get("features_version", FEATURES_V2))
+    if src == fv:
+        load_init_from(model, args)
+        return ""
+    if (src, fv) != (FEATURES_V2, FEATURES_V3):
+        raise ResumeError(f"--init-from features v{src} cannot start a features v{fv} run")
+    old = BusNet(
+        obs_size=obs_size(src), hidden=model.hidden, separate_value=model.separate_value,
+        aux=model.has_aux,
+    )  # fmt: skip
+    load_init_from(old, argparse.Namespace(**{**vars(args), "features": "v2"}))
+    widen_model(old, model.cpu(), src, fv)
+    return f" (widened v2 -> v3: {obs_size(fv) - obs_size(src)} new zero input columns)"
+
+
 def save_checkpoint(
     out: Path, gen: int, model: BusNet, opt: torch.optim.Optimizer, args: argparse.Namespace,
     state: dict[str, Any],
 ) -> None:  # fmt: skip
     meta = {
-        "gen": gen, "hidden": list(model.hidden), "features_version": FEATURES_VERSION,
-        "layout_hash": layout_hash(), "obs_size": model.obs_size, "seed": args.seed,
+        "gen": gen, "hidden": list(model.hidden), "features_version": features_version(args),
+        "layout_hash": layout_hash(features_version(args)), "obs_size": model.obs_size,
+        "seed": args.seed,
         "value_trunk": "separate" if model.separate_value else "shared", "trainer": "az",
     }  # fmt: skip
     save_pt(
@@ -355,8 +389,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     device = torch.device(dev)
     hidden = tuple(int(x) for x in args.hidden.split(",") if x)
     model = BusNet(
-        hidden=hidden, separate_value=args.value_trunk == "separate", aux=args.aux_coef > 0
-    ).to(device)
+        obs_size=obs_size(features_version(args)), hidden=hidden,
+        separate_value=args.value_trunk == "separate", aux=args.aux_coef > 0,
+    ).to(device)  # fmt: skip
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     lcfg = LearnConfig(
         batch=args.batch, vf_coef=args.vf_coef, aux_coef=args.aux_coef,
@@ -369,12 +404,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     best: dict[str, Any] | None = None
     if res is None and args.init_from:
         try:
-            load_init_from(model, args)
+            note = init_model(model, args)
         except ResumeError as e:
             print(f"error: {e}", file=sys.stderr)
             return 2
         model.to(device)
-        print(f"warm-started weights from {args.init_from}", flush=True)
+        print(f"warm-started weights from {args.init_from}{note}", flush=True)
     out.mkdir(parents=True, exist_ok=True)
     (out / "pool").mkdir(exist_ok=True)
     if res is not None:
@@ -401,7 +436,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     truncate_csv(out / "eval.csv", EVAL_COLUMNS, start - 1)
     if res is not None:
         print(f"resumed {out} at generation {start}; overrides: {res['changes'] or 'none'}")
-    replay = Replay(args.replay_size)
+    replay = Replay(args.replay_size, model.obs_size)
     sig = StopSignals()
     sig.install()
     runner = Runner(
@@ -454,7 +489,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                     wr = sum(r["win_rate"] * r["games"] for r in key) / sum(r["games"] for r in key)
                     if best is None or wr > best["win_rate"]:
                         best = {"gen": gen, "opponent": key[0]["opponent"], "win_rate": wr}
-                        meta = {"gen": gen, "best": best, "features_version": FEATURES_VERSION}
+                        meta = {"gen": gen, "best": best,
+                                "features_version": features_version(args)}  # fmt: skip
                         save_pt(out / "best.pt", {"model": model.state_dict(), "meta": meta})
                         export_npz(model, out / "best.npz", meta)
                         atomic_write_json(out / "best.json", best)

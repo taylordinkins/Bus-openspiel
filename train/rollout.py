@@ -392,7 +392,8 @@ def play_games(
                 actions[i] = _bot_action(label, sl.env)
         for label, net_idx in groups.items():
             w = weights if label == CURRENT else _opponent_weights(label, opponents)
-            obs = np.stack([cur[i].env.obs() for i in net_idx])
+            enc = w.encoder  # each net reads its own observation version
+            obs = np.stack([enc(cur[i].env.state.core) for i in net_idx])
             mask = np.stack([cur[i].env.legal_mask() for i in net_idx])
             act, logp, val, ill = _sample(
                 w,

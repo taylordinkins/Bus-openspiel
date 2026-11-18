@@ -56,7 +56,7 @@ from bots.gumbel import skip_forced, terminal_values  # noqa: E402
 from bots.net_forward import NetWeights  # noqa: E402
 from bus import rules  # noqa: E402
 from bus.actions import NUM_DISTINCT_ACTIONS  # noqa: E402
-from train.features import MAX_SEATS, encode  # noqa: E402
+from train.features import MAX_SEATS  # noqa: E402
 
 Array = np.ndarray[Any, Any]
 QUANTITIES = ("R", "R_leader", "R_rank", "wl")
@@ -154,7 +154,7 @@ def play(
             if trace:
                 for g in live:
                     g.trace.append((g.core, int(g.core.current)))  # type: ignore[union-attr]
-            obs = np.stack([encode(g.core) for g in live]).astype(np.float32)
+            obs = np.stack([w.encode(g.core) for g in live]).astype(np.float32)
             mask = np.zeros((len(live), NUM_DISTINCT_ACTIONS), np.bool_)
             for i, g in enumerate(live):
                 mask[i, g.legal] = True
@@ -254,7 +254,7 @@ def net_values(path: str, cores: Sequence[Any], movers: Array) -> Array:
     out = np.full((len(cores), MAX_SEATS), np.nan)
     for a in range(0, len(cores), 256):
         chunk = cores[a : a + 256]
-        obs = np.stack([encode(c) for c in chunk]).astype(np.float32)
+        obs = np.stack([w.encode(c) for c in chunk]).astype(np.float32)
         mask = np.zeros((len(chunk), NUM_DISTINCT_ACTIONS), np.bool_)
         for i, c in enumerate(chunk):
             mask[i, rules.legal_actions(c)] = True

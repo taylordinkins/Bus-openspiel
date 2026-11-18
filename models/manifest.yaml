@@ -1,5 +1,6 @@
 # Allow-list of trained nets playable as `net:<name>` seats. Only names listed here resolve;
-# `file` is relative to this directory. `features_version` must equal train.features.FEATURES_VERSION.
+# `file` is relative to this directory. `features_version` (1 = observation v2, 2 = v3) must be one
+# of train.features.FEATURE_VERSIONS and match the layout stored in the file.
 models:
   - name: ppo-long
     file: ppo-long.npz

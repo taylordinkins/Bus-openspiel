@@ -449,10 +449,13 @@ def sparse_forward(weights: NetWeights) -> Forward:
     return fwd
 
 
-def evaluate_batch(forward: Forward, searches: Sequence[GumbelSearch]) -> None:
-    """One batched forward for the pending leaf of every search in ``searches``."""
+def evaluate_batch(
+    forward: Forward, searches: Sequence[GumbelSearch], encoder: Callable[[Any], Array] = encode
+) -> None:
+    """One batched forward for the pending leaf of every search in ``searches``; ``encoder`` is
+    the net's observation (``NetWeights.encoder``; default v2)."""
     nodes = [s.leaf for s in searches]
-    obs = np.stack([encode(nd.core) for nd in nodes if nd is not None]).astype(np.float32)
+    obs = np.stack([encoder(nd.core) for nd in nodes if nd is not None]).astype(np.float32)
     mask = np.zeros((len(nodes), NUM_ACTIONS), np.bool_)
     for r, nd in enumerate(nodes):
         assert nd is not None
@@ -462,13 +465,15 @@ def evaluate_batch(forward: Forward, searches: Sequence[GumbelSearch]) -> None:
         s.give(logits[r], values[r])
 
 
-def run_searches(forward: Forward, searches: Sequence[GumbelSearch]) -> list[SearchResult]:
+def run_searches(
+    forward: Forward, searches: Sequence[GumbelSearch], encoder: Callable[[Any], Array] = encode
+) -> list[SearchResult]:
     """Run all ``searches`` to completion, one batched forward per wave of leaves."""
     while True:
         waiting = [s for s in searches if s.want() is not None]
         if not waiting:
             return [s.result() for s in searches]
-        evaluate_batch(forward, waiting)
+        evaluate_batch(forward, waiting, encoder)
 
 
 # ------------------------------------------------------------------ seat
@@ -494,7 +499,7 @@ class GumbelBot:
         if self.config.gumbel_scale > 0:  # g = 0 consumes nothing from the game rng
             np_rng = np.random.default_rng(rng.randrange(2**63))
         s = GumbelSearch(core, self.sims, self.config, np_rng)
-        return run_searches(self._forward, [s])[0]
+        return run_searches(self._forward, [s], self.weights.encoder)[0]
 
     def choose(self, state: pyspiel.State, rng: random.Random) -> int:
         legal = list(state.legal_actions())
