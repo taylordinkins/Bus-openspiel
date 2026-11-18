@@ -203,7 +203,9 @@ def train_cell(
     start = evaluate()
     opt = torch.optim.AdamW(params, lr=args.lr, weight_decay=args.weight_decay)
     rng = np.random.default_rng(args.seed)
-    best, best_ep, best_state, bad = start, 0, None, 0
+    # Snapshot the start so the saved net always matches the reported best (8k-r finding 3).
+    best_state = {k: v.detach().clone() for k, v in net.state_dict().items()}
+    best, best_ep, bad = start, 0, 0
     history = []
     full = torch.ones((1, net.n_actions), dtype=torch.bool, device=device)
     for ep in range(1, args.epochs + 1):
@@ -234,8 +236,7 @@ def train_cell(
             bad += 1
             if bad >= args.patience:
                 break
-    if best_state is not None:
-        net.load_state_dict(best_state)
+    net.load_state_dict(best_state)
     for k, v in net.state_dict().items():  # the policy side never moved
         if k in frozen:
             assert torch.equal(v, frozen[k]), k
