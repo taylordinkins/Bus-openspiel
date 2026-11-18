@@ -40,6 +40,10 @@ class AgentPlayError(Exception):
     """A user-facing error (bad arguments or an illegal action)."""
 
 
+class RejectedAction(AgentPlayError):
+    """An action id that cannot be played now; also reported on stdout."""
+
+
 def normalize_bot_spec(spec: str) -> str:
     """Accept a registry seat type (``heuristic``, ``net:ppo-long``) or a bare model name."""
     spec = spec.strip()
@@ -156,10 +160,10 @@ def cmd_legend(args: argparse.Namespace, out: Callable[[str], None]) -> int:
     return 0
 
 
-def render_summary(state: BusState, out: Callable[[str], None]) -> None:
+def render_summary(state: BusState, out: Callable[[str], None], compact: bool = False) -> None:
     from tools.board_legend import summary
 
-    out(summary(state.core))
+    out(summary(state.core, compact))
 
 
 def cmd_new(args: argparse.Namespace, out: Callable[[str], None]) -> int:
@@ -204,8 +208,8 @@ def cmd_show(args: argparse.Namespace, out: Callable[[str], None]) -> int:
     data = load(args.game)
     state = build_state(data["config"], data["history"])
     render(args.game, data, state, out)
-    if args.summary:
-        render_summary(state, out)
+    if args.summary or args.board_compact:
+        render_summary(state, out, args.board_compact)
     return 0
 
 
@@ -213,11 +217,12 @@ def cmd_act(args: argparse.Namespace, out: Callable[[str], None]) -> int:
     data = load(args.game)
     state = build_state(data["config"], data["history"])
     if state.is_terminal():
-        raise AgentPlayError("game is over")
+        raise RejectedAction("game is over; no actions can be played (run show)")
     seat = state.current_player()
     if args.action not in state.legal_actions():
-        raise AgentPlayError(
-            f"action {args.action} is not legal for P{seat}; legal: {state.legal_actions()}"
+        raise RejectedAction(
+            f"action {args.action} is not legal now (P{seat} to move; run show). "
+            f"Legal: {state.legal_actions()}"
         )
     n = len(data["history"])
     data["log"].append(
@@ -244,8 +249,8 @@ def cmd_act(args: argparse.Namespace, out: Callable[[str], None]) -> int:
     finish(args.game, data, state)
     save(args.game, data)
     render(args.game, data, state, out)
-    if args.summary:
-        render_summary(state, out)
+    if args.summary or args.board_compact:
+        render_summary(state, out, args.board_compact)
     data["shown"] = len(data["history"])
     save(args.game, data)
     return 0
@@ -275,14 +280,17 @@ def main(argv: Sequence[str] | None = None, out: Callable[[str], None] = print) 
     p = sub.add_parser("show", help="print the current decision")
     p.add_argument("--game", type=Path, required=True)
     p.add_argument("--summary", action="store_true", help="append a per-seat situational summary")
+    p.add_argument("--board-compact", action="store_true", help="add a compact action-board view")
     p.set_defaults(fn=cmd_show)
     p = sub.add_parser("act", help="play an action id, advance bots, show the next decision")
     p.add_argument("action", type=int)
     p.add_argument("--game", type=Path, required=True)
     p.add_argument("--note", default="")
     p.add_argument("--summary", action="store_true", help="append a per-seat situational summary")
+    p.add_argument("--board-compact", action="store_true", help="add a compact action-board view")
     p.set_defaults(fn=cmd_act)
     p = sub.add_parser("legend", help="print the board map legend and a key to the state text")
+    p.add_argument("--game", type=Path, default=None, help="accepted and ignored")
     p.set_defaults(fn=cmd_legend)
     p = sub.add_parser("notes", help="dump the agent's moves with notes")
     p.add_argument("--game", type=Path, required=True)
@@ -291,6 +299,8 @@ def main(argv: Sequence[str] | None = None, out: Callable[[str], None] = print) 
     try:
         return args.fn(args, out)
     except (AgentPlayError, ValueError, pyspiel.SpielError) as e:
+        if isinstance(e, RejectedAction):
+            out(f"REJECTED: {e}")
         print(f"error: {e}", file=sys.stderr)
         return 2
 

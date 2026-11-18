@@ -86,3 +86,43 @@ def test_summary_mentions_line_ends_and_default_unchanged(tmp_path: Path) -> Non
             assert f"P{seat}:" in withs
             seen += 1
     assert seen >= 1
+
+
+def _mid_game(tmp_path: Path) -> Path:
+    g = tmp_path / "g.json"
+    code, text = run(["new", "--players", "3", "--agent", "0", "--seed", "2", "--out", str(g)])
+    assert code == 0
+    for _ in range(12):
+        ids = [int(ln.split(":")[0]) for ln in text.splitlines() if re.match(r"^  \d+: ", ln)]
+        code, text = run(["act", str(ids[0]), "--game", str(g)])
+        assert code == 0 and "GAME OVER" not in text
+    return g
+
+
+def test_legend_accepts_game_flag(tmp_path: Path) -> None:
+    g = _mid_game(tmp_path)
+    code, text = run(["legend", "--game", str(g)])
+    assert code == 0 and text == run(["legend"])[1]
+
+
+def test_summary_markers_and_post_clock(tmp_path: Path) -> None:
+    g = _mid_game(tmp_path)
+    code, text = run(["show", "--game", str(g), "--summary"])
+    assert code == 0
+    for seat in range(3):
+        assert re.search(rf"P{seat}: am=\d+ \(placed this round: \d+\)", text)
+    assert "R-066" in text and "if the clock advances:" in text
+    assert text.count("Vrrooomm! targets if the clock advances") == 3
+    assert "-- action board (compact)" not in text
+
+
+def test_board_compact_lists_every_space(tmp_path: Path) -> None:
+    from bus.actions import ACTION_NAMES
+
+    g = _mid_game(tmp_path)
+    code, text = run(["show", "--game", str(g), "--board-compact"])
+    assert code == 0
+    section = text.split("-- action board (compact)")[1]
+    for name in ACTION_NAMES:
+        assert f"  {name} [" in section
+    assert "-- summary" in text

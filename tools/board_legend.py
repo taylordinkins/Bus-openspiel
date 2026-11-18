@@ -14,10 +14,25 @@ from __future__ import annotations
 import sys
 
 from bus import constants as C
-from bus.actions import site_ref
+from bus.actions import ACTION_NAMES, site_ref
 from bus.board import Board
 from bus.lines import legal_extensions, line_ends, line_nodes
-from bus.rules import EMPTY, PHASE_END, Core, board, vrrooomm_moves
+from bus.rules import (
+    ACT_BUILDINGS,
+    ACT_LINES,
+    ACT_PASSENGERS,
+    EMPTY,
+    PHASE_END,
+    PHASE_SEL,
+    Core,
+    advance_clock,
+    board,
+    marker_power,
+    move_passengers,
+    resolution_positions,
+    round_end_types,
+    vrrooomm_moves,
+)
 
 KEY = """\
 -- key to the state text --
@@ -67,11 +82,88 @@ def legend(b: Board | None = None) -> str:
     return "\n".join(out)
 
 
-def summary(core: Core) -> str:
+def markers_section(core: Core) -> list[str]:
+    """Action markers per seat and the markers end condition (R-004, R-065, R-066, R-067)."""
+    out = [
+        "-- action markers (am) --",
+        "am = markers not yet placed. A marker is subtracted from am the moment it is placed on the",
+        "action board (R-065), so am already excludes this round's markers shown on the board",
+        "(placed this round); markers are never recovered.",
+    ]
+    for seat, s in enumerate(core.seats):
+        placed = sum(row.count(seat) for row in core.action_board)
+        out.append(f"  P{seat}: am={s.action_markers} (placed this round: {placed})")
+    holders = [p for p, s in enumerate(core.seats) if s.action_markers > 0]
+    met = "markers" in round_end_types(core)
+    out.append(
+        f"  seats with am>0: {['P' + str(p) for p in holders]}. Markers end condition (R-066, "
+        f"R-067: checked at round end, holds when at most 1 seat has am>0): "
+        + ("MET if the round ended now" if met else "not met now")
+        + "; am only decreases, so once met it stays met."
+    )
+    return out
+
+
+def post_clock_section(core: Core) -> list[str]:
+    """Vrrooomm! targets under the clock type shown after an advance (R-050, R-051, R-055)."""
+    types = C.BUILDING_TYPES
+    nxt = move_passengers(advance_clock(core))
+    out = [
+        f"-- clock: now {types[core.clock]}; if the clock advances: {types[nxt.clock]} "
+        "(house -> office -> pub -> house) --",
+        "   Vrrooomm! resolves after the Clock step (R-029). Estimate below assumes the clock",
+        "   advances (not a Clock-marker pause, R-052) and nothing else changes before then",
+        "   (this round's Lines/Passengers/Buildings are not simulated); step-out/in applied.",
+    ]
+    for seat in range(core.players):
+        out.append(
+            f"   P{seat}: Vrrooomm! targets if the clock advances ({types[nxt.clock]}): "
+            f"{vrrooomm_moves(nxt, seat)}"
+        )
+    return out
+
+
+def compact_board(core: Core) -> str:
+    """Action spaces with slots in resolution order, occupants and power letters."""
+    out = ["-- action board (compact): slots in resolution order (R-029, R-030) --"]
+    by_kind: dict[int, list[int]] = {}
+    for a, k in resolution_positions(core):
+        by_kind.setdefault(a, []).append(k)
+    for a, name in enumerate(ACTION_NAMES):
+        row = core.action_board[a]
+        cap = C.ACTION_SPACES[a]
+        slots = by_kind.get(a, [])
+        parts: list[str] = []
+        for k in slots:
+            txt = f"{chr(ord('a') + k)}=P{row[k]}"
+            if a in (ACT_LINES, ACT_PASSENGERS, ACT_BUILDINGS):
+                txt += f"(power {marker_power(core, a, k)})"
+            parts.append(txt)
+        free = cap - len(row)
+        out.append(
+            f"  {name} [{len(row)}/{cap} used]: "
+            + (", ".join(parts) or "empty")
+            + f"; free letters: {free}"
+        )
+    out.append(
+        "  power = M - letter index (+1 Lines at 5 players), M = most buses now (R-031..R-033);"
+        " M is re-read at resolution."
+    )
+    if core.phase != PHASE_SEL:
+        out.append(f"  (phase {core.phase}: resolving; cursor letter index {core.cursor})")
+    return "\n".join(out)
+
+
+def summary(core: Core, compact: bool = False) -> str:
     """Per-seat situational summary of ``core`` from state fields and existing helpers."""
     b = board()
     types = C.BUILDING_TYPES
     out = ["-- summary (derived from the state above) --"]
+    out += markers_section(core)
+    if core.phase != PHASE_END:
+        out += post_clock_section(core)
+    if compact:
+        out.append(compact_board(core))
     lines = [s.line for s in core.seats]
     for seat, s in enumerate(core.seats):
         head = f"P{seat}: pts={s.points} buses={s.buses} line_markers_left={s.line_markers}"
@@ -113,7 +205,13 @@ def summary(core: Core) -> str:
     return "\n".join(out)
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    import argparse
+    from pathlib import Path
+
+    ap = argparse.ArgumentParser(prog="tools.board_legend")
+    ap.add_argument("--game", type=Path, default=None, help="accepted and ignored")
+    ap.parse_args(argv)
     print(legend())
     return 0
 

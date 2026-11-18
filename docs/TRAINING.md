@@ -350,7 +350,13 @@ building sites there), every street, and a key to the state fields (`line`, `wai
 `occupied`, `board`, `am`, `lm`, `st`, ...). `--summary` (off by default, appended after the legal
 actions) gives per seat: the line as a node path with its ends, buildings on it, passengers waiting
 on and next to it, the legal extensions now (`bus.lines.legal_extensions`) and the Vrrooomm! moves
-now (`bus.rules.vrrooomm_moves`). It uses engine helpers read-only and adds no rule logic.
+now (`bus.rules.vrrooomm_moves`). It also lists each seat's action markers left (`am`, already
+reduced by markers placed this round, R-065) with the markers end condition from
+`bus.rules.round_end_types` (R-066), and the Vrrooomm! targets if the clock advances (an estimate:
+`advance_clock` + `move_passengers` on the current state, ignoring this round's other actions).
+`show|act --board-compact` adds each action space with its letters in resolution order, occupants
+and power (`marker_power`). Rejected actions print a `REJECTED: ...` line on stdout (exit 2, file
+unchanged). `legend` accepts and ignores `--game`. All helpers are used read-only; no rule logic.
 
 Recommended workflow: read `legend` once, then each turn call `show --summary` (or `act ... --summary`,
 which already shows the next decision), pick an action id, and record why with `--note`.

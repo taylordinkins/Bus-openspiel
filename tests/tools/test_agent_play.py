@@ -114,3 +114,21 @@ def test_bad_bots_count(tmp_path: Path) -> None:
 def test_unknown_model(tmp_path: Path, spec: str) -> None:
     code, _ = run(["new", "--players", "3", "--bots", spec, "--out", str(tmp_path / "x.json")])
     assert code == 2
+
+
+def test_rejection_prints_message_on_stdout(tmp_path: Path) -> None:
+    g = tmp_path / "g.json"
+    run(["new", "--players", "3", "--agent", "0", "--seed", "1", "--out", str(g)])
+    before = g.read_bytes()
+    code, text = run(["act", "999999", "--game", str(g)])
+    assert code == 2 and g.read_bytes() == before
+    assert text.startswith("REJECTED: action 999999 is not legal now (P0 to move; run show)")
+
+
+def test_rejection_when_game_over(tmp_path: Path) -> None:
+    g = tmp_path / "g.json"
+    _, text = run(["new", "--players", "3", "--agent", "0", "--seed", "1", "--out", str(g)])
+    play_to_end(g, text)
+    before = g.read_bytes()
+    code, out = run(["act", "0", "--game", str(g)])
+    assert code == 2 and "REJECTED: game is over" in out and g.read_bytes() == before
