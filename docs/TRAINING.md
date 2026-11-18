@@ -334,3 +334,23 @@ uv run python -m tools.agent_play notes --game /tmp/g.json
 (`ppo-long` means `net:ppo-long`), either one for all bot seats or a comma list per bot seat.
 `--agent` may list several seats. At game end the output shows the result and a replay file
 `<game>.replay.json` is written, loadable by `tools.replay` and the web import.
+
+### Map legend and `--summary` (for LLM players)
+
+The state text uses bare node ids, so read the map once per game:
+
+```bash
+uv run python -m tools.agent_play legend      # or: uv run python -m tools.board_legend
+uv run python -m tools.agent_play show --game /tmp/g.json --summary
+uv run python -m tools.agent_play act 150 --game /tmp/g.json --note "why" --summary
+```
+
+`legend` lists every node (position, station/roundabout role, neighbours with street ids, the
+building sites there), every street, and a key to the state fields (`line`, `waiting`, `sites`,
+`occupied`, `board`, `am`, `lm`, `st`, ...). `--summary` (off by default, appended after the legal
+actions) gives per seat: the line as a node path with its ends, buildings on it, passengers waiting
+on and next to it, the legal extensions now (`bus.lines.legal_extensions`) and the Vrrooomm! moves
+now (`bus.rules.vrrooomm_moves`). It uses engine helpers read-only and adds no rule logic.
+
+Recommended workflow: read `legend` once, then each turn call `show --summary` (or `act ... --summary`,
+which already shows the next decision), pick an action id, and record why with `--note`.

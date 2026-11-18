@@ -149,6 +149,19 @@ def render(path: Path, data: dict[str, Any], state: BusState, out: Callable[[str
         out(f"  {a}: {state.action_to_string(seat, a)}")
 
 
+def cmd_legend(args: argparse.Namespace, out: Callable[[str], None]) -> int:
+    from tools.board_legend import legend
+
+    out(legend())
+    return 0
+
+
+def render_summary(state: BusState, out: Callable[[str], None]) -> None:
+    from tools.board_legend import summary
+
+    out(summary(state.core))
+
+
 def cmd_new(args: argparse.Namespace, out: Callable[[str], None]) -> int:
     agents = sorted(parse_humans([args.agent], args.players))
     if not agents:
@@ -191,6 +204,8 @@ def cmd_show(args: argparse.Namespace, out: Callable[[str], None]) -> int:
     data = load(args.game)
     state = build_state(data["config"], data["history"])
     render(args.game, data, state, out)
+    if args.summary:
+        render_summary(state, out)
     return 0
 
 
@@ -229,6 +244,8 @@ def cmd_act(args: argparse.Namespace, out: Callable[[str], None]) -> int:
     finish(args.game, data, state)
     save(args.game, data)
     render(args.game, data, state, out)
+    if args.summary:
+        render_summary(state, out)
     data["shown"] = len(data["history"])
     save(args.game, data)
     return 0
@@ -257,12 +274,16 @@ def main(argv: Sequence[str] | None = None, out: Callable[[str], None] = print) 
     p.set_defaults(fn=cmd_new)
     p = sub.add_parser("show", help="print the current decision")
     p.add_argument("--game", type=Path, required=True)
+    p.add_argument("--summary", action="store_true", help="append a per-seat situational summary")
     p.set_defaults(fn=cmd_show)
     p = sub.add_parser("act", help="play an action id, advance bots, show the next decision")
     p.add_argument("action", type=int)
     p.add_argument("--game", type=Path, required=True)
     p.add_argument("--note", default="")
+    p.add_argument("--summary", action="store_true", help="append a per-seat situational summary")
     p.set_defaults(fn=cmd_act)
+    p = sub.add_parser("legend", help="print the board map legend and a key to the state text")
+    p.set_defaults(fn=cmd_legend)
     p = sub.add_parser("notes", help="dump the agent's moves with notes")
     p.add_argument("--game", type=Path, required=True)
     p.set_defaults(fn=cmd_notes)
