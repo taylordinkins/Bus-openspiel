@@ -31,8 +31,10 @@ to a multiple of ``n``); the baseline seats follow it in seat order. Seeds: game
 uses ``tools.tournament.game_seed(cell_seed, g)`` with ``cell_seed`` depending on ``--seed``, the
 player count and the baseline table only, so every candidate meets the same seeds (common random
 numbers) and results do not depend on ``--workers``. Win accounting follows ``tools.tournament``:
-a k-way shared win earns 1/k. ``distinct`` counts distinct (seat types, final scores, rounds)
-outcomes, a cheap flag for deterministic tables that replay the same few games.
+a k-way shared win earns 1/k. ``--paired-ref <candidate>`` adds the paired difference of every
+other candidate against it (same games, common random numbers). ``distinct`` counts distinct
+(seat types, final scores, rounds) outcomes, a cheap flag for deterministic tables that replay the
+same few games.
 
 Outputs in ``--out``: ``games.jsonl`` (one row per game, appended as games finish; a rerun with
 the same arguments skips games already there), ``summary.csv`` and ``summary.json``.
@@ -382,6 +384,35 @@ def summarize(
     return out
 
 
+def _credit(r: dict[str, Any]) -> float:
+    w = r["winners"]
+    return 1 / len(w) if r["cand_seat"] in w else 0.0
+
+
+def paired(rows: Sequence[dict[str, Any]], ref: str) -> list[dict[str, Any]]:
+    """Paired win-share difference of every candidate against ``ref`` per (baseline, players)
+    cell, over the games both played (same game index = same seed and seat, common random
+    numbers): mean of credit(candidate) - credit(ref) with a normal 95% half-width."""
+    by: dict[tuple[str, str, int], dict[int, float]] = {}
+    for r in rows:
+        by.setdefault((r["candidate"], r["baseline"], r["players"]), {})[r["game"]] = _credit(r)
+    out = []
+    for (cand, base, n), games in sorted(by.items(), key=lambda kv: (kv[0][1], kv[0][2])):
+        refg = by.get((ref, base, n))
+        if cand == ref or not refg:
+            continue
+        common = sorted(set(games) & set(refg))
+        if not common:
+            continue
+        d = np.array([games[g] - refg[g] for g in common])
+        half = 1.96 * float(d.std(ddof=1)) / math.sqrt(len(d)) if len(d) > 1 else float("nan")
+        out.append({
+            "candidate": cand, "ref": ref, "baseline": base, "players": n, "games": len(d),
+            "diff": float(d.mean()), "half_width": half,
+        })  # fmt: skip
+    return out
+
+
 def format_table(summary: Sequence[dict[str, Any]]) -> str:
     head = (
         f"{'candidate':26}{'baseline':12}{'n':>2}{'games':>6}{'win%':>7}{'lo95':>7}{'hi95':>7}"
@@ -427,6 +458,10 @@ def main(argv: Sequence[str] | None = None, out: Callable[[str], None] = _print)
     ap.add_argument("--baseline-net", default=None, help="baseline net .npz (default: --net)")
     ap.add_argument("--out", type=Path, default=Path("runs/eval_search/default"))
     ap.add_argument("--quiet", action="store_true", help="no progress lines")
+    ap.add_argument(
+        "--paired-ref", default=None,
+        help="candidate to pair every other candidate against (common seeds; paired diff)",
+    )  # fmt: skip
     args = ap.parse_args(argv)
     try:
         cands = _split(args.candidates)
@@ -478,14 +513,21 @@ def main(argv: Sequence[str] | None = None, out: Callable[[str], None] = _print)
 
         run_jobs(jobs, args.workers, sink, None if args.quiet else out)
     summary = summarize(rows, cands)
+    pairs = paired(rows, args.paired_ref) if args.paired_ref else []
     (args.out / "summary.json").write_text(
-        json.dumps({"config": config, "summary": summary}, indent=1), encoding="utf-8"
+        json.dumps({"config": config, "summary": summary, "paired": pairs}, indent=1),
+        encoding="utf-8",
     )
     with open(args.out / "summary.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, SUMMARY_COLUMNS)
         w.writeheader()
         w.writerows(summary)
     out(format_table(summary))
+    for p in pairs:
+        out(
+            f"paired {p['candidate']} - {p['ref']} ({p['baseline']}, {p['players']}p, "
+            f"{p['games']} games): {p['diff']:+.3f} ± {p['half_width']:.3f}"
+        )
     return 0
 
 
