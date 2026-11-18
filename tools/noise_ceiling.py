@@ -29,7 +29,9 @@ Protocol:
    the quantity the trainers log) and R² against E[R|s] (K-mean, finite-K corrected).
 
 Numpy-only workers (spawn pool, one BLAS thread each); forwards batched over all live games of a
-task. Writes ``positions.npz`` (raw), ``summary.json`` and ``summary.md`` to ``--out``.
+task. Writes ``positions.npz`` (raw), ``summary.json`` and ``summary.md`` to ``--out``. With
+``--save-obs`` the npz also holds each position's observation from the mover's view in both
+versions (``obs_v2``, ``obs_v3``), the labels ``tools.value_sup`` trains on.
 
     PYTHONUNBUFFERED=1 uv run python -m tools.noise_ceiling --positions 400 --k 32 --workers 6
 """
@@ -386,10 +388,16 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "games": n_games, "players": 4, "seed": args.seed, "sample_net": args.sample_net,
         "cont_net": args.cont_net if args.policy == "net" else None, "mix": args.mix,
         "workers": args.workers, "bootstrap": args.bootstrap, "nets": nets,
+        "save_obs": bool(args.save_obs),
         "seconds": {"sample": round(t1 - t0, 1), "continue": round(t2 - t1, 1),
                     "analyse": round(t3 - t2, 1), "total": round(t3 - t0, 1)},
     }  # fmt: skip
     arrays: dict[str, Any] = {**data, **{f"pred_{k}": v for k, v in preds.items()}}
+    if args.save_obs:
+        from train.features import encode, encode_v3
+
+        arrays["obs_v2"] = np.stack([encode(c) for c in cores])
+        arrays["obs_v3"] = np.stack([encode_v3(c) for c in cores])
     np.savez_compressed(out / "positions.npz", **arrays)
     (out / "summary.json").write_text(json.dumps({"meta": meta, "summary": summary}, indent=1))
     (out / "summary.md").write_text(markdown(summary, meta))
@@ -413,6 +421,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     ap.add_argument("--bootstrap", type=int, default=1000)
     ap.add_argument("--games-per-task", type=int, default=8)
     ap.add_argument("--positions-per-task", type=int, default=4)
+    ap.add_argument("--save-obs", action="store_true", help="store obs_v2 / obs_v3 (labels)")
     ap.add_argument("--out", default="runs/noise_ceiling/net")
     return ap.parse_args(argv)
 
