@@ -289,3 +289,29 @@ uv run --group train python -m tools.train_az --name az2 --init-from runs/long/b
     --heuristic-share 0.15 --frozen-share 0.2 --value-target zq --lr 1e-4 --lr-final 1e-4 \
     --vf-coef 2.0
 ```
+
+Interaction options (after attempt 2; design and experiments in `docs/GUMBEL_AZ.md` §10). All
+are run-defining (a change on resume is rejected) and default to the attempt-2 behaviour:
+
+- `--features v2|v3` (default v2): observation version (`train.features`). `--features v3` with
+  a v2 `--init-from` checkpoint widens the first layers with zero columns for the new inputs, so
+  generation 0 plays exactly like the checkpoint (`train.model.widen_model`). Frozen and eval
+  nets keep their own observation version.
+- `--value-quantity mean|leader|rank` (default mean): the relative term of R for z and for
+  terminal search values (`bots.gumbel.relative_term`).
+- `--opp-temp T`, `--opp-mix e`, `--opp-scope opponents|nonroot` (defaults 1, 0, opponents): the
+  search's opponent model at non-root nodes (`bots.gumbel.opponent_prior`).
+- Resume pitfall (attempt 2): `--stop-after` is saved in `args.json` and carries over on
+  `--resume`; pass `--stop-after 0` explicitly when resuming a session that used it.
+
+Supervised value path (no self-play): `tools.noise_ceiling --save-obs` labels positions with K
+continuations and stores both observation versions; `tools.value_sup` trains the value trunk
+only (policy frozen) on the K-mean of a target and reports held-out EV / R² against the ceiling:
+
+```
+uv run python -m tools.noise_ceiling --positions 16000 --k 8 --save-obs --nets "" \
+    --bootstrap 20 --seed 201 --out runs/value_labels/train
+uv run --group train python -m tools.value_sup --labels runs/value_labels/train/positions.npz \
+    --holdout runs/value_labels/heldout/positions.npz --features v2,v3 --targets R,R_leader \
+    --out runs/value_sup/a1
+```

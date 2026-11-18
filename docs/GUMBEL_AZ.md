@@ -317,3 +317,253 @@ Two steps, ~2 hours of wall time in total:
 0.25 over ≥ 400 games, without losing more than 0.05 vs 3 heuristic or vs the exploiter, and
 value EV in the first game quartile above 0.2. **Failure (stop and rethink):** no significant
 gain over the 8e dense run's +0.05–0.1 within 90 minutes.
+
+## 10. Interaction-aware value and search (after attempts 1–2, 2026-11-17)
+
+Status: built and tested (PLAN units 8k–8n); the experiments in §10.6 are designed, not run.
+
+### 10.1 Diagnosis
+
+- Every method stalls at a value EV of ~0.25–0.30. The noise ceiling (4p, 1600 positions × 32
+  `ppo-long` continuations at τ = 1, `tools/noise_ceiling.py`) is 0.25 / 0.38 / 0.63 / 0.91 by
+  game quartile (0.54 overall) against single outcomes; the best net reaches 0.14 / 0.16 / 0.37 /
+  0.55 (0.30), about 0.56 R² against the K-mean. Under heuristic continuations the ceiling is
+  0.75 overall.
+- In AZ, once the policy moves, the value cannot rank actions: search targets drift
+  (search-differs 15% → 36%) and play against the heuristic collapses (PLAN 8i, attempts 1–2).
+- The user's diagnosis (taken as given, not re-tested): Bus is highly interactive. Board state and
+  marker placement matter a lot, players easily disrupt each other through marker placement and
+  resolution choices, so outcomes are driven by the other players' choices. Bus is deterministic
+  with perfect information (R-073), so all outcome spread comes from those choices; a value that
+  does not model the interaction cannot predict it.
+
+Three directions follow (pool diversification comes later): model opponents in the search
+(§10.2), give the net interaction features (§10.3), and make the value target leader-aware
+(§10.4). §10.5 is a cheap supervised path to test the value directions without self-play.
+
+### 10.2 Opponent modelling in the search
+
+**Problem.** Gumbel explores widely only at the root. At a non-root node the selection
+argmax_a [π'(a) − N(a) / (1 + ΣN)] is a deterministic quasi-sampler: it keeps the node's visit
+distribution close to π' = softmax(logits + σ(q̂)) (Danihelka et al. 2022, §5). The prior is
+therefore the search's *model of how the seat at that node plays*. `ppo-long`'s prior is nearly
+one-hot (top probability 0.92–0.95, §1.1), and with 1–10 visits per opponent node σ(q̂) cannot
+move it: the first visit always takes the argmax, and with all-equal Q the off-argmax visit share
+at opponent nodes is 0 (`tests/bots/test_gumbel_interaction.py`). The search assumes every
+opponent plays its single likeliest move and never sees the disruptive replies that decide Bus
+games.
+
+**Method chosen: a tempered / ε-mixed opponent prior at non-root nodes.** With `opp_temp` = T,
+`opp_mix` = ε, the prior of every node whose mover is not the root's mover (`opp_scope =
+"opponents"`; `"nonroot"` also covers the root player's own later nodes) is
+
+    p_opp = (1 − ε) · softmax(logits / T) + ε / k    (k = legal actions at that node)
+
+and its log replaces the logits in π', v_mix and the selection rule (`bots.gumbel.opponent_prior`;
+the root is untouched, so Gumbel-top-k, sequential halving, the improved-policy target and its
+guarantee are unchanged). The defaults T = 1, ε = 0 leave the search bit-identical to unit 8g
+(pinned by a reference test on recorded root outputs).
+
+Why this and not the alternatives:
+
+- **It is what Gumbel MuZero's non-root rule already is**, with a different behaviour model.
+  Because selection tracks π', flattening the prior turns opponent nodes into a deterministic,
+  low-variance expectation over plausible replies (an expectimax-like average under a Boltzmann
+  opponent model) while σ(q̂) still lets each opponent prefer replies that are good *for it*
+  (the max^n reading of §2.2 is kept). One knob per idea, no new node type.
+- **Boltzmann (quantal-response) opponents** are the standard bounded-rationality model
+  (McKelvey & Palfrey 1995): a temperature keeps the ranking of the net's replies and gives a
+  plausible second move more weight than a blunder. The uniform share ε is the complementary
+  "any legal move" floor: it reaches low-prior blocking placements the PPO net almost never makes
+  (R-026 allows ineffective blocking markers), at the price of visits on absurd moves. Both are
+  exposed; the experiment picks.
+- **max^n with a sharp model is brittle; paranoid and best-reply are wrong models here.** max^n
+  (Luckhardt & Irani 1986; Sturtevant 2003) assumes each opponent maximises its own value under
+  the model; with a near-deterministic model that collapses to "opponents play the PPO argmax".
+  Paranoid search (Sturtevant & Korf 2000) assumes a coalition against the root and is too
+  pessimistic at 3–5 players; best-reply search (Schadd & Winands 2011) lets only one opponent
+  move and changes the game tree. A softened max^n sits between "opponents play their argmax" and
+  "opponents do anything".
+- **Not sequential halving or Gumbel sampling at opponent nodes.** Sequential halving needs
+  ≥ m·log2 m visits to mean anything and its guarantee is about the root's simple regret;
+  opponent nodes get 1–10 visits at n = 64. Danihelka et al. use it only at the root for that
+  reason. Gumbel noise at interior nodes would add variance to a 64-simulation search.
+- **Not sampled opponent replies (chance-node style, as Stochastic MuZero treats chance).**
+  The deterministic selection already allocates visits ∝ π' without sampling noise and keeps the
+  search reproducible for a fixed seed.
+
+Effects to expect: root Q values become expectations against a spread of replies, so actions that
+only work if every opponent plays its argmax lose value and robust or disruptive actions gain;
+search-differs rises a little. In AZ self-play only root targets are trained, and every seat's
+target comes from its own root search, so the opponent model never trains the opponents'
+policies directly.
+
+Exposed as `GumbelConfig(opp_temp, opp_mix, opp_scope)`; env `BUS_GUMBEL_OPP_TEMP`,
+`BUS_GUMBEL_OPP_MIX`, `BUS_GUMBEL_OPP_SCOPE` for registry seats; `tools.eval_search` candidates
+`gumbel:<n>,t=<T>,e=<ε>,scope=<…>`; `tools.train_az --opp-temp --opp-mix --opp-scope`. Cost:
+none measurable (`gumbel:64` 67–73 ms per decision with or without it, 4p smoke).
+
+### 10.3 Observation v3: per-seat and interaction features
+
+`train.features.encode_v3` (`FEATURES_V3` = 2, 3219 inputs) is the v2 vector unchanged (same
+blocks and offsets) followed by 905 inputs, all from public state through the rule helpers and
+board data (no ids in code; the module docstring lists every block with its rule IDs):
+
+| Group | Blocks |
+|---|---|
+| v2's ego-only derived features for every seat | `seat_pickable` (N, 5), `seat_free_sites` (N, 5), `seat_vroom` (5, 3) |
+| What each seat can score now | `seat_vroom_now` (5): the R-060 move count (= `rules.vrrooomm_moves`); `seat_targets` (5, 3): unoccupied buildings per type on the line (R-059 destinations per clock type) |
+| Who can reach what next | `seat_reach` (N, 5): nodes one legal extension would add (R-036..R-039, R-041) |
+| Contest between seats | `contested_node` (N, 3): waiting passengers and free buildings on the ego line that an opponent's line also covers, and opponents one extension away from the ego's nodes; `pair_overlap` (5, 4): per opponent, shared nodes / waiting / buildings / streets; `frontier_contested` (S): opponents whose legal extensions include the ego's extension streets |
+| Who acts before whom | `res_before`, `res_after` (7, 5): per action, each seat's markers resolving before / after the ego's first marker there (R-029, R-030); `res_pending` (7, 5): markers still to resolve this round |
+| What a marker placed now gets | `place_now` (7, 2): power with the current M (R-025, R-031..R-033; M is re-read at resolution, R-032) and whether it would resolve first (R-030) |
+| Round and score state | `sel_state` (5, 2): still selecting (R-024, R-027), markers placed; `score_gap` (3): ego score minus best / mean opponent (clipped /10) and the rank term |
+
+Remaining action and line markers per seat were already in v2. No feature needed a rule reading
+the spec does not cover (no §9 entry): reach and frontier reuse v2's `legal_extensions` reading
+(no R-042 lookahead, as v2), and `place_now` says explicitly that it uses the current M.
+
+**Versions side by side.** `FEATURES_VERSION` (the default for new PPO runs, `encode`,
+`OBS_SIZE`) stays v2, so `ppo-long`, `ppo-smoke` and `runs/az*` load and play unchanged.
+`NetWeights` reads the features version from the stored layout hash (the v2 hash
+`4bb7af3e33b12f0e` is pinned in a test) and exposes its encoder; every seat type (`net:`,
+`gumbel:`, `mcts_net`), the AZ actors (learner and frozen seats separately), the PPO/AZ eval
+rollouts and the noise-ceiling tool encode with the net's own version, so mixed v2/v3 tables work.
+
+**Warm start.** `NetWeights.widened(2)` (numpy) and `train.model.widen_model` (torch) copy the v2
+first-layer weights of both trunks into the matching columns (`train.features.input_columns`)
+and zero the 905 new columns; everything else is copied. The widened net equals `ppo-long` on
+v3 observations (logits and values within 2e-5; identical Gumbel decisions and visit counts in
+tests). `tools.train_az --features v3 --init-from <v2 .pt>` does this automatically.
+
+**Cost.** `encode` v2 ≈ 19–20 µs per state on this machine; v3 ≈ 25 µs when the board/order
+blocks hit their caches (typical inside a search, where many states share lines and passengers),
+≈ 38–46 µs on a stream of random-play states, ≈ 89 µs worst case (every cache missing). At the
+8f profile's ~12% encode share of actor time this is roughly +5–10% actor time. The forward
+grows too: v3 has ~246 non-zero inputs per state vs ~153 for v2, and the sparse first layer
+(`bots.gumbel.sparse_forward`, one BLAS thread) costs 152 vs 114 µs per observation at B = 1 and
+57 vs 47 µs at B = 32 (`ppo-long` widened, 400 labelled positions). At the 8f forward share of
+7–30% that is another +2–7% actor time.
+
+### 10.4 Leader-aware value targets
+
+R stays `mix` · win_loss (R-071) + (1 − `mix`) · relative term, mix 0.5 (Q-AZ2), final scores
+s = points − stones (R-068). `bots.gumbel.relative_term`:
+
+| `target` | relative term for seat p | range |
+|---|---|---|
+| `mean` (default, unchanged) | R-072 margin: (s_p − mean_{q≠p} s_q) / 10, clipped | [−1, 1] |
+| `leader` | (s_p − max_{q≠p} s_q) / 10, clipped like R-072 | [−1, 1] |
+| `rank` | 2 · (#opponents beaten + ties / 2) / (n − 1) − 1 | [−1, 1] |
+
+- `leader`: for the leader it is the lead over the runner-up; for everyone else the gap to the
+  leader; tied leaders get 0. It removes the mean-margin incentive to farm weak seats: in 4p,
+  scoring 10 against 4, 4 and a leader's 14 is +0.27 on the mean margin but −0.4 on the leader
+  margin. It is still relative (a stone costs its taker against the leader too), never
+  own-score-only.
+- `rank`: scale-free placement, robust to blowouts; ties count half, tiebreaks (R-069, R-070) are
+  left to the win_loss half. Sums to 0 over seats.
+- Same /10 scale and clip as R-072, so values stay in the tanh head's range and σ(q̂)'s min-max
+  rescaling makes the scale irrelevant to the search anyway. Note the leader term is ≤ 0 for all
+  but one seat, so its mean is negative (−0.14 in 4p over the 800-position smoke labels),
+  unlike the zero-mean margin; the value head's bias absorbs it.
+- Plumbed through `terminal_values(core, mix, target)` (default unchanged), `GumbelConfig.target`
+  (terminal search values), the AZ trainer's z (`--value-quantity`) and `tools.noise_ceiling`,
+  which now labels R, R_leader, R_rank and wl in one pass. Hand tests cover ties at the top,
+  clipping and all-way ties.
+
+### 10.5 Supervised value path
+
+`tools.noise_ceiling --save-obs` stores both observations of every labelled position;
+`tools.value_sup` trains only the value trunk and head (policy trunk and head frozen; checked) on
+the K-mean of a chosen quantity, starting from `ppo-long` (widened for v3, so both start equal),
+with early stopping on a held-out set, and reports per quartile: EV against single outcomes, R²
+against the K-mean and the ceiling EV_max. Measured: labelling runs at ~190 continuations/s at 6
+workers (800 positions × K = 8 in 41 s); training a cell takes seconds on the GPU. RAM: actors
+≤ ~230 MB each; a 16k-position label file holds ~350 MB of dense observations in memory.
+
+A smoke on 800 positions (640 train, 160 held out, 10 epochs; far too small to decide anything)
+already moved held-out R² against the K-mean from 0.63 (`ppo-long`) to 0.73 (v2) / 0.73 (v3)
+on R: the K-mean target alone is a much cleaner signal than single outcomes.
+
+### 10.6 Initial experiments (designed, not run; cheapest decisive first)
+
+All 4p, 6 workers, numbers from this machine. "R²" is held-out R² against the K-mean, "EV" is
+against single outcomes, both ego seat (§10.5).
+
+**A. Value-only supervised: features × target (unit 8l, ~25 min).**
+- Hypothesis: interaction features close part of the gap to the ceiling where interaction
+  matters most (q3/q4: ceiling 0.63 / 0.91 vs 0.37 / 0.55 reached), and the leader target is
+  at least as learnable as the mean one.
+- Setup: train labels `noise_ceiling --positions 16000 --k 8 --save-obs --nets "" --seed 201`
+  (~12 min); held-out labels `--positions 4000 --k 16 --seed 202` (~6 min; a separate seed, so
+  no game is shared); `value_sup --features v2,v3 --targets R,R_leader,R_rank` (6 cells, ~2 min
+  on the GPU), then the best cell again with `--seed 1` to check training noise.
+- Success: v3 beats v2 on the same target by ≥ 0.05 R² overall and ≥ 0.05 in q3 or q4 (on R
+  and on R_leader), with the seed repeat agreeing in sign. For the target: compare R² as a share
+  of each quantity's own ceiling, and carry the nets to A2 (predictability is not usefulness).
+- Decision: v3 for attempt 3 if it wins; otherwise keep v2 (cheaper, no conversion).
+- **Drop direction 2** if v3 − v2 < 0.02 R² overall and in both q3 and q4 on both targets.
+- Side result that changes attempt 3 by itself: if supervised v2 on R already reaches R² ≥ 0.75,
+  the value gap is mostly target noise, which argues for K-mean / zq-style targets in AZ.
+
+**A2. Do better values make better search? (unit 8l, ~30 min, after A).**
+- Hypothesis: the value-trained nets from A (policy identical to `ppo-long`, only the value
+  differs) make `gumbel:64,c=0.1` stronger, and leader beats mean in play.
+- Setup: `eval_search --candidates "gumbel:64,c=0.1" --baselines ppo_sample --players 4
+  --games 800 --seed 1 --net runs/value_sup/a1/<cell>.npz --baseline-net models/ppo-long.npz`
+  for the best v2 cell, the best v3 cell and v3 R_leader (3 × ~8 min); pair against
+  `runs/gumbel_check/confirm` (`ppo-long`, 0.372 [0.340, 0.407], same seeds: join the two
+  `games.jsonl` on (baseline, players, game) and apply `tools.eval_search.paired`).
+- Success: a cell beats the confirm reference by a paired diff whose 95% interval excludes 0.
+- Decision: the value init and target for attempt 3. **Drop direction 3** (keep mean, Q-AZ2) if
+  R_leader neither beats R in A (share of ceiling) nor in A2 (paired diff ≤ 0).
+
+**B. Search-only opponent modelling (unit 8m, ~40 min; independent of A, can run first if
+preferred).**
+- Hypothesis: a softened opponent model makes the frozen-`ppo-long` Gumbel player stronger
+  against 3 sampled `ppo-long` (their actual replies are spread, τ = 1) without losing to the
+  heuristic.
+- Setup: `eval_search --candidates "gumbel:64,c=0.1;gumbel:64,c=0.1,t=2;gumbel:64,c=0.1,t=4;
+  gumbel:64,c=0.1,e=0.25;gumbel:64,c=0.1,t=2,scope=nonroot" --baselines ppo_sample --players 4
+  --games 800 --seed 1 --net models/ppo-long.npz --out runs/gumbel_check/opp
+  --paired-ref "gumbel:64,c=0.1"` after `cp -r runs/gumbel_check/confirm runs/gumbel_check/opp`
+  (a rerun rewrites the summary files, so never point it at the confirm directory itself); the
+  copied `games.jsonl` makes it skip the 800 reference games and pair on the same seeds (4 new
+  cells × ~8 min ≈ 32 min). Then the best setting and the reference vs `--baselines
+  heuristic`, 400 games each (~6 min).
+- Success: a setting with paired diff > 0 and 95% interval excluding 0 (at 800 games the
+  half-width is ~0.035–0.045, so ≳ +0.04), Wilson lower bound > 0.34, and vs heuristic within
+  0.03 of the reference. A borderline best (interval touching 0) gets 800 more games on fresh
+  seeds (`--seed 2`) before deciding.
+- Decision: the opponent setting for attempt 3 (or none). **Drop direction 1** if no setting is
+  above the reference by more than +0.01 and the best's interval includes 0 after the extension.
+
+**C. AZ attempt 3 (unit 8n, 90 minutes, only after A/A2/B).**
+- Hypothesis: with a value that models interaction (v3 and/or leader target, initialised from the
+  A2 winner) and a search that expects disruption, the value keeps ranking actions after the
+  policy moves, so search targets stop drifting and the heuristic collapse does not recur.
+- Setup: attempt 2's command (`docs/TRAINING.md`: n = 64, c_scale 0.1, 10 value-only warm-up
+  generations, 128 games/gen, replay 300k, `--heuristic-share 0.15 --frozen-share 0.2
+  --value-target zq`, lr 1e-4 constant) plus the winners: `--features v3` (widened warm start),
+  `--value-quantity <winner>`, `--opp-temp/--opp-mix <winner>`. If A2 picked a value_sup net,
+  attempt 3 needs it as the warm start: today `--init-from` takes a trainer `.pt` and
+  `value_sup` writes `.npz`, so 8n first adds an npz → `.pt` conversion (small;
+  `tools.value_sup.weights_to_net` already builds the `BusNet`), or it warm-starts from
+  `best_1320.pt` and relies on the warm-up.
+- Stop rule (kept from attempt 2): stop when vs 3 heuristic < 0.80 after warm-up. Resume
+  pitfall: `--stop-after` is saved and carries over on `--resume`, so resume with
+  `--stop-after 0` (attempt 2 lost a session to this).
+- Success (go on): raw policy vs 3 `ppo-long` Wilson lower bound > 0.25 at ≥ 400 games, vs
+  heuristic within 0.05 of g0, and the failure signature absent: fresh-sample value EV after the
+  policy starts moving stays within 0.03 of the warm-up level (attempts 1–2 fell 0.05–0.13) and
+  search-differs stays ≤ 25%. Failure: the heuristic stop rule fires again, or EV falls as before.
+- Decision: go on to the held-out protocol (§7, 8i) and the exploiter test; or, on failure,
+  pool diversification (the next approved direction) before more AZ.
+
+| Order | Experiment | Cost | Success criterion | Feeds | Drop if |
+|---|---|---|---|---|---|
+| 1 | A: value-only, v2/v3 × mean/leader/rank | ~25 min | v3 − v2 ≥ 0.05 R² overall and in q3 or q4 | features for C; size of the target-noise effect | v3 − v2 < 0.02 everywhere → drop direction 2 |
+| 2 | A2: search with A's value nets | ~30 min | paired diff vs confirm ref > 0, CI excludes 0 | value init/target for C | leader ≤ mean in A and A2 → drop direction 3 |
+| 3 | B: opponent model, frozen `ppo-long` | ~40 min | paired diff ≳ +0.04 (CI excludes 0), LB > 0.34, heuristic within 0.03 | search setting for C | best ≤ +0.01 or CI includes 0 after 800 more games → drop direction 1 |
+| 4 | C: AZ attempt 3 | 90 min | raw vs 3 `ppo-long` LB > 0.25, heuristic −0.05 max, EV holds | go to held-out protocol | heuristic stop rule fires or EV falls as before |
