@@ -17,6 +17,7 @@ from bots.heuristic import HeuristicBot
 from bots.mcts import parse_mcts_param
 from bots.mcts_net import parse_mcts_net_param
 from bots.net import parse_net_param
+from bots.planner import parse_planner_param, parse_tree_param
 from bots.random_bot import RandomBot
 
 HUMAN = "human"
@@ -73,6 +74,16 @@ def _net_factory(param: str | None) -> Bot:
 register("net", _net_factory)
 
 
+def _net_sample_factory(param: str | None) -> Bot:
+    bot = parse_net_param(param)
+    bot.sample = True
+    return bot
+
+
+# Tool-only: the same net sampling from its policy instead of greedy (evaluation opponents).
+register("net_sample", _net_sample_factory)
+
+
 def _mcts_net_factory(param: str | None) -> Bot:
     return parse_mcts_net_param(param)
 
@@ -86,6 +97,21 @@ def _gumbel_factory(param: str | None) -> Bot:
 
 # Tool-only (registry, tournament, eval_search); the lobby's model list does not offer it (Q-AZ7).
 register("gumbel", _gumbel_factory)
+
+
+def _planner_factory(param: str | None) -> Bot:
+    return parse_planner_param(param)
+
+
+# Tool-only search seat (model-based planner, 2026-11-19).
+register("planner", _planner_factory)
+
+
+def _tree_factory(param: str | None) -> Bot:
+    return parse_tree_param(param)
+
+
+register("tplanner", _tree_factory)
 
 
 def parse_seat_type(s: str) -> tuple[str, str | None]:
