@@ -135,6 +135,7 @@ class _Tracker:
         self.core = rules.initial_core(self.players)
         self.loglik = np.tile(LOG_PRIOR, (self.players, 1))
         self.obs_count = np.zeros(self.players)
+        self.hits = np.zeros((self.players, len(MODELS)))  # argmax agreement (greedy models)
 
     def extend(self, history: list[int], me: int) -> None:
         for a in history[len(self.history) :]:
@@ -142,7 +143,9 @@ class _Tracker:
             legal = rules.legal_actions(core)
             p = core.current
             if len(legal) > 1 and p != me:
-                self.loglik[p] += _model_logliks(core, legal, a)
+                ll = _model_logliks(core, legal, a)
+                self.loglik[p] += ll
+                self.hits[p] += ll > math.log(0.3)
                 self.obs_count[p] += 1
             self.core = rules.apply(core, a)
             self.history.append(a)
@@ -485,6 +488,10 @@ MAXN_MODELS = tuple(
 )
 
 
+DET_AGREE = float(os.environ.get("PLANNER_DET_AGREE", "0.97"))
+SAMPLE_MODE = os.environ.get("PLANNER_SAMPLE_MODE", "sample")
+
+
 @dataclass
 class _Node:
     core: Any
@@ -503,7 +510,12 @@ class TreePlannerBot(PlannerBot):
     """Multi-player tree search over the true state (max-n at our nodes and at unpredictable
     opponents' nodes, model-following elsewhere), leaves valued by one model rollout each."""
 
-    def __init__(self, sims: int = 96, batch: int = 16, c_puct: float = 1.5) -> None:
+    def __init__(
+        self,
+        sims: int = 96,
+        batch: int = int(os.environ.get("PLANNER_BATCH", "16")),
+        c_puct: float = 1.5,
+    ) -> None:
         super().__init__()
         self.sims, self.batch, self.c = sims, batch, c_puct
 
@@ -518,13 +530,21 @@ class TreePlannerBot(PlannerBot):
             return nd
         p = core.current
         nd = _Node(core, legal, p)
-        if p == me or raw[p] in MAXN_MODELS:
-            nd.mode = "puct"
-        elif models[p] in STOCHASTIC:
-            nd.mode = "sample"
-        else:
-            nd.mode = "det"
+        nd.mode = "puct" if p == me else self.modes[p]
         return nd
+
+    def _seat_mode(self, t: _Tracker, p: int, models: list[str], raw: list[str]) -> str:
+        """How the tree treats seat p: "det" only for a greedy model it follows almost always
+        (exploit it), "sample" for sampling nets when SAMPLE_MODE says so, else max-n."""
+        m = MODELS.index(raw[p]) if raw[p] in MODELS else -1
+        if m >= 0 and raw[p] not in STOCHASTIC:
+            n = t.obs_count[p]
+            if n >= 8 and t.hits[p, m] / n >= DET_AGREE:
+                return "det"
+            return "puct"
+        if raw[p] in MAXN_MODELS:
+            return "puct"
+        return SAMPLE_MODE if models[p] in STOCHASTIC else "puct"
 
     def _expand(self, nd: _Node, me: int, models: list[str], rng: random.Random) -> None:
         legal = nd.legal
@@ -582,6 +602,7 @@ class TreePlannerBot(PlannerBot):
         raw = [self.self_model if p == me else MODELS[int(np.argmax(t.posterior(p)))]
                for p in range(t.players)]  # fmt: skip
         cands = self.candidates(core, legal)
+        self.modes = [self._seat_mode(t, p, models, raw) for p in range(t.players)]
         root = self._make(core, cands, me, models, raw)
         k = len(cands)
         root.prior = np.full(k, 1.0 / k)

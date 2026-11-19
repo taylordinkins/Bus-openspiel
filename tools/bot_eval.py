@@ -28,9 +28,26 @@ from typing import Any
 import pyspiel
 
 import bus.game  # noqa: F401  # pyright: ignore[reportUnusedImport]
-from bots.registry import make_bot
+from bots.registry import make_bot, register
 from bus import constants as C
 from bus import rules
+
+
+def _gumbel_sup_factory(param: str | None) -> Any:
+    """Eval-only seat ``gumbel_sup:<R|R_leader|R_rank>``: the experiment A2 search player
+    (``gumbel:64,c=0.1``, policy = ppo-long, value = the supervised K-mean value net)."""
+    from pathlib import Path
+
+    from bots.gumbel import GumbelBot, GumbelConfig
+    from bots.net_forward import NetWeights
+
+    if param not in ("R", "R_leader", "R_rank"):
+        raise ValueError("gumbel_sup takes R, R_leader or R_rank")
+    path = Path(__file__).resolve().parent.parent / f"runs/value_sup/a1/v2_{param}.npz"
+    return GumbelBot(NetWeights.load(path), 64, GumbelConfig(c_scale=0.1), name=f"sup-{param}")
+
+
+register("gumbel_sup", _gumbel_sup_factory)
 
 _WASTE: list[int] = []
 _COUNT = False
