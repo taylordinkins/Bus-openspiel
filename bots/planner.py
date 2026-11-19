@@ -488,6 +488,7 @@ MAXN_MODELS = tuple(
 )
 
 
+TREE_EARLY = float(os.environ.get("PLANNER_TREE_EARLY", "2.0"))
 DET_AGREE = float(os.environ.get("PLANNER_DET_AGREE", "0.97"))
 SAMPLE_MODE = os.environ.get("PLANNER_SAMPLE_MODE", "sample")
 
@@ -512,7 +513,7 @@ class TreePlannerBot(PlannerBot):
 
     def __init__(
         self,
-        sims: int = 96,
+        sims: int = 384,
         batch: int = int(os.environ.get("PLANNER_BATCH", "16")),
         c_puct: float = 1.5,
     ) -> None:
@@ -622,6 +623,11 @@ class TreePlannerBot(PlannerBot):
                 break
             q = root.w / np.maximum(root.n, 1)
             alive.sort(key=lambda c: -q[c])
+            # Early stop: the leader is clear of the runner-up by more than outcome noise.
+            gap = q[alive[0]] - q[alive[1]]
+            if TREE_EARLY > 0 and gap > TREE_EARLY / math.sqrt(root.n[alive[0]]):
+                root.n[alive[0]] += 1e-6  # make it the unique most-visited finalist
+                break
             alive = alive[: max(1, len(alive) // 2)]
             if len(alive) == 1:
                 break

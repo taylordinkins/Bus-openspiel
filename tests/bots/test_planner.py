@@ -65,3 +65,31 @@ def test_waste_tracking_counts_power_zero_markers() -> None:
             i += ro.core.move_number - before
         total += ro.waste
     assert total > 0  # random play always wastes markers
+
+
+@pytest.mark.slow
+def test_tree_planner_plays_legal_moves_and_params() -> None:
+    from bots.planner import TreePlannerBot, parse_tree_param, surely_wasted
+
+    assert is_valid_seat_type("tplanner") and is_valid_seat_type("tplanner:64-1.0")
+    assert not is_valid_seat_type("tplanner:x")
+    t = parse_tree_param("64-1.0")
+    assert (t.sims, t.c) == (64, 1.0)
+    bot = TreePlannerBot(sims=8)
+    state = pyspiel.load_game("python_bus", {"players": 3}).new_initial_state()
+    rng = random.Random(1)
+    other = make_bot("random")
+    decisions = 0
+    while not state.is_terminal() and decisions < 6:
+        legal = state.legal_actions()
+        if state.current_player() == 0 and len(legal) > 1:
+            a = bot.choose(state, rng)
+            decisions += 1
+            core = state.core  # type: ignore[attr-defined]
+            # never picks a surely-wasted selection when a useful one exists
+            if any(not surely_wasted(core, x) for x in legal):
+                assert not surely_wasted(core, a)
+        else:
+            a = other.choose(state, rng)
+        assert a in legal
+        state.apply_action(a)
