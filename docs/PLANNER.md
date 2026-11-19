@@ -66,7 +66,7 @@ game, and the opponents' waste for comparison:
 | 3 | ppo-long ×2 | tplanner:96 | 1.00 | 1.42 (7.3) |
 | 3 | sampled ppo-long ×2 | tplanner:96 | 0.83 | 1.17 (7.4) |
 | 3 | mcts:100 ×2 | tplanner:192 | 0.92 | 0.75 (8.6) |
-| 3 | R_leader (A2) ×2 | tplanner:192 | 0.75 | 1.42 (6.5) |
+| 3 | R_leader (A2) ×2 | tplanner:192 → **384** | 0.75 → 1.00 | 0.67 (6.7) |
 | 3 | gumbel:32 ×2 | **tplanner (384)** | 0.92 | 0.75 (7.0) |
 | 3 | mcts:200 ×2 | **tplanner (384)** | 0.75 | 1.00 (6.4) |
 | 4 | ppo-long ×3 | tplanner:192 | 1.00 | 0.83 (6.9) |
@@ -86,5 +86,5 @@ at equal seeds); simulations (192 → 384 doubles the 4p win rate against the gu
 What did not help: greedy `ppo-long` rollouts for MCTS-like seats; larger simulation batches
 (engine cost per state dominates, not the net).
 
-Open: 3p vs mcts:200 (0.75) and vs R_leader at 192 sims (0.75; not rerun at 384); mcts:1000 and
+Open: 3p vs mcts:200 (0.75); mcts:1000 and
 5 players are untested (too slow for this budget); 12-game cells are noisy.
