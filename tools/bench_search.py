@@ -21,7 +21,7 @@ multi-process cells and ``--worker-sims`` their budgets, ``--net`` npz (default
 ``models/ppo-long.npz``), ``--players``, ``--quick``.
 """
 
-# pyright: basic
+# pyright: basic, reportMissingImports=false
 from __future__ import annotations
 
 import argparse
