@@ -16,6 +16,11 @@ Agents (nets are loaded from a file path, not from the model manifest):
   head instead of rollouts, no Dirichlet noise, most-visited child played). ``c`` defaults to
   ``bots.mcts_net.UCT_C``; ``t`` (default 1) rescales the prior as ``p ** (1 / t)``; ``fpu`` is the
   value assumed for an unvisited child (default 0, OpenSpiel's behaviour).
+- ``gumbel:<SIMS>[,c=<c_scale>][,v=<c_visit>][,m=<considered>][,t=<opp temp>][,e=<opp mix>]
+  [,scope=opponents|nonroot]``: the ``bots.gumbel`` search (Gumbel top-m + sequential halving,
+  completed-Q, per-seat values, g = 0) guided by the ``--net`` model; defaults are
+  ``bots.gumbel.GumbelConfig`` (c 0.1, v 50, m 16, t 1, e 0, scope opponents). ``t`` / ``e``
+  set the opponent model at non-root nodes (prior temperature, uniform share).
 
 Baseline tables (the ``n - 1`` non-candidate seats; ``--baseline-net`` defaults to ``--net``):
 ``ppo_greedy``, ``ppo_sample``, ``heuristic`` and ``mixed`` (sampled net and heuristic seats
@@ -26,8 +31,10 @@ to a multiple of ``n``); the baseline seats follow it in seat order. Seeds: game
 uses ``tools.tournament.game_seed(cell_seed, g)`` with ``cell_seed`` depending on ``--seed``, the
 player count and the baseline table only, so every candidate meets the same seeds (common random
 numbers) and results do not depend on ``--workers``. Win accounting follows ``tools.tournament``:
-a k-way shared win earns 1/k. ``distinct`` counts distinct (seat types, final scores, rounds)
-outcomes, a cheap flag for deterministic tables that replay the same few games.
+a k-way shared win earns 1/k. ``--paired-ref <candidate>`` adds the paired difference of every
+other candidate against it (same games, common random numbers). ``distinct`` counts distinct
+(seat types, final scores, rounds) outcomes, a cheap flag for deterministic tables that replay the
+same few games.
 
 Outputs in ``--out``: ``games.jsonl`` (one row per game, appended as games finish; a rerun with
 the same arguments skips games already there), ``summary.csv`` and ``summary.json``.
@@ -59,6 +66,7 @@ import numpy as np  # noqa: E402
 import pyspiel  # noqa: E402
 from open_spiel.python.algorithms import mcts  # noqa: E402
 
+from bots.gumbel import GumbelBot, GumbelConfig  # noqa: E402
 from bots.heuristic import HeuristicBot  # noqa: E402
 from bots.mcts import MAX_SIMS, _TimedMCTSBot  # noqa: E402
 from bots.mcts_net import UCT_C, NetEvaluator  # noqa: E402
@@ -81,12 +89,13 @@ SUMMARY_COLUMNS = [
 
 @dataclass(frozen=True)
 class AgentSpec:
-    kind: str  # "net" | "heuristic" | "mcts"
+    kind: str  # "net" | "heuristic" | "mcts" | "gumbel"
     sample: bool = False
     sims: int = 0
     uct_c: float = UCT_C
     prior_temp: float = 1.0
     fpu: float = 0.0
+    gumbel: GumbelConfig | None = None
 
 
 def parse_agent(text: str) -> AgentSpec:
@@ -116,6 +125,21 @@ def parse_agent(text: str) -> AgentSpec:
         if spec.prior_temp <= 0 or spec.uct_c < 0:
             raise ValueError(f"mcts needs t > 0 and c >= 0: {text!r}")
         return spec
+    if text.startswith("gumbel:"):
+        sims_s, *opts = text[7:].split(",")
+        if not sims_s.isdigit() or not 1 <= int(sims_s) <= MAX_SIMS:
+            raise ValueError(f"gumbel simulations must be 1..{MAX_SIMS}: {text!r}")
+        gkw: dict[str, Any] = {}
+        gnames = {
+            "c": "c_scale", "v": "c_visit", "m": "m", "t": "opp_temp", "e": "opp_mix",
+            "scope": "opp_scope",
+        }  # fmt: skip
+        for o in opts:
+            k, eq, v = o.partition("=")
+            if not eq or k not in gnames:
+                raise ValueError(f"bad gumbel option {o!r} (use c=, v=, m=, t=, e=, scope=)")
+            gkw[gnames[k]] = int(v) if k == "m" else v if k == "scope" else float(v)
+        return AgentSpec("gumbel", sims=int(sims_s), gumbel=GumbelConfig(**gkw))
     raise ValueError(f"unknown agent {text!r}")
 
 
@@ -210,6 +234,8 @@ def build_agent(text: str, net_path: str) -> Any:
         return HeuristicBot()
     if spec.kind == "net":
         return PathNetBot(_weights(net_path), spec.sample)
+    if spec.kind == "gumbel":
+        return GumbelBot(_weights(net_path), spec.sims, spec.gumbel)
     return PathNetMCTSBot(_weights(net_path), spec)
 
 
@@ -290,7 +316,7 @@ def run_job(job: dict[str, Any]) -> dict[str, Any]:
 
 def job_cost(j: dict[str, Any]) -> float:
     spec = parse_agent(j["candidate"])
-    return spec.sims * j["players"] if spec.kind == "mcts" else j["players"]
+    return spec.sims * j["players"] if spec.kind in ("mcts", "gumbel") else j["players"]
 
 
 def run_jobs(
@@ -358,6 +384,35 @@ def summarize(
     return out
 
 
+def _credit(r: dict[str, Any]) -> float:
+    w = r["winners"]
+    return 1 / len(w) if r["cand_seat"] in w else 0.0
+
+
+def paired(rows: Sequence[dict[str, Any]], ref: str) -> list[dict[str, Any]]:
+    """Paired win-share difference of every candidate against ``ref`` per (baseline, players)
+    cell, over the games both played (same game index = same seed and seat, common random
+    numbers): mean of credit(candidate) - credit(ref) with a normal 95% half-width."""
+    by: dict[tuple[str, str, int], dict[int, float]] = {}
+    for r in rows:
+        by.setdefault((r["candidate"], r["baseline"], r["players"]), {})[r["game"]] = _credit(r)
+    out = []
+    for (cand, base, n), games in sorted(by.items(), key=lambda kv: (kv[0][1], kv[0][2])):
+        refg = by.get((ref, base, n))
+        if cand == ref or not refg:
+            continue
+        common = sorted(set(games) & set(refg))
+        if not common:
+            continue
+        d = np.array([games[g] - refg[g] for g in common])
+        half = 1.96 * float(d.std(ddof=1)) / math.sqrt(len(d)) if len(d) > 1 else float("nan")
+        out.append({
+            "candidate": cand, "ref": ref, "baseline": base, "players": n, "games": len(d),
+            "diff": float(d.mean()), "half_width": half,
+        })  # fmt: skip
+    return out
+
+
 def format_table(summary: Sequence[dict[str, Any]]) -> str:
     head = (
         f"{'candidate':26}{'baseline':12}{'n':>2}{'games':>6}{'win%':>7}{'lo95':>7}{'hi95':>7}"
@@ -403,6 +458,10 @@ def main(argv: Sequence[str] | None = None, out: Callable[[str], None] = _print)
     ap.add_argument("--baseline-net", default=None, help="baseline net .npz (default: --net)")
     ap.add_argument("--out", type=Path, default=Path("runs/eval_search/default"))
     ap.add_argument("--quiet", action="store_true", help="no progress lines")
+    ap.add_argument(
+        "--paired-ref", default=None,
+        help="candidate to pair every other candidate against (common seeds; paired diff)",
+    )  # fmt: skip
     args = ap.parse_args(argv)
     try:
         cands = _split(args.candidates)
@@ -454,14 +513,21 @@ def main(argv: Sequence[str] | None = None, out: Callable[[str], None] = _print)
 
         run_jobs(jobs, args.workers, sink, None if args.quiet else out)
     summary = summarize(rows, cands)
+    pairs = paired(rows, args.paired_ref) if args.paired_ref else []
     (args.out / "summary.json").write_text(
-        json.dumps({"config": config, "summary": summary}, indent=1), encoding="utf-8"
+        json.dumps({"config": config, "summary": summary, "paired": pairs}, indent=1),
+        encoding="utf-8",
     )
     with open(args.out / "summary.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, SUMMARY_COLUMNS)
         w.writeheader()
         w.writerows(summary)
     out(format_table(summary))
+    for p in pairs:
+        out(
+            f"paired {p['candidate']} - {p['ref']} ({p['baseline']}, {p['players']}p, "
+            f"{p['games']} games): {p['diff']:+.3f} ± {p['half_width']:.3f}"
+        )
     return 0
 
 

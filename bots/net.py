@@ -1,8 +1,9 @@
 """Trained-net seat: `net:<name>`, with `<name>` resolved only through `models/manifest.yaml`.
 
 The name is looked up in the allow-list; nothing user-supplied is ever used as a path. Weights are
-loaded once per name (numpy only, no torch). Observation comes from `train.features.encode`, which
-is imported lazily and is torch-free. Play is greedy (argmax of the masked logits) unless
+loaded once per name (numpy only, no torch). Observation comes from the net's own encoder
+(`NetWeights.encoder`: `train.features.encode` for v2 nets, `encode_v3` for v3), imported lazily
+and torch-free. Play is greedy (argmax of the masked logits) unless
 `sample=True`. Any runtime failure or illegal result falls back to the heuristic bot (logged).
 """
 
@@ -75,15 +76,21 @@ def resolve_model(name: str, players: int | None = None) -> ModelInfo:
 @cache
 def load_weights(name: str) -> NetWeights:
     """Load (once per name) the allow-listed model; StaleModelError if it does not fit."""
-    from train.features import FEATURES_VERSION
+    from train.features import FEATURE_VERSIONS
 
     info = resolve_model(name)
-    if info.features_version != FEATURES_VERSION:
+    if info.features_version not in FEATURE_VERSIONS:
         raise StaleModelError(
             f"net model {name!r} was built for features v{info.features_version}; "
-            f"current are v{FEATURES_VERSION}: retrain or re-export"
+            f"known are {list(FEATURE_VERSIONS)}: retrain or re-export"
         )
-    return NetWeights.load(info.path)
+    w = NetWeights.load(info.path)
+    if w.features_version != info.features_version:
+        raise StaleModelError(
+            f"net model {name!r} is listed with features v{info.features_version} but its file "
+            f"holds v{w.features_version}: fix the manifest or re-export"
+        )
+    return w
 
 
 class NetBot:
@@ -94,11 +101,9 @@ class NetBot:
         self._fallback = HeuristicBot()
 
     def _pick(self, state: pyspiel.State, legal: list[int], rng: random.Random) -> int:
-        from train.features import encode
-
         mask = np.zeros(self.weights.n_actions, np.bool_)
         mask[legal] = True
-        obs = encode(state.core)  # type: ignore[attr-defined]
+        obs = self.weights.encode(state.core)  # type: ignore[attr-defined]
         if not self.sample:
             logits, _ = self.weights.forward(obs, mask)
             return int(np.argmax(logits))
@@ -127,9 +132,9 @@ def parse_net_param(param: str | None) -> NetBot:
 
 
 def check_players(seat_type: str, players: int) -> None:
-    """ValueError if a `net:<name>` seat type does not support `players`; no-op otherwise."""
+    """ValueError if a net-backed seat type does not support `players`; no-op otherwise."""
     kind, _, name = seat_type.partition(":")
     if kind == "net":
         resolve_model(name, players)
-    elif kind == "mcts_net":
+    elif kind in ("mcts_net", "gumbel"):
         resolve_model(name.partition("-")[2], players)

@@ -46,7 +46,8 @@ for this whitelist: `--max-minutes --workers --eval-every --eval-games --eval-mc
 --eval-greedy --ckpt-every --keep-every --lr --lr-decay/--no-lr-decay --ent-coef
 --ent-coef-final --players --player-weights --league --snapshot-every --pool-size
 --device --stop-after --task-timeout --max-retries --games-per-update --ratings-every
---ratings-games`. Anything else (`--hidden`, `--seed`, `--name`, `--out-dir`, `--value-trunk`, ...) that differs from the run is rejected with an error (exit code 2); so
+--ratings-games --aux-coef` (`--aux-coef` only between positive values; 0 <-> >0 adds or removes
+model heads and is rejected, as is any `--reward` change). Anything else (`--hidden`, `--seed`, `--name`, `--out-dir`, `--value-trunk`, ...) that differs from the run is rejected with an error (exit code 2); so
 is a checkpoint whose `features_version`, observation layout hash or hidden sizes do not match the
 code. Changing `--lr`, `--lr-decay` or `--ent-coef*` changes the schedules from the resume point
 on by design. `--updates` is the horizon of the cosine/linear LR and the entropy schedule, so
@@ -156,3 +157,206 @@ pool (`--pool-size`, oldest evicted every `--snapshot-every` updates).
   (MM iteration, prior of half a win each way per pair) and reported as `400 * log10(strength)`
   with heuristic = 1000. Columns: update, entrant, kind, rating, games (seats), score_rate.
   Ratings are per round, not accumulated, and noisy at 300 games.
+
+## Exploiter test
+
+Measures how exploitable a trained net (here `ppo-long`) is: warm-start a learner from it and
+train only against frozen copies of it. `--init-from` loads the model weights of a trainer `.pt`
+(fresh run only; fresh optimizer, update 0; exit code 2 on a hidden-size, value-trunk,
+features-version or observation-layout mismatch; not combinable with `--resume`, and ignored when
+a run resumes). `--opp-seats all` makes every non-self game give the opponents all n-1 seats, so
+the learner holds exactly one randomly placed seat (default `random` keeps the 1..n-1 sampling;
+run-defining, so it cannot change on resume). `runs/long` used the default `--hidden 512,512` and
+`--value-trunk separate`, so no extra flags are needed.
+
+```
+uv run python -m tools.train_ppo --name exploit_long --players 3,4,5 --init-from runs/long/best_1320.pt \
+  --league 0,1,0 --opp-seats all --hof-seed ppo-long --snapshot-every 0 --hof-every 0 --no-pfsp \
+  --mix 1.0 --mix-anneal-updates 0 --lr 1e-4 --ent-coef 0.002 --updates 600 --max-minutes 90 \
+  --ratings-every 0 --eval-every 10 --eval-games 200
+```
+
+With an empty snapshot pool and the single permanent hall-of-fame seed, every training game is one
+learner against n-1 `ppo-long` seats, and `eval.csv` carries `hof_ref:ppo-long` at each player
+count; its win rate rising well above the fair share (1/n) means the net is exploitable.
+
+## Dense reward and aux heads (unit 8e)
+
+`ppo-long` plateaued with critic EV ~0.25-0.30 on the single terminal return. Two opt-in changes
+give the learner more signal; defaults are unchanged (`--reward terminal --aux-coef 0` is
+bit-identical to before).
+
+- `--reward dense` (run-defining; rejected on resume if changed; old runs resume as `terminal`).
+  The margin part of the shaped return is paid out as potential differences. Per seat,
+  `Phi = (own score - mean opponent score) / 10`, score = points - stones (the R-068 formula, used
+  only as a training signal). At each of a seat's own decisions the rollout records `Phi` of all
+  seats; reward `r_t = (1-mix) (Phi(s_{t+1}) - Phi(s_t))` where `s_{t+1}` is the state at the
+  seat's next decision (so opponents' moves between decisions count), and the last reward adds
+  `mix * win_loss` and closes on the terminal state. The sum telescopes exactly to
+  `mix * win_loss + (1-mix) * (unclipped margin)`. Shaping is relative on purpose: passenger
+  deliveries are the points, and taking a time stone costs the taker 1 to deny others points, so
+  own-score-only shaping would wrongly penalise the stone.
+- Value targets in dense mode are return-to-go per ego entry,
+  `mix * wl_j + (1-mix) * (Phi_j(T) - Phi_j(t))`, clipped to [-1, 1] (tanh head); the clipped
+  fraction is `vclip` in `log.csv`. Entry 0 equals the lambda=1 GAE return.
+- `mix` now weights win/loss against the dense margin. Use `--mix 0.5 --mix-anneal-updates 0`
+  (constant): annealing mix to 1.0 would switch the dense shaping off (user decision 2026-11-17).
+- Use `--gae-lambda 0.95` with dense rewards (the default stays 0.99; gamma stays 1.0).
+- `--aux-coef C` (> 0 builds training-only heads on the value trunk output: final score / 20 per
+  ego seat (MSE), rank per ego seat (CE over the present rank classes, ties share the best rank),
+  winner (masked softmax CE against a uniform distribution over the R-069/R-070 winner set)). The
+  loss `C * (score + rank + win)` is added in `ppo_update`; terms are logged as `aux_score`,
+  `aux_rank`, `aux_win`. Rollout workers never evaluate the heads; targets travel in the samples.
+  `.pt` checkpoints include the heads; the npz export and `bots.net_forward` ignore them.
+  `--init-from` a checkpoint without heads leaves the heads freshly initialised (all other keys
+  still strict).
+- Diagnostic: `stones_cur` / `stones_oth` in `log.csv` = mean `CLOCK_PAUSE` (time stone) takes per
+  current / other seat per game.
+
+Recommended dense run (exploiter-style warm start from the long run):
+
+```
+uv run python -m tools.train_ppo --name dense --init-from runs/long/best_1320.pt \
+    --reward dense --gae-lambda 0.95 --mix 0.5 --mix-anneal-updates 0 --aux-coef 0.5 \
+    --players 3,4,5 --updates 600 --workers 11 --lr 1e-4 --lr-decay
+```
+
+## Gumbel AlphaZero trainer (unit 8h)
+
+`tools/train_az.py` (CLI; the trainer is `train/az_trainer.py`, actors `train/az_selfplay.py`,
+replay `train/az_replay.py`, learner `train/az_learn.py`). Design: `docs/GUMBEL_AZ.md`; user
+decisions Q-AZ1..Q-AZ7 in PLAN.md §9.
+
+- Synchronous generations: `--workers` (default 6) numpy-only actor processes play
+  `--games-per-gen` games with the current weights under Gumbel search (`bots.gumbel`,
+  `--sims` 32, `--c-scale` 0.3, `--c-visit` 50, `--m` 16, `--gumbel-scale` 1), `--concurrent`
+  games in flight per task and one batched (sparse first-layer) forward per search wave. Samples
+  return through `/dev/shm` spill files. The CLI module imports no torch, so spawned actors stay
+  at ~150 MB RSS each (the learner process with CUDA is ~1.6 GB).
+- Targets: completed-Q improved policy at the root (policy CE); per-seat final
+  R = `--mix` win_loss + (1 − `--mix`) relative margin (stones counted), ego order, present seats
+  only (value MSE); `--value-target zq` uses (z + root search value) / 2 (off by default); aux
+  heads at `--aux-coef` 0.25 (training only, not exported); AdamW with `--weight-decay` 1e-4.
+  The first `--warmup-gens` (2) generations train the value side only (policy loss off).
+- Learner: FIFO replay of `--replay-size` (500k) samples, `ceil(--reuse * new / --batch)` steps
+  per generation (reuse 4, batch 1024), lr cosine `--lr` 3e-4 → `--lr-final` 1e-4 over
+  `--generations`. `--min-replay` holds training until the buffer has that many samples.
+- Tables: `--frozen-share` (0.2) of games seat a frozen net in 1..n−1 random seats: the
+  `--frozen-nets` manifest names (`ppo-long`) plus the learner's own snapshot every
+  `--snapshot-every` (10) generations (last `--snapshot-keep` 4 kept in `pool/`). Frozen seats play
+  their raw policy sampled; only learner seats yield samples. 4p only by default (`--players`).
+  `--heuristic-share` (default 0) of games, disjoint from the frozen ones, seat `bots.registry`
+  heuristic bots in 1..n−1 random seats (learner in the rest; no search, no samples for the
+  heuristic seats). One uniform draw per table picks heuristic / frozen / self, so the shares are
+  shares of all tables (their sum must be ≤ 1). Both shares are run-defining: changing either on
+  `--resume` is rejected.
+- Evaluation every `--eval-every` (10) generations, generation 0 first (before training): raw
+  policy, greedy (`--no-eval-greedy` to sample), no search, one seat vs 3 sampled copies of each
+  `--eval-nets` entry (`ppo-long`, exploiter `runs/exploit_long/best.npz`) and vs 3 heuristic,
+  seats rotated, `--eval-games` (200) per cell, shared wins credited 1/k, Wilson 95% intervals and
+  mean score margin in `eval.csv`. `best.*` tracks the best win rate vs the first eval net.
+- `log.csv` per generation: losses, value EV (own seat, overall and by game quartile, on the
+  fresh samples before training), policy CE to the targets, target entropy, KL(π′‖prior),
+  `search_differs` (share of moves where search overrode the prior's argmax: the R2 diagnostic),
+  per table kind (self / frozen / heuristic) the share of games (`tables_*`) and the learner
+  seats' mean win credit (`win_*`, 1/k for a k-way shared win), sims/s, games/h, RSS (parent and max actor),
+  replay MB, timings.
+- Stop/resume: `--max-minutes`, `--stop-after`, SIGINT/SIGTERM finish the generation, checkpoint
+  and exit 0 (a second signal aborts). `--resume <run dir>` restores model, optimizer, generation,
+  snapshot pool and best record; the replay is not saved and refills from the resume point (noted
+  in `resume_log.json`). Overrides allowed on resume: `--max-minutes --workers --eval-every
+  --eval-games --ckpt-every --keep-every --stop-after --task-timeout --max-retries --device
+  --generations --games-per-gen --concurrent --lr --lr-final --reuse`.
+- Exports (`ckpt_<gen>.npz`, `best.npz`) are the usual format-2 npz, usable as `net:`, `gumbel:`
+  and `mcts_net:` seats once copied into `models/` and the manifest.
+
+Recommended 8i run (90 minutes, warm start from `ppo-long`, 4p, n = 32, c_scale 0.3, the 8g
+confirmation's choice):
+
+```
+uv run --group train python -m tools.train_az --name az1 --init-from runs/long/best_1320.pt \
+    --players 4 --sims 32 --c-scale 0.3 --workers 6 --games-per-gen 256 --eval-every 10 \
+    --eval-games 200 --max-minutes 90
+```
+
+Attempt 2 (after `runs/az1` was stopped at g18 for losing ground vs 3 heuristic, PLAN 8i):
+heuristic tables, zq value targets, a lower constant lr and a heavier value loss:
+
+```
+uv run --group train python -m tools.train_az --name az2 --init-from runs/long/best_1320.pt \
+    --players 4 --sims 64 --c-scale 0.1 --warmup-gens 10 --replay-size 300000 --workers 6 \
+    --games-per-gen 128 --eval-every 4 --eval-games 200 --max-minutes 90 \
+    --heuristic-share 0.15 --frozen-share 0.2 --value-target zq --lr 1e-4 --lr-final 1e-4 \
+    --vf-coef 2.0
+```
+
+Interaction options (after attempt 2; design and experiments in `docs/GUMBEL_AZ.md` §10). All
+are run-defining (a change on resume is rejected) and default to the attempt-2 behaviour:
+
+- `--features v2|v3` (default v2): observation version (`train.features`). `--features v3` with
+  a v2 `--init-from` checkpoint widens the first layers with zero columns for the new inputs, so
+  generation 0 plays exactly like the checkpoint (`train.model.widen_model`). Frozen and eval
+  nets keep their own observation version.
+- `--value-quantity mean|leader|rank` (default mean): the relative term of R for z and for
+  terminal search values (`bots.gumbel.relative_term`).
+- `--opp-temp T`, `--opp-mix e`, `--opp-scope opponents|nonroot` (defaults 1, 0, opponents): the
+  search's opponent model at non-root nodes (`bots.gumbel.opponent_prior`).
+- Resume pitfall (attempt 2): `--stop-after` is saved in `args.json` and carries over on
+  `--resume`; pass `--stop-after 0` explicitly when resuming a session that used it.
+
+Supervised value path (no self-play): `tools.noise_ceiling --save-obs` labels positions with K
+continuations and stores both observation versions; `tools.value_sup` trains the value trunk
+only (policy frozen) on the K-mean of a target and reports held-out EV / R² against the ceiling:
+
+```
+uv run python -m tools.noise_ceiling --positions 16000 --k 8 --save-obs --nets "" \
+    --bootstrap 20 --seed 201 --out runs/value_labels/train
+uv run --group train python -m tools.value_sup --labels runs/value_labels/train/positions.npz \
+    --holdout runs/value_labels/heldout/positions.npz --features v2,v3 --targets R,R_leader \
+    --out runs/value_sup/a1
+```
+
+## Playing against the bots from the command line (`tools/agent_play.py`)
+
+One decision per command, so an LLM agent (or a person) can play a full game against bot seats.
+The game lives in a JSON file (config, action history, notes); every call rebuilds the state by
+replaying the history, and bots are only queried for new moves (seeded from `--seed` and the
+history length). Forced moves (one legal action) are applied automatically for every seat.
+
+```bash
+uv run python -m tools.agent_play new --players 4 --agent 0 --bots ppo-long --seed 7 --out /tmp/g.json
+uv run python -m tools.agent_play show --game /tmp/g.json
+uv run python -m tools.agent_play act 150 --game /tmp/g.json --note "why I chose it"
+uv run python -m tools.agent_play notes --game /tmp/g.json
+```
+
+`--bots` takes a registry seat type (`heuristic`, `net:ppo-long`) or a bare model name
+(`ppo-long` means `net:ppo-long`), either one for all bot seats or a comma list per bot seat.
+`--agent` may list several seats. At game end the output shows the result and a replay file
+`<game>.replay.json` is written, loadable by `tools.replay` and the web import.
+
+### Map legend and `--summary` (for LLM players)
+
+The state text uses bare node ids, so read the map once per game:
+
+```bash
+uv run python -m tools.agent_play legend      # or: uv run python -m tools.board_legend
+uv run python -m tools.agent_play show --game /tmp/g.json --summary
+uv run python -m tools.agent_play act 150 --game /tmp/g.json --note "why" --summary
+```
+
+`legend` lists every node (position, station/roundabout role, neighbours with street ids, the
+building sites there), every street, and a key to the state fields (`line`, `waiting`, `sites`,
+`occupied`, `board`, `am`, `lm`, `st`, ...). `--summary` (off by default, appended after the legal
+actions) gives per seat: the line as a node path with its ends, buildings on it, passengers waiting
+on and next to it, the legal extensions now (`bus.lines.legal_extensions`) and the Vrrooomm! moves
+now (`bus.rules.vrrooomm_moves`). It also lists each seat's action markers left (`am`, already
+reduced by markers placed this round, R-065) with the markers end condition from
+`bus.rules.round_end_types` (R-066), and the Vrrooomm! targets if the clock advances (an estimate:
+`advance_clock` + `move_passengers` on the current state, ignoring this round's other actions).
+`show|act --board-compact` adds each action space with its letters in resolution order, occupants
+and power (`marker_power`). Rejected actions print a `REJECTED: ...` line on stdout (exit 2, file
+unchanged). `legend` accepts and ignores `--game`. All helpers are used read-only; no rule logic.
+
+Recommended workflow: read `legend` once, then each turn call `show --summary` (or `act ... --summary`,
+which already shows the next decision), pick an action id, and record why with `--note`.

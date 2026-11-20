@@ -50,7 +50,7 @@ import train.rollout as rollout_mod  # noqa: E402
 from bots.net_forward import layout_hash  # noqa: E402
 from train.atomic import atomic_write_json  # noqa: E402
 from train.export import export_npz  # noqa: E402
-from train.features import FEATURES_VERSION  # noqa: E402
+from train.features import FEATURES_VERSION, OBS_SIZE, obs_size  # noqa: E402
 from train.league import GAME_TYPES, League, parse_league  # noqa: E402
 from train.model import BusNet  # noqa: E402
 from train.ppo import (  # noqa: E402
@@ -79,6 +79,7 @@ from train.runstate import (  # noqa: E402
     beats,
     explicit_options,
     find_latest_checkpoint,
+    load_pt,
     merge_resume_args,
     now_iso,
     read_eval_rows,
@@ -111,6 +112,7 @@ COLUMNS = [
     *[f"ret_{t}" for t in GAME_TYPES[1:]], "pool_size", "hof_size",
     "eval_games", "eval_win", "eval_lo", "eval_hi", "eval_composite", "eval_s", "ratings_s",
     "rating_latest", "elapsed_s", "rss_mb",
+    "vclip", "aux_score", "aux_rank", "aux_win", "stones_cur", "stones_oth",  # appended in 8e
 ]  # fmt: skip
 EVAL_COLUMNS = ["update", "opponent", "players", "games", "win_rate", "lo", "hi", "mean_return"]
 EVAL_COLUMNS += ["mean_score", "mean_opp_score", "mean_win_score"]  # appended in unit 8c
@@ -169,6 +171,15 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--gamma", type=float, default=1.0)
     ap.add_argument("--gae-lambda", "--lam", dest="lam", type=float, default=0.99)
     ap.add_argument(
+        "--reward", choices=("terminal", "dense"), default="terminal",
+        help="terminal: one shaped return per game; dense: potential-based relative-score reward "
+        "(use --gae-lambda 0.95); run-defining",
+    )  # fmt: skip
+    ap.add_argument(
+        "--aux-coef", type=float, default=0.0,
+        help="weight of the training-only value aux heads (score, rank, winner); 0 = no heads",
+    )  # fmt: skip
+    ap.add_argument(
         "--value-trunk", choices=("separate", "shared"), default="separate",
         help="separate value network (export format 2) or the original shared trunk",
     )  # fmt: skip
@@ -206,6 +217,18 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--ratings-every", type=int, default=50, help="Elo round-robin; 0 = off")
     ap.add_argument("--ratings-games", type=int, default=300, help="games per rating round")
     ap.add_argument("--league-seed", type=int, default=0, help="extra seed for league sampling")
+    ap.add_argument(
+        "--opp-seats",
+        choices=["random", "all"],
+        default="random",
+        help="non-self games: opponents take 1..n-1 random seats (random) or all n-1 (all)",
+    )
+    ap.add_argument(
+        "--init-from",
+        default=None,
+        metavar="CKPT.pt",
+        help="fresh run only: warm-start the model weights from a trainer .pt checkpoint",
+    )
     ap.add_argument("--resume", default=None, metavar="RUN_DIR", help="continue a stopped run")
     ap.add_argument("--keep-every", type=int, default=250, help="milestone ckpt every N (0 = off)")
     ap.add_argument("--best-keep", type=int, default=5, help="top-K best checkpoints kept")
@@ -246,7 +269,13 @@ class Runner:
     raises ``WorkerFailure``.
     """
 
-    def __init__(self, workers: int, timeout: float = 0.0, max_retries: int = 3) -> None:
+    def __init__(
+        self, workers: int, timeout: float = 0.0, max_retries: int = 3,
+        task_fn: Callable[[Any], dict[str, Any]] = run_task,
+        spill_fn: Callable[[Any], dict[str, Any]] = run_task_spill,
+    ) -> None:  # fmt: skip
+        self.task_fn = task_fn  # inline (0 workers); module-level so the pool can pickle it
+        self.spill_fn = spill_fn  # pool workers: samples spilled to tmpfs (see run_task_spill)
         self.workers = workers
         self.timeout = timeout
         self.max_retries = max_retries
@@ -274,8 +303,8 @@ class Runner:
 
     def _map_once(self, tasks: list[Any], abort: Callable[[], bool] | None) -> list[dict[str, Any]]:
         if self.ex is None:
-            return [run_task(t) for t in tasks]
-        futs = [self.ex.submit(run_task_spill, t) for t in tasks]
+            return [self.task_fn(t) for t in tasks]
+        futs = [self.ex.submit(self.spill_fn, t) for t in tasks]
         deadline = time.monotonic() + self.timeout if self.timeout > 0 else None
         pending = set(futs)
         while pending:
@@ -648,6 +677,64 @@ def seed_hall_of_fame(league: League, names: str) -> None:
             print(f"WARNING: hall-of-fame seed {name!r} skipped: {e}", flush=True)
 
 
+def checkpoint_problems(meta: dict[str, Any], args: argparse.Namespace, resume: bool) -> list[str]:
+    """Why a checkpoint's ``meta`` does not fit the run settings in ``args`` (empty = fits)."""
+    hidden = [int(x) for x in args.hidden.split(",") if x]
+    problems = []
+    if "hidden" in meta and list(meta["hidden"]) != hidden:
+        problems.append(f"hidden {meta['hidden']} vs {hidden}")
+    # best_*.pt files carry no value_trunk; for --init-from the strict state_dict load catches it
+    if (resume or "value_trunk" in meta) and (
+        meta.get("value_trunk", "shared") != args.value_trunk
+    ):
+        problems.append(f"value_trunk {meta.get('value_trunk', 'shared')} vs {args.value_trunk}")
+    # AZ runs choose the observation with --features (v2 | v3); PPO runs use the default
+    fv = FEATURES_VERSION
+    if getattr(args, "features", None) is not None:
+        from train.features import FEATURES_V2, FEATURES_V3
+
+        fv = {"v2": FEATURES_V2, "v3": FEATURES_V3}[args.features]
+    size = OBS_SIZE if fv == FEATURES_VERSION else obs_size(fv)
+    if "features_version" in meta and meta["features_version"] != fv:
+        problems.append(f"features_version {meta['features_version']} vs {fv}")
+    if "layout_hash" in meta and meta["layout_hash"] != layout_hash(fv):
+        problems.append("observation layout hash differs (obs size/layout changed)")
+    if "obs_size" in meta and meta["obs_size"] != size:
+        problems.append(f"obs_size {meta['obs_size']} vs {size}")
+    if resume and "seed" in meta and meta["seed"] != args.seed:
+        problems.append(f"seed {meta['seed']} vs {args.seed}")
+    return problems
+
+
+AUX_PREFIXES = ("aux_score.", "aux_rank.", "aux_win.")
+
+
+def load_state_allow_new_aux(model: BusNet, sd: dict[str, Any]) -> None:
+    """Strict load, except that aux-head keys missing from ``sd`` stay freshly initialised."""
+    res = model.load_state_dict(sd, strict=False)
+    bad = [k for k in res.missing_keys if not k.startswith(AUX_PREFIXES)]
+    if bad or res.unexpected_keys:
+        raise RuntimeError(f"missing {bad}, unexpected {list(res.unexpected_keys)}")
+
+
+def load_init_from(model: BusNet, args: argparse.Namespace) -> None:
+    """Load model weights (only) from the trainer ``.pt`` at ``args.init_from``."""
+    path = Path(args.init_from)
+    try:
+        ck = load_pt(path)
+        sd = ck["model"]
+    except Exception as e:
+        raise ResumeError(f"--init-from {path}: cannot read a trainer checkpoint ({e})") from e
+    problems = checkpoint_problems(ck.get("meta", {}), args, resume=False)
+    if not problems:
+        try:
+            load_state_allow_new_aux(model, sd)
+        except RuntimeError as e:
+            problems.append(f"weights do not fit the model (hidden / value-trunk?): {e}")
+    if problems:
+        raise ResumeError(f"--init-from {path} is incompatible: " + "; ".join(problems))
+
+
 def prepare(argv: list[str]) -> tuple[argparse.Namespace, Path, dict[str, Any] | None]:
     """Parse arguments; for ``--resume`` merge the saved ``args.json`` and load the checkpoint.
 
@@ -655,6 +742,8 @@ def prepare(argv: list[str]) -> tuple[argparse.Namespace, Path, dict[str, Any] |
     """
     ap = build_parser()
     args = ap.parse_args(argv)
+    if args.resume and args.init_from:
+        raise ResumeError("--init-from cannot be combined with --resume")
     if not args.resume:
         out = Path(args.out_dir) / args.name
         if out.exists() and (
@@ -676,21 +765,11 @@ def prepare(argv: list[str]) -> tuple[argparse.Namespace, Path, dict[str, Any] |
     if found is None:
         raise ResumeError(f"no loadable checkpoint in {run}")
     update, ck = found
-    meta = ck.get("meta", {})
-    hidden = [int(x) for x in new_args.hidden.split(",") if x]
-    problems = []
-    if "hidden" in meta and list(meta["hidden"]) != hidden:
-        problems.append(f"hidden {meta['hidden']} vs {hidden}")
-    if meta.get("value_trunk", "shared") != new_args.value_trunk:
-        problems.append(
-            f"value_trunk {meta.get('value_trunk', 'shared')} vs {new_args.value_trunk}"
+    if (saved.get("aux_coef", 0.0) > 0) != (merged.get("aux_coef", 0.0) > 0):
+        raise ResumeError(
+            "cannot toggle --aux-coef between 0 and >0 on resume (it adds/removes model heads)"
         )
-    if "features_version" in meta and meta["features_version"] != FEATURES_VERSION:
-        problems.append(f"features_version {meta['features_version']} vs {FEATURES_VERSION}")
-    if "layout_hash" in meta and meta["layout_hash"] != layout_hash():
-        problems.append("observation layout hash differs (obs size/layout changed)")
-    if "seed" in meta and meta["seed"] != new_args.seed:
-        problems.append(f"seed {meta['seed']} vs {new_args.seed}")
+    problems = checkpoint_problems(ck.get("meta", {}), new_args, resume=True)
     if problems:
         raise ResumeError(
             "checkpoint is incompatible with this code/config: " + "; ".join(problems)
@@ -714,15 +793,24 @@ def main(argv: Sequence[str] | None = None) -> int:
     if dev_name == "auto":
         dev_name = "cuda" if torch.cuda.is_available() else "cpu"
     device = torch.device(dev_name)
-    model = BusNet(hidden=hidden, separate_value=args.value_trunk == "separate").to(device)
+    model = BusNet(
+        hidden=hidden, separate_value=args.value_trunk == "separate", aux=args.aux_coef > 0
+    ).to(device)
     opt = torch.optim.Adam(model.parameters(), lr=args.lr, eps=1e-5)
     pcfg = PPOConfig(
         lr=args.lr, lr_decay=args.lr_decay, clip=args.clip, vf_coef=args.vf_coef,
         ent_coef=args.ent_coef, ent_coef_final=args.ent_coef_final,
         max_grad_norm=args.max_grad_norm, epochs=args.epochs, minibatches=args.minibatches,
-        target_kl=args.target_kl,
+        target_kl=args.target_kl, aux_coef=args.aux_coef,
     )  # fmt: skip
     gen = torch.Generator().manual_seed(args.seed)
+    if res is None and args.init_from:
+        try:
+            load_init_from(model, args)
+        except ResumeError as e:
+            print(f"error: {e}", file=sys.stderr)
+            return 2
+        print(f"warm-started weights from {args.init_from}", flush=True)
     out.mkdir(parents=True, exist_ok=True)
     start_update = 0
     total_games = 0
@@ -779,7 +867,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         league = League(
             lprobs, args.pool_size, args.snapshot_sampling, out / "pool", hof_cap=args.hof_cap,
             hof_share=args.hof_share, pfsp=args.pfsp, pfsp_floor=args.pfsp_floor,
-            ema_alpha=args.pfsp_ema,
+            ema_alpha=args.pfsp_ema, opp_seats=args.opp_seats,
         )  # fmt: skip
         if res is not None:
             if league_state is not None:
@@ -860,7 +948,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                         players=args.players, gamma=args.gamma, lam=args.lam, mix=mix,
                         envs_per_worker=args.envs_per_worker,
                         league=league.spec() if league is not None else None,
-                        player_weights=player_weights,
+                        player_weights=player_weights, reward=args.reward,
                     )  # fmt: skip
                     weights = net_to_weights(model)
                     te = time.perf_counter()
@@ -886,7 +974,16 @@ def main(argv: Sequence[str] | None = None) -> int:
                     ev_q = ev_by_quartile(cat["value"], cat["vtarget"][:, 0], cat["prog"])
                     data = {
                         k: torch.from_numpy(cat[k]).to(device)
-                        for k in ("obs", "mask", "action", "logp", "adv", "vtarget", "vmask")
+                        for k in (
+                            "obs",
+                            "mask",
+                            "action",
+                            "logp",
+                            "adv",
+                            "vtarget",
+                            "vmask",
+                            *(("ascore", "arank", "awin") if pcfg.aux_coef > 0 else ()),
+                        )
                     }
                     del cat  # on cuda the host copies are no longer needed
                     diag = ppo_update(model, opt, data, pcfg, ent_coef, gen)
@@ -923,6 +1020,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                         if t != "self" and seats_:
                             row[f"win_{t}"] = wins_ / seats_
                             row[f"ret_{t}"] = ret_ / seats_
+                    vc = [sum(s["vclip"][i] for s in stats) for i in (0, 1)]
+                    row["vclip"] = vc[0] / max(vc[1], 1)
+                    row["stones_cur"] = sum(s["stones_cur"] for s in stats) / max(
+                        sum(s["seats_cur"] for s in stats), 1
+                    )
+                    row["stones_oth"] = sum(s["stones_oth"] for s in stats) / max(
+                        sum(s["seats_oth"] for s in stats), 1
+                    )
                     for qi, qv in enumerate(ev_q):
                         row[f"ev_q{qi + 1}"] = qv
                     by_label: dict[str, list[float]] = {}
@@ -1026,7 +1131,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                         f"u{update} games={total_games} dec/s={row['decisions_per_s']:.0f} "
                         f"env={env_s:.1f}s learn={learn_s:.1f}s ent={row['entropy']:.3f} "
                         f"kl={row['approx_kl']:.4f} vl={row['value_loss']:.4f} ev={ev:.2f} "
-                        f"mix={mix:.2f} types="
+                        f"mix={mix:.2f} vclip={row['vclip']:.3f} stones={row['stones_cur']:.2f} "
+                        "types="
                         + "/".join(f"{row[f'frac_{t}']:.2f}" for t in GAME_TYPES)
                         + (f" eval={row['eval_win']:.2f}[{row['eval_lo']:.2f},{row['eval_hi']:.2f}]"
                            if "eval_win" in row else ""),

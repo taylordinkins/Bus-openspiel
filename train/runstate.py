@@ -26,6 +26,7 @@ RESUME_WHITELIST = frozenset({
     "ckpt_every", "keep_every", "lr", "lr_decay", "ent_coef", "ent_coef_final", "players",
     "league", "snapshot_every", "pool_size", "device", "stop_after", "task_timeout",
     "max_retries", "games_per_update", "player_weights", "ratings_every", "ratings_games",
+    "aux_coef",  # a positive value may change; 0 <-> >0 is rejected in tools.train_ppo.prepare
 })  # fmt: skip
 
 
@@ -250,9 +251,10 @@ def _norm(v: Any) -> Any:
 
 
 def merge_resume_args(
-    saved: dict[str, Any], explicit: dict[str, Any], defaults: dict[str, Any]
-) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
-    """Saved args with whitelisted explicit overrides applied.
+    saved: dict[str, Any], explicit: dict[str, Any], defaults: dict[str, Any],
+    whitelist: frozenset[str] = RESUME_WHITELIST,
+) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:  # fmt: skip
+    """Saved args with whitelisted explicit overrides applied (``whitelist``: PPO's by default).
 
     Returns (merged dict, {name: {"old", "new"}} for every value that actually changed). Any
     changed value outside ``RESUME_WHITELIST`` raises ``ResumeError`` naming the option.
@@ -261,7 +263,7 @@ def merge_resume_args(
     merged = dict(base)
     changes: dict[str, dict[str, Any]] = {}
     for k, v in explicit.items():
-        if k in ("resume", "allow_horizon_change"):
+        if k in ("resume", "allow_horizon_change", "init_from"):  # init_from: fresh runs only
             continue
         if _norm(v) == _norm(base.get(k)):
             continue
@@ -272,11 +274,11 @@ def merge_resume_args(
                 "point on; add --allow-horizon-change if that is intended"
             )
         flag = "--" + k.replace("_", "-")
-        if k not in RESUME_WHITELIST and k != "updates":
+        if k not in whitelist and k != "updates":
             raise ResumeError(
                 f"cannot change {flag} on resume (run has {base.get(k)!r}, got {v!r}); "
                 f"allowed overrides: "
-                + ", ".join("--" + w.replace("_", "-") for w in sorted(RESUME_WHITELIST))
+                + ", ".join("--" + w.replace("_", "-") for w in sorted(whitelist))
             )
         merged[k] = v
         changes[k] = {"old": _norm(base.get(k)), "new": _norm(v)}

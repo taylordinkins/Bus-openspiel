@@ -20,6 +20,17 @@ decision is 0.
 The 5-wide value head is trained on the *undiscounted* final shaped returns of all present seats in
 ego order for that trajectory's seat (``vtarget`` / ``vmask``), so entry 0 has the same target as
 the seat's own Monte Carlo return, and the other entries are auxiliary.
+
+Dense mode (``cfg.reward == "dense"``, unit 8e). Per-seat potential Phi_p = (score_p - mean opponent
+score) / 10 (score = points - stones, ``train.env.potentials``) is recorded for all seats at each of
+the seat's own decisions. Rewards are r_t = (1-mix) (Phi(s_t+1) - Phi(s_t)) between own decisions
+(opponents' moves count), and the last one is mix * win_loss + (1-mix) (Phi(s_T) - Phi(s_k-1)), so
+a seat's rewards sum to mix * win_loss + (1-mix) * unclipped margin. Value targets are
+return-to-go per ego entry (clipped to [-1, 1], clipped fraction in ``stats["vclip"]``); ego entry 0
+equals the GAE lambda=1 return. Use ``--gae-lambda 0.95`` with it. Samples also carry training-only
+aux targets (``ascore`` final score/20, ``arank``, ``awin``), ego-ordered and padded to 5; rollout
+workers never evaluate aux heads. ``stats`` counts time-stone takes (``CLOCK_PAUSE``) for current
+vs other seats.
 """
 
 from __future__ import annotations
@@ -34,7 +45,8 @@ from typing import Any
 import numpy as np
 
 from bots.net_forward import NetWeights
-from train.env import BusEnv, shaped_return
+from bus.actions import CLOCK_PAUSE
+from train.env import BusEnv, potentials, shaped_return
 from train.features import MAX_SEATS
 from train.league import HOF_PREFIX, LeagueSpec, game_type, sample_assignment
 from train.shm import make_spill_dir
@@ -61,6 +73,8 @@ class RolloutConfig:
     eval_opponent: str = RANDOM  # label of the non-ego seats when ``egos`` is given
     player_weights: tuple[float, ...] | None = None  # sampling weights over ``players``
     record_scores: bool = False  # keep (labels, final scores) per game in ``stats["scores"]``
+    reward: str = "terminal"  # "terminal" or "dense" (potential-based margin, unit 8e)
+    ego_greedy: bool = False  # greedy "current" seats only, other nets still sample (AZ eval)
 
 
 def assign_seat_policies(
@@ -107,6 +121,58 @@ def gae(
     return adv, adv + values.astype(np.float32)
 
 
+def _dense_targets(
+    phis: np.ndarray[Any, Any],
+    phi_t: np.ndarray[Any, Any],
+    wlr: list[float],
+    seat: int,
+    mix: float,
+    vclip: list[int],
+) -> tuple[np.ndarray[Any, Any], np.ndarray[Any, Any]]:
+    """Dense rewards and return-to-go value targets for one seat's trajectory (unit 8e).
+
+    ``phis`` (k, n): potentials of all seats at the state of each own decision; ``phi_t`` (n,) at
+    the terminal state. r_t = (1-mix) (P[t+1] - P[t]) with P[k] = terminal, plus ``mix * win_loss``
+    on the last step, so the sum telescopes to ``mix * wl + (1-mix) * (P_T - P_0)``. Value target
+    for ego entry j at decision t: ``mix * wl_j + (1-mix) * (Phi_j(T) - Phi_j(t))``, clipped to
+    [-1, 1] (tanh head); ``vclip`` accumulates [clipped, total] entries.
+    """
+    k, n = phis.shape
+    own = np.concatenate([phis[:, seat], phi_t[seat : seat + 1]]).astype(np.float64)
+    rew = ((1.0 - mix) * np.diff(own)).astype(np.float32)
+    rew[-1] += np.float32(mix * wlr[seat])
+    vt = np.zeros((k, MAX_SEATS), np.float32)
+    for j in range(n):
+        q = (seat + j) % n
+        vt[:, j] = mix * wlr[q] + (1.0 - mix) * (phi_t[q] - phis[:, q])
+    clipped = np.abs(vt[:, :n]) > 1.0
+    vclip[0] += int(clipped.sum())
+    vclip[1] += clipped.size
+    return rew, np.clip(vt, -1.0, 1.0)
+
+
+def aux_targets(
+    core: Any, seat: int
+) -> tuple[np.ndarray[Any, Any], np.ndarray[Any, Any], np.ndarray[Any, Any]]:
+    """Ego-ordered aux targets for ``seat``, padded to MAX_SEATS: final score / 20, rank (0 =
+    best, ties share the best rank, -1 padding) and the winner distribution (uniform over the
+    R-069/R-070 winner set)."""
+    from bus.rules import final_scores, winners
+
+    n = core.players
+    sc = final_scores(core)
+    win = winners(core)
+    a_sc = np.zeros(MAX_SEATS, np.float32)
+    a_rk = np.full(MAX_SEATS, -1, np.int64)
+    a_wn = np.zeros(MAX_SEATS, np.float32)
+    for j in range(n):
+        q = (seat + j) % n
+        a_sc[j] = sc[q] / 20.0
+        a_rk[j] = sum(1 for x in sc if x > sc[q])
+        a_wn[j] = 1.0 / len(win) if q in win else 0.0
+    return a_sc, a_rk, a_wn
+
+
 class _Slot:
     __slots__ = ("env", "policies", "steps", "seed", "n", "decisions")
 
@@ -116,10 +182,10 @@ class _Slot:
         self.seed = seed
         self.n = env.num_players
         self.decisions = 0
-        # per seat: obs, mask, action, logp, value
-        self.steps: list[tuple[list[Any], list[Any], list[int], list[float], list[float]]] = [
-            ([], [], [], [], []) for _ in range(self.n)
-        ]
+        # per seat: obs, mask, action, logp, value, potentials of all seats at the decision
+        self.steps: list[
+            tuple[list[Any], list[Any], list[int], list[float], list[float], list[Any]]
+        ] = [([], [], [], [], [], []) for _ in range(self.n)]
 
 
 def _sample(
@@ -183,7 +249,21 @@ def play_games(
     rng = np.random.default_rng(seed)
     pool: dict[int, list[BusEnv]] = {}
     out_lists: dict[str, list[Any]] = {
-        k: [] for k in ("obs", "mask", "action", "logp", "value", "adv", "vtarget", "vmask", "prog")
+        k: []
+        for k in (
+            "obs",
+            "mask",
+            "action",
+            "logp",
+            "value",
+            "adv",
+            "vtarget",
+            "vmask",
+            "prog",
+            "ascore",
+            "arank",
+            "awin",
+        )
     }
     stats: dict[str, Any] = {
         "games": 0, "decisions": 0, "forced": 0, "illegal": 0, "lengths": [], "ego_returns": [],
@@ -192,7 +272,8 @@ def play_games(
         "by_type": {},
         # opponent label -> [games containing it, current seats in them, current wins]
         "by_label": {},
-        "scores": [],
+        "scores": [], "vclip": [0, 0],  # [clipped value-target entries, entries]
+        "stones_cur": 0, "seats_cur": 0, "stones_oth": 0, "seats_oth": 0,  # time-stone takes
     }  # fmt: skip
     next_game = 0
     pw = None
@@ -238,6 +319,7 @@ def play_games(
         acc = stats["by_type"].setdefault(game_type(sl.policies), [0, 0, 0, 0.0])
         acc[0] += 1
         for p in range(n):
+            stats["seats_cur" if sl.policies[p] == CURRENT else "seats_oth"] += 1
             if sl.policies[p] == CURRENT:
                 stats["ego_returns"].append((float(wlr[p]), n))
                 acc[1] += 1
@@ -259,26 +341,37 @@ def play_games(
             for seat in range(n):
                 if sl.policies[seat] != CURRENT:
                     continue
-                o, m, a, lp, v = sl.steps[seat]
+                o, m, a, lp, v, ph = sl.steps[seat]
                 if not a:
                     continue
                 k = len(a)
                 rew = np.zeros(k, np.float32)
-                rew[-1] = rets[seat]
                 val = np.asarray(v, np.float32)
-                adv, _ = gae(rew, val, cfg.gamma, cfg.lam)
-                tv = np.zeros(MAX_SEATS, np.float32)
                 tm = np.zeros(MAX_SEATS, np.float32)
-                for j in range(n):
-                    tv[j] = rets[(seat + j) % n]
-                    tm[j] = 1.0
+                tm[:n] = 1.0
+                if cfg.reward == "dense":
+                    rew, vt = _dense_targets(
+                        np.stack(ph), potentials(wl), wlr, seat, cfg.mix, stats["vclip"]
+                    )
+                    adv, _ = gae(rew, val, cfg.gamma, cfg.lam)
+                else:
+                    rew[-1] = rets[seat]
+                    adv, _ = gae(rew, val, cfg.gamma, cfg.lam)
+                    tv = np.zeros(MAX_SEATS, np.float32)
+                    for j in range(n):
+                        tv[j] = rets[(seat + j) % n]
+                    vt = np.tile(tv, (k, 1))
+                a_sc, a_rk, a_wn = aux_targets(wl, seat)
                 out_lists["obs"].append(np.stack(o))
                 out_lists["mask"].append(np.stack(m))
                 out_lists["action"].append(np.asarray(a, np.int64))
                 out_lists["logp"].append(np.asarray(lp, np.float32))
                 out_lists["value"].append(val)
                 out_lists["adv"].append(adv)
-                out_lists["vtarget"].append(np.tile(tv, (k, 1)))
+                out_lists["vtarget"].append(vt)
+                out_lists["ascore"].append(np.tile(a_sc, (k, 1)))
+                out_lists["arank"].append(np.tile(a_rk, (k, 1)))
+                out_lists["awin"].append(np.tile(a_wn, (k, 1)))
                 out_lists["vmask"].append(np.tile(tm, (k, 1)))
                 out_lists["prog"].append(((np.arange(k) + 0.5) / k).astype(np.float32))
         pool.setdefault(n, []).append(env)
@@ -299,17 +392,25 @@ def play_games(
                 actions[i] = _bot_action(label, sl.env)
         for label, net_idx in groups.items():
             w = weights if label == CURRENT else _opponent_weights(label, opponents)
-            obs = np.stack([cur[i].env.obs() for i in net_idx])
+            enc = w.encoder  # each net reads its own observation version
+            obs = np.stack([enc(cur[i].env.state.core) for i in net_idx])
             mask = np.stack([cur[i].env.legal_mask() for i in net_idx])
             act, logp, val, ill = _sample(
-                w, obs, mask, rng, cfg.greedy, need_values=cfg.collect and label == CURRENT
+                w,
+                obs,
+                mask,
+                rng,
+                cfg.greedy or (cfg.ego_greedy and label == CURRENT),
+                need_values=cfg.collect and label == CURRENT,
             )
             stats["illegal"] += ill
             for r, i in enumerate(net_idx):
                 sl = cur[i]
                 actions[i] = int(act[r])
                 if cfg.collect and label == CURRENT:
-                    o, m, a, lp, v = sl.steps[sl.env.current_seat]
+                    o, m, a, lp, v, ph = sl.steps[sl.env.current_seat]
+                    if cfg.reward == "dense":
+                        ph.append(potentials(sl.env.state.core))
                     o.append(obs[r])
                     m.append(mask[r])
                     a.append(int(act[r]))
@@ -317,6 +418,10 @@ def play_games(
                     v.append(float(val[r]))
         finished: list[_Slot] = []
         for sl, a_ in zip(cur, actions, strict=True):
+            if a_ == CLOCK_PAUSE:  # taking a time stone (R-050..R-053)
+                stats[
+                    "stones_cur" if sl.policies[sl.env.current_seat] == CURRENT else "stones_oth"
+                ] += 1
             sl.env.step(a_)
             sl.decisions += 1
             if sl.env.done:

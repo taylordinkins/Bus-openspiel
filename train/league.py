@@ -43,6 +43,7 @@ RANDOM = "random"
 HEURISTIC = "heuristic"
 SNAP_PREFIX = "snap:"
 HOF_PREFIX = "hof:"
+OPP_SEATS = ("random", "all")
 FIXED_BOTS = (HEURISTIC, RANDOM)
 GAME_TYPES = ("self", "snap", "heuristic", "random")  # as reported by ``game_type``
 
@@ -71,6 +72,7 @@ class LeagueSpec:
     snap_w: tuple[float, ...] = ()  # extra (PFSP) weights parallel to snap_ids; () = none
     hof_w: tuple[float, ...] = ()  # same for hof_names
     bot_split: float = 5 / 6  # P(heuristic) among fixed-bot games (rest random): 15% vs 3%
+    opp_seats: str = "random"  # "all": non-self games give opponents n-1 seats (one learner seat)
 
 
 def _draw(rng: np.random.Generator, w: np.ndarray[Any, Any], k: int) -> np.ndarray[Any, Any]:
@@ -87,8 +89,12 @@ def sample_assignment(spec: LeagueSpec, n: int, rng: np.random.Generator) -> lis
     kind = int(rng.choice(3, p=p / p.sum()))
     if kind == 0 or n < 2:
         return [CURRENT] * n
-    k = int(rng.integers(1, n))  # opponent seats: 1..n-1, so a current seat always remains
-    seats = rng.choice(n, size=k, replace=False)
+    if spec.opp_seats == "all":  # exactly one learner seat, randomly placed
+        me = int(rng.integers(0, n))
+        seats = np.array([i for i in range(n) if i != me])
+    else:
+        k = int(rng.integers(1, n))  # opponent seats: 1..n-1, so a current seat always remains
+        seats = rng.choice(n, size=k, replace=False)
     labels = [CURRENT] * n
     if kind == 1:
         w_rec = np.ones(len(spec.snap_ids))
@@ -136,7 +142,7 @@ def save_weights(w: NetWeights, path: Path, extra: dict[str, Any] | None = None)
         "hidden": [int(x[0].shape[1]) for x in w.layers], "n_layers": len(w.layers),
         "n_v_layers": len(w.v_layers),
         "obs_size": w.obs_size, "n_actions": w.n_actions, "n_seats": w.n_seats,
-        "layout_hash": layout_hash(),
+        "layout_hash": layout_hash(w.features_version),
     }  # fmt: skip
     atomic_write(path, lambda f: np.savez(f, meta=np.array(json.dumps(info)), **arrays))
 
@@ -175,7 +181,10 @@ class League:
         pfsp: bool = True,
         pfsp_floor: float = 0.05,
         ema_alpha: float = 0.2,
+        opp_seats: str = "random",
     ) -> None:
+        if opp_seats not in OPP_SEATS:
+            raise ValueError("opp_seats must be random or all")
         if sampling not in ("uniform", "recency"):
             raise ValueError("sampling must be uniform or recency")
         if pool_size < 1:
@@ -183,6 +192,7 @@ class League:
         self.probs = probs
         self.pool_size = pool_size
         self.sampling = sampling
+        self.opp_seats = opp_seats
         self.hof_cap, self.hof_share = hof_cap, hof_share
         self.pfsp, self.pfsp_floor, self.ema_alpha = pfsp, pfsp_floor, ema_alpha
         self.directory = directory.resolve() if directory is not None else None
@@ -219,7 +229,7 @@ class League:
         hof_w = tuple(self._w(self.hof_label(n), 1.0) for n in self.hof_names) if self.pfsp else ()
         return LeagueSpec(
             self.probs, tuple(self._ids), self.sampling, tuple(self.hof_names), self.hof_share,
-            snap_w, hof_w,
+            snap_w, hof_w, opp_seats=self.opp_seats,
         )  # fmt: skip
 
     def sample_assignment(self, n: int, rng: np.random.Generator) -> list[str]:

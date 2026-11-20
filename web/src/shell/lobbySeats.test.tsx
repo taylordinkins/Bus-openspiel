@@ -12,20 +12,29 @@ beforeEach(() => {
   POST.mockResolvedValue({ data: { id: "g1" } });
 });
 
-const seat = (i: number) => screen.getByLabelText(`Seat P${i}`) as HTMLSelectElement;
+const seat = (i: number) =>
+  screen.getByLabelText(`Seat P${i}`) as HTMLSelectElement;
 const think = () => screen.queryByLabelText(/Think time/);
 
 describe("Lobby seat picker", () => {
   it("defaults to a human at P0 and random bots, without a think-time field", () => {
     render(<Lobby onCreated={vi.fn()} />);
-    expect([0, 1, 2, 3].map((i) => seat(i).value)).toEqual(["human", "random", "random", "random"]);
+    expect([0, 1, 2, 3].map((i) => seat(i).value)).toEqual([
+      "human",
+      "random",
+      "random",
+      "random",
+    ]);
     expect(think()).toBeNull();
     expect(screen.queryByText(/Player 1/)).toBeNull();
   });
 
   it("offers the bot kinds and MCTS strengths, mapped to seat type strings", () => {
     render(<Lobby onCreated={vi.fn()} />);
-    const opts = Array.from(seat(1).options).map((o) => [o.value, o.textContent]);
+    const opts = Array.from(seat(1).options).map((o) => [
+      o.value,
+      o.textContent,
+    ]);
     expect(opts).toEqual([
       ["human", "Human"],
       ["random", "Random bot"],
@@ -33,6 +42,7 @@ describe("Lobby seat picker", () => {
       ["mcts:50", "MCTS · Quick (50 sims)"],
       ["mcts:200", "MCTS · Normal (200 sims)"],
       ["mcts:1000", "MCTS · Strong (1000 sims)"],
+      ["tplanner", "Planner · Strongest (best at 15 s think time)"],
     ]);
   });
 
@@ -73,20 +83,42 @@ describe("Lobby trained-net seats", () => {
     const { api } = await import("../api/client");
     vi.mocked(api.GET).mockResolvedValueOnce({
       data: [
-        { seat_type: "net:ppo-smoke", label: "Trained net (smoke)", description: "", players: [3, 4, 5] },
-        { seat_type: "net:four-only", label: "Four only", description: "", players: [4] },
+        {
+          seat_type: "net:ppo-smoke",
+          label: "Trained net (smoke)",
+          description: "",
+          players: [3, 4, 5],
+        },
+        {
+          seat_type: "net:four-only",
+          label: "Four only",
+          description: "",
+          players: [4],
+        },
       ],
     } as never);
     render(<Lobby onCreated={vi.fn()} />);
-    await waitFor(() => expect(Array.from(seat(1).options).map((o) => o.value)).toContain("net:ppo-smoke"));
+    await waitFor(() =>
+      expect(Array.from(seat(1).options).map((o) => o.value)).toContain(
+        "net:ppo-smoke",
+      ),
+    );
     const values = Array.from(seat(1).options).map((o) => o.value);
     expect(values).toContain("net:four-only");
-    fireEvent.change(screen.getByLabelText(/Players/), { target: { value: "3" } });
-    await waitFor(() => expect(Array.from(seat(1).options).map((o) => o.value)).not.toContain("net:four-only"));
+    fireEvent.change(screen.getByLabelText(/Players/), {
+      target: { value: "3" },
+    });
+    await waitFor(() =>
+      expect(Array.from(seat(1).options).map((o) => o.value)).not.toContain(
+        "net:four-only",
+      ),
+    );
     fireEvent.change(seat(1), { target: { value: "net:ppo-smoke" } });
     expect(think()).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Create game" }));
     await waitFor(() => expect(POST).toHaveBeenCalled());
-    expect((POST.mock.calls[0]?.[1] as { body: { seats: string[] } }).body.seats[1]).toBe("net:ppo-smoke");
+    expect(
+      (POST.mock.calls[0]?.[1] as { body: { seats: string[] } }).body.seats[1],
+    ).toBe("net:ppo-smoke");
   });
 });

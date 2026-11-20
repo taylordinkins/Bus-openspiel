@@ -48,6 +48,7 @@ class BusNet(nn.Module):
         n_actions: int = NUM_DISTINCT_ACTIONS,
         n_seats: int = MAX_SEATS,
         separate_value: bool = True,
+        aux: bool = False,
     ) -> None:
         super().__init__()  # pyright: ignore[reportUnknownMemberType]
         self.obs_size, self.hidden, self.n_actions, self.n_seats = (
@@ -67,6 +68,13 @@ class BusNet(nn.Module):
         )
         self.pi = layer_init(nn.Linear(sizes[-1], n_actions), std=0.01)
         self.v = layer_init(nn.Linear(sizes[-1], n_seats), std=1.0)
+        # Training-only auxiliary heads on the value trunk output (unit 8e); never exported.
+        self.has_aux = aux
+        self._vfeat: torch.Tensor | None = None
+        if aux:
+            self.aux_score = layer_init(nn.Linear(sizes[-1], n_seats), std=1.0)
+            self.aux_rank = layer_init(nn.Linear(sizes[-1], n_seats * n_seats), std=1.0)
+            self.aux_win = layer_init(nn.Linear(sizes[-1], n_seats), std=1.0)
 
     def forward(self, obs: torch.Tensor, mask: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """(masked logits (B, n_actions), values (B, n_seats) in [-1, 1])."""
@@ -77,7 +85,19 @@ class BusNet(nn.Module):
         if self.separate_value:
             for layer in self.v_trunk:
                 xv = torch.tanh(layer(xv))
+        if self.has_aux:
+            self._vfeat = xv  # read by ``aux_outputs`` right after this call
         return mask_logits(self.pi(x), mask), torch.tanh(self.v(xv))
+
+    def aux_outputs(self) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """(score (B, S), rank logits (B, S, S), winner logits (B, S)) of the last ``forward``."""
+        assert self.has_aux and self._vfeat is not None
+        f = self._vfeat
+        return (
+            self.aux_score(f),
+            self.aux_rank(f).view(-1, self.n_seats, self.n_seats),
+            self.aux_win(f),
+        )
 
     def act(
         self,
@@ -96,3 +116,35 @@ class BusNet(nn.Module):
         ent = -(p * torch.where(mask.bool(), dist.logits, torch.zeros_like(p))).sum(-1)
         logp = cast(torch.Tensor, dist.log_prob(action))
         return action, logp, ent, values
+
+
+FIRST_LAYERS = ("trunk.0.weight", "v_trunk.0.weight")
+
+
+def widen_model(src: BusNet, dst: BusNet, src_version: int, dst_version: int) -> None:
+    """Function-preserving warm start of ``dst`` (features ``dst_version``) from ``src``.
+
+    Every parameter is copied; the first layer of each trunk gets the old weights in the input
+    columns of the matching blocks (``train.features.input_columns``) and zeros in the new
+    columns, so ``dst`` on a v3 observation computes exactly what ``src`` computes on the v2
+    observation it contains (up to float summation order). The new columns still get gradients.
+    """
+    from train.features import input_columns, obs_size
+
+    if src.obs_size != obs_size(src_version) or dst.obs_size != obs_size(dst_version):
+        raise ValueError("obs sizes do not match the given features versions")
+    cols = torch.as_tensor(input_columns(src_version, dst_version), dtype=torch.long)
+    sd = src.state_dict()
+    out = dst.state_dict()
+    if set(sd) != set(out):
+        raise ValueError(f"parameter sets differ: {sorted(set(sd) ^ set(out))}")
+    for k, v in sd.items():
+        if k in FIRST_LAYERS:
+            w = torch.zeros_like(out[k])
+            w[:, cols.to(w.device)] = v.to(w.device)
+            out[k] = w
+        else:
+            if out[k].shape != v.shape:
+                raise ValueError(f"{k}: shape {tuple(v.shape)} vs {tuple(out[k].shape)}")
+            out[k] = v.clone().to(out[k].device)
+    dst.load_state_dict(out)
