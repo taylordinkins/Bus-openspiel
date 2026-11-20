@@ -103,7 +103,7 @@ def _planner_factory(param: str | None) -> Bot:
     return parse_planner_param(param)
 
 
-# Tool-only search seat (model-based planner, 2026-11-19).
+# Flat model-based planner (tool-only); the tree version below is offered in the lobby.
 register("planner", _planner_factory)
 
 
@@ -111,6 +111,7 @@ def _tree_factory(param: str | None) -> Bot:
     return parse_tree_param(param)
 
 
+# Model-based tree planner (docs/PLANNER.md); lobby preset "Planner · Strongest".
 register("tplanner", _tree_factory)
 
 

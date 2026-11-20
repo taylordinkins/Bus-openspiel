@@ -1,7 +1,9 @@
 # Model-based planner bots (`planner`, `tplanner`)
 
 Phase 4 bot work, 2026-11-19, branch `phase-4/planner`. Bots only: no engine, server or UI
-changes. Seats are tool-only (registry, tournament, `tools/bot_eval.py`); not offered in the lobby.
+changes. `tplanner` is offered in the lobby as **Planner · Strongest**; the server's think-time
+cap applies to it (it stops searching when the cap runs out). `planner` and `net_sample` are
+tool-only.
 
 ## Idea
 

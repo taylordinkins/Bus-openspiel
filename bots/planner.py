@@ -22,6 +22,8 @@ from __future__ import annotations
 import math
 import os
 import random
+import threading
+import time
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -77,15 +79,17 @@ class _NetPolicy:
         return logits
 
 
-_STATE_SHIM: Any = None
+_SHIM = threading.local()  # per thread: the server runs bots on worker threads
 
 
 def _shim(core: Any) -> Any:
-    global _STATE_SHIM
-    if _STATE_SHIM is None or _STATE_SHIM.core.players != core.players:
-        _STATE_SHIM = pyspiel.load_game("python_bus", {"players": core.players}).new_initial_state()
-    _STATE_SHIM.core = core
-    return _STATE_SHIM
+    """A BusState holding `core`, for the heuristic's scorer (which reads `state.core`)."""
+    st: Any = getattr(_SHIM, "state", None)
+    if st is None or st.core.players != core.players:
+        st = pyspiel.load_game("python_bus", {"players": core.players}).new_initial_state()
+        _SHIM.state = st
+    st.core = core
+    return st
 
 
 def heuristic_scores(core: Any, legal: list[int]) -> np.ndarray:
@@ -519,6 +523,15 @@ class TreePlannerBot(PlannerBot):
     ) -> None:
         super().__init__()
         self.sims, self.batch, self.c = sims, batch, c_puct
+        self.time_limit_s: float | None = None
+        self.modes: list[str] = []
+
+    def with_time_limit(self, seconds: float | None) -> TreePlannerBot:
+        """A fresh copy (own opponent tracker, so concurrent games never share state) that stops
+        searching once `seconds` have passed; used by the server's think-time cap."""
+        bot = TreePlannerBot(self.sims, self.batch, self.c)
+        bot.time_limit_s = seconds
+        return bot
 
     # -- node setup
     def _make(
@@ -612,29 +625,35 @@ class TreePlannerBot(PlannerBot):
         if k == 1:
             return cands[0]
         # Sequential halving at the root (each candidate's sims go through its subtree).
+        deadline = None if self.time_limit_s is None else time.monotonic() + self.time_limit_s
         alive = list(range(k))
         rounds = max(1, math.ceil(math.log2(k)))
-        while True:
+        timed_out = False
+        while not timed_out:
             per = max(1, self.sims // (rounds * len(alive)))
-            forced = [c for c in alive for _ in range(per)]
+            forced = [c for _ in range(per) for c in alive]  # round-robin over candidates
             for j in range(0, len(forced), self.batch):
+                if deadline is not None and j > 0 and time.monotonic() >= deadline:
+                    timed_out = True
+                    break
                 self._simulate(root, forced[j : j + self.batch], me, models, raw, rng)
-            if len(alive) == 1:
+            if timed_out or len(alive) == 1:
                 break
             q = root.w / np.maximum(root.n, 1)
             alive.sort(key=lambda c: -q[c])
             # Early stop: the leader is clear of the runner-up by more than outcome noise.
             gap = q[alive[0]] - q[alive[1]]
             if TREE_EARLY > 0 and gap > TREE_EARLY / math.sqrt(root.n[alive[0]]):
-                root.n[alive[0]] += 1e-6  # make it the unique most-visited finalist
+                alive = alive[:1]
                 break
             alive = alive[: max(1, len(alive) // 2)]
             if len(alive) == 1:
                 break
         n = root.n
         q = root.w / np.maximum(n, 1)
-        top = n >= n.max()
-        best = int(np.argmax(np.where(top, q, -1e9)))
+        # Best mean value among the surviving candidates that were searched.
+        pool = [c for c in alive if n[c] > 0] or [c for c in range(k) if n[c] > 0] or [0]
+        best = max(pool, key=lambda c: q[c])
         self.last_info = {"models": raw, "cands": cands, "values": q.tolist(), "n": n.tolist()}
         return cands[best]
 

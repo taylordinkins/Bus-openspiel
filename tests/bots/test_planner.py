@@ -93,3 +93,18 @@ def test_tree_planner_plays_legal_moves_and_params() -> None:
             a = other.choose(state, rng)
         assert a in legal
         state.apply_action(a)
+
+
+def test_tree_planner_time_limit_returns_fresh_legal_bot() -> None:
+    import time
+
+    base = make_bot("tplanner")
+    bot = base.with_time_limit(0.5)  # type: ignore[attr-defined]
+    assert bot is not base and bot.time_limit_s == 0.5 and bot._tracker is None
+    state = pyspiel.load_game("python_bus", {"players": 3}).new_initial_state()
+    while len(state.legal_actions()) < 2:
+        state.apply_action(state.legal_actions()[0])
+    t = time.monotonic()
+    a = bot.choose(state, random.Random(0))
+    assert a in state.legal_actions()
+    assert time.monotonic() - t < 5.0  # one simulation batch may overrun the cap
