@@ -64,7 +64,7 @@ game, and the opponents' waste for comparison:
 | 3 | ppo-long + heuristic | tplanner:96 | 1.00 | 0.83 (9.6) |
 | 3 | ppo-long + ppo-smoke | tplanner:96 | 1.00 | 1.33 (7.8) |
 | 3 | ppo-long ×2 | tplanner:96 | 1.00 | 1.42 (7.3) |
-| 3 | sampled ppo-long ×2 | tplanner:96 | 0.83 | 1.17 (7.4) |
+| 3 | sampled ppo-long ×2 | tplanner:96 → **384** | 0.83 → 1.00 | 0.58 (7.3) |
 | 3 | mcts:100 ×2 | tplanner:192 | 0.92 | 0.75 (8.6) |
 | 3 | R_leader (A2) ×2 | tplanner:192 → **384** | 0.75 → 1.00 | 0.67 (6.7) |
 | 3 | gumbel:32 ×2 | **tplanner (384)** | 0.92 | 0.75 (7.0) |
